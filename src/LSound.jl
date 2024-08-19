@@ -17,6 +17,9 @@ module LSound
     include("U0.jl")
     include("bathe.jl")
 
+    include("main_modal.jl")
+    include("main_transiente.jl")
+
     export Transiente, Modal
 
 end

@@ -3,7 +3,21 @@ uuid = "f73e1f51-bd35-4e1d-877f-2490c5746094"
 authors = ["Eduardo Lenz <eduardobarplenz@gmail.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+ArnoldiMethod = "ec485272-7323-5ecc-a04f-4719b315124d"
+Lgmsh = "901517f6-ef86-4a80-bf35-2c5b8e720204"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+LinearMaps = "7a12625a-238d-50fd-b39a-03d52299707e"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
 [compat]
+ArnoldiMethod = "0.4.0"
+Lgmsh = "1.0.0"
+LinearAlgebra = "1.11.0"
+LinearMaps = "3.11.3"
+ProgressMeter = "1.10.2"
+SparseArrays = "1.11.0"
 julia = "1.10"
 
 [extras]
