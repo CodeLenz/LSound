@@ -1,21 +1,9 @@
-using LinearAlgebra
-using SparseArrays
-using LinearMaps
-using ArnoldiMethod
-using ProgressMeter
-using Lgmsh
-
-include("parsemsh_daniele.jl")
-include("elemento.jl")
-include("global.jl")
-include("autovalores.jl")
-include("newmark.jl")
 
 
 #
 # Versão lendo direto do .msh (gmsh)
 #
-function Modal2D(meshfile::String, nev=4)
+function Modal(meshfile::String, nev=4)
 
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities = Parsemsh_Daniele(meshfile)

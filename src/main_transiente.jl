@@ -1,16 +1,3 @@
-using LinearAlgebra
-using SparseArrays
-using ProgressMeter
-using Lgmsh
-
-include("parsemsh_daniele.jl")
-include("elemento.jl")
-include("global.jl")
-include("vetor_P.jl")
-include("newmark.jl")
-include("U0.jl")
-include("bathe.jl")
-
 #
 # Versão lendo direto do .msh (gmsh)
 #
