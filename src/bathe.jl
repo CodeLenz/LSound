@@ -50,7 +50,7 @@ function B1B2Bathe2d(M, C, K, F::Function,  livres, Δt, Tf;  U0=Float64[], V0=F
     d2 = (γ*β1 + (1-β2)*(1-γ))/comum1
     d3 = (γ*(1-β1)) / (β2*(1-γ))
     d4 = (γ*β1 + (1-β2)*(1-γ))/(β2*(1-γ))
-    d5 = 1/(β2*(1-γ))
+    d5 = 1/(β2*(1-γ)*Δt)
 
     # Para a aceleração final
     credo = c1*β1 + (1-γ)*Δt*(1-β2)
