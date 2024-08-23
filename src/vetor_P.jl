@@ -43,6 +43,9 @@
  
     end # dict
 
+    # Mesmo sendo uma função !, vamos retornar
+    # o vetor, pois depois vamos fazer um f(t)
+    # com essa rotina
     return P
 
  end

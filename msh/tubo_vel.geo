@@ -25,10 +25,12 @@ Plane Surface(1) = {1};
 Physical Surface("Material,Ar,1,1.028,340.0,400.0") = {1};
 
 // Normal velocity (left)
-Physical Curve("Vn,1E-3,100.0,0.0") = {4};
+// closed-open
+// f1 = 85 Hz
+Physical Curve("Vn,1E-3,160.0,0.0") = {4};
 
 // Boundary conditions - Open
-Physical Curve("Open") = {2};
+// Physical Curve("Open") = {2};
 
 // Convert triangles to quads
 Recombine Surface{:};

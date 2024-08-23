@@ -5,9 +5,12 @@
 #
 function Monta_KM(nn,ne,coord,connect,materials)
 
-    # Aloca as matrizes globais
-    K = spzeros(nn,nn)
-    M = spzeros(nn,nn)
+    # Aloca vetores para a montagem eficiente 
+    # das matrizes esparsas
+    I = Int64[]
+    J = Int64[]
+    VK = Float64[]
+    VM = Float64[]
 
     # Loop pelos elementos
     for ele=1:ne
@@ -22,11 +25,19 @@ function Monta_KM(nn,ne,coord,connect,materials)
         Ke,Me,nos = KMe(ele,c,coord,connect)
 
         # Sobreposição das locais nas globais
-        K[nos,nos] += Ke
-        M[nos,nos] += Me
+        for i=1:4
+            ni = nos[i]
+            for j=1:4
+                push!(I,ni)
+                push!(J,nos[j])
+                push!(VK,Ke[i,j])
+                push!(VM,Me[i,j])
+            end
+        end
 
     end
 
-    return K, M
+    # Retorna as matrizes globais
+    return sparse(I,J,VK), sparse(I,J,VM)
 
 end
