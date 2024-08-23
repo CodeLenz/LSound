@@ -16,8 +16,8 @@ function Transiente(meshfile::String,metodo=:Bathe)
 
     # Aplica condição inicial de pressão
     # funcao(x,y) = Gauss(x,y,0.5,0.5,0.2)
-    # funcao(x,y) = Zero(x,y)
-    funcao(x,y) = Degrau(x,y,0.5,0.0005,50*0.0011,0.0011)
+    funcao(x,y) = Zero(x,y)
+    #funcao(x,y) = Degrau(x,y,0.5,0.0005,50*0.0011,0.0011)
     U0 = Applica_U0(nn,coord,funcao)
 
     # Calcula as matrizes globais
@@ -41,11 +41,11 @@ function Transiente(meshfile::String,metodo=:Bathe)
     Tf = 0.1
 
     if metodo===:Newmark
-      println("Usando o método Newmark")
-      tempos, MP = Newmark(M, C, K, F, livres, Δt, Tf,U0=U0)
+       println("Usando o método Newmark")
+       tempos, MP = Newmark(M, C, K, F, livres, Δt, Tf,U0=U0)
     elseif metodo===:Bathe
-      println("Usando o método Bathe b1 b2")
-      tempos, MP = B1B2Bathe2d(M, C, K, F, livres, Δt, Tf,U0=U0)
+       println("Usando o método Bathe b1 b2")
+       tempos, MP = B1B2Bathe2d(M, C, K, F, livres, Δt, Tf,U0=U0)
     end
 
     # Inicializa um vetor com todos os gls
@@ -58,7 +58,7 @@ function Transiente(meshfile::String,metodo=:Bathe)
         vv .= MP[:,i]
 
         # Adiciona ao arquivo
-        Lgmsh_export_nodal_scalar(nome,vv,"Pressao")
+        Lgmsh_export_nodal_scalar(nome,vv,"Pressão")
 
     end
 

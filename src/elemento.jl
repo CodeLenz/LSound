@@ -91,7 +91,7 @@ function Matriz_N(r,s)
   # Devolve os vetores nos, X e Y com os nós 
   # e as coordenadas do elemento
   #
-  function Estrelinha(ele,coord,connect)
+  function Nos_Coordenadas(ele,coord,connect)
   
       # Descobre os nós do elemento
       nos = connect[ele,3:end]
@@ -129,7 +129,7 @@ function Matriz_N(r,s)
       Me = zeros(4,4)
   
       # Descobre nos, X e Y para este elemento
-      nos, X, Y = Estrelinha(ele,coord,connect) 
+      nos, X, Y = Nos_Coordenadas(ele,coord,connect) 
   
       # Integração por quadratura de Gauss-Legendre
       pg = (1/sqrt(3))*[-1;1]

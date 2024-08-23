@@ -31,7 +31,7 @@
         ρ = materials[mat,1]
 
         # Find nodes and coordinates
-        nos,X,Y = Estrelinha(ele,coord,connect)
+        nos,X,Y = Nos_Coordenadas(ele,coord,connect)
 
         # Local vector 
         Pn = Edge_load_local(edge,-ρ*qn,X,Y)
