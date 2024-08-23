@@ -1,7 +1,7 @@
 #
 # Versão lendo direto do .msh (gmsh)
 #
-function Transiente(meshfile::String,metodo=:Bathe)
+function Transiente(meshfile::String,metodo=:Newnark)
 
     # Evita chamar um .geo
     if occursin(".geo",meshfile)
@@ -52,7 +52,8 @@ function Transiente(meshfile::String,metodo=:Bathe)
     vv = zeros(nn)
 
     # Exporta os tempos
-    for  i=1:size(MP,2)
+    println("Escrevendo os dados para o arquivo .pos")
+    for  i=1:101:size(MP,2)
 
         # Copia o deslocamento para as posições livres
         vv .= MP[:,i]

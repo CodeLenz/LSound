@@ -33,9 +33,9 @@ function Newmark(M, C, K, F::Function, livres, Δt, Tf;  U0=Float64[], V0=Float6
     β = 1/4
 
     # Alias para as coordenadas livres
-    ML = M[livres,livres]
-    KL = K[livres,livres]
-    CL = C[livres,livres]
+    ML = @view M[livres,livres]
+    KL = @view K[livres,livres]
+    CL = @view C[livres,livres]
 
     # Calcula a aceleração no tempo 0
     A0 = zeros(nl)
