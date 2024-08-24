@@ -1,7 +1,7 @@
 #
 # Versão lendo direto do .msh (gmsh)
 #
-function Transiente(meshfile::String,metodo=:Newnark)
+function Transiente(meshfile::String,metodo=:Newmark)
 
     # Evita chamar um .geo
     if occursin(".geo",meshfile)
@@ -36,7 +36,7 @@ function Transiente(meshfile::String,metodo=:Newnark)
     F(t) = Vetor_P!(t,nn,materials,velocities,coord,connect,P)
 
     # Chama o Newmark
-    C = zeros(nn,nn)
+    C = spzeros(nn,nn)
     Δt = 3E-6
     Tf = 0.1
 

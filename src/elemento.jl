@@ -8,7 +8,7 @@ function Matriz_N(r,s)
     N3 = (1/4)*(1+r)*(1+s)
     N4 = (1/4)*(1-r)*(1+s)
   
-    return [N1 N2 N3 N4]
+    return @SMatrix [N1 N2 N3 N4]
   
   end
   
@@ -20,10 +20,10 @@ function Matriz_N(r,s)
       # Deriva das funções de interpolação em relação
       # a r e s
       #               N1     N2     N3       N4
-      dNr = (1/4)*[-(1-s);  (1-s); (1+s); -(1+s)]
-      dNs = (1/4)*[-(1-r); -(1+r); (1+r);  (1-r)]
+      dNr = SMatrix{4,1}((1/4)*[-(1-s);  (1-s); (1+s); -(1+s)])
+      dNs = SMatrix{4,1}((1/4)*[-(1-r); -(1+r); (1+r);  (1-r)])
       
-      return dNr, dNs
+      return dNr,  dNs
   end
    
   #
@@ -36,7 +36,7 @@ function Matriz_N(r,s)
       dNr, dNs = dNrs(r,s)
   
       # Inicializa a matriz J
-      J = zeros(2,2)
+      J = @MMatrix zeros(2,2)
   
       # Loop pelos somatórios
       for i=1:4
@@ -65,7 +65,7 @@ function Matriz_N(r,s)
       J = Jacobiana(r,s,X,Y)
   
       # Inicializa a matriz B
-      B = zeros(2,4)
+      B = @MMatrix zeros(2,4)
   
       # Inverte a J
       iJ = inv(J)
@@ -125,8 +125,8 @@ function Matriz_N(r,s)
   function KMe(ele,c,coord,connect)
   
       # Aloca as matrizes
-      Ke = zeros(4,4)
-      Me = zeros(4,4)
+      Ke = @MMatrix zeros(4,4)
+      Me = @MMatrix zeros(4,4)
   
       # Descobre nos, X e Y para este elemento
       nos, X, Y = Nos_Coordenadas(ele,coord,connect) 
@@ -135,12 +135,12 @@ function Matriz_N(r,s)
       pg = (1/sqrt(3))*[-1;1]
       wg = ones(2)
   
-      for i=1:2
+      @inbounds for i=1:2
           # Ponto e peso nesta dimensão
           r = pg[i]
           wr = wg[i]
   
-          for j=1:2
+          @inbounds for j=1:2
               # Ponto e peso nesta dimensão
               s = pg[j]
               ws = wg[j]

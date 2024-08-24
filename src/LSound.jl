@@ -3,6 +3,7 @@ module LSound
     # Imports
     using LinearAlgebra
     using SparseArrays
+    using StaticArrays
     using LinearMaps
     using ArnoldiMethod
     using ProgressMeter
