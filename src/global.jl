@@ -11,7 +11,7 @@ function Monta_KM(nn,ne,coord,connect,materials)
     J = Int64[]
     VK = Float64[]
     VM = Float64[]
-
+ 
     # Loop pelos elementos
     for ele=1:ne
 
@@ -21,9 +21,12 @@ function Monta_KM(nn,ne,coord,connect,materials)
         # Velocidade
         c = materials[mat,2]
 
-        # Monta as matrizes dos elementos
-        Ke,Me,nos = KMe(ele,c,coord,connect)
+        # Descobre nos, X e Y para este elemento
+        nos, X, Y = Nos_Coordenadas(ele,coord,connect) 
 
+        # Monta as matrizes dos elementos
+        Ke, Me = KMe(ele,c,X,Y)
+ 
         # Sobreposição das locais nas globais
         for i=1:4
             ni = nos[i]

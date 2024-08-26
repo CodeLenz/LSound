@@ -122,14 +122,11 @@ function Matriz_N(r,s)
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe(ele,c,coord,connect)
+  function KMe(ele,c,X,Y)
   
       # Aloca as matrizes
       Ke = @MMatrix zeros(4,4)
       Me = @MMatrix zeros(4,4)
-  
-      # Descobre nos, X e Y para este elemento
-      nos, X, Y = Nos_Coordenadas(ele,coord,connect) 
   
       # Integração por quadratura de Gauss-Legendre
       pg = (1/sqrt(3))*[-1;1]
@@ -158,7 +155,7 @@ function Matriz_N(r,s)
           end
       end
   
-      return Ke, (1/c^2)*Me, nos
+      return Ke, (1/c^2)*Me
   
   end
   
@@ -290,5 +287,25 @@ function Edge_load_local(edge,qn,X,Y)
   
     # Return F
     return F
+
+end
+
+#
+# Damping matrix Ce
+#
+function Damping_local(edge,damp,X,Y)
+
+    # As we assume cte damp
+    # and the element is linear
+    # we can use one Gauss Point
+
+    # Compute Mappings (edge's center)
+    n, t, dJ, N = Map_edge_bi4(edge,0.0,X,Y)
+
+    # Matrix
+    C   = (N'*N)*damp*(dJ*2.0)
+  
+    # Return C
+    return C
 
 end

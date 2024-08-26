@@ -5,6 +5,7 @@ version = "1.0.0-DEV"
 
 [deps]
 ArnoldiMethod = "ec485272-7323-5ecc-a04f-4719b315124d"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Lgmsh = "901517f6-ef86-4a80-bf35-2c5b8e720204"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LinearMaps = "7a12625a-238d-50fd-b39a-03d52299707e"
@@ -14,6 +15,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 ArnoldiMethod = "0.4.0"
+DelimitedFiles = "1.9.1"
 Lgmsh = "1.0.0"
 LinearAlgebra = "1.11.0"
 LinearMaps = "3.11.3"

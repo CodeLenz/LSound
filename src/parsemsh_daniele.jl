@@ -26,6 +26,7 @@ function Parsemsh_Daniele(meshfile::String)
     # 
     # Vn,value,freq,phase (in degrees)
     #
+    # Cn, value
     #
     pgroups, pgnames = Lgmsh_import_physical_groups(meshfile)
 
@@ -42,6 +43,12 @@ function Parsemsh_Daniele(meshfile::String)
 
     # Local dict inside the loop
     localD_vn = Dict{String,Union{Float64,Matrix{Int64}}}()
+
+    # Vector with Dicts of damping in faces
+    damping = Dict{String,Union{Float64,Matrix{Int64}}}[]
+
+    # Local dict inside the loop
+    localD_damp = Dict{String,Union{Float64,Matrix{Int64}}}()
 
     # Vector of OPEN nodes
     nodes_open = Int64[]
@@ -115,6 +122,27 @@ function Parsemsh_Daniele(meshfile::String)
             # Copy the dict to the vector of velocities
             push!(velocities,copy(localD_vn))
 
+      elseif  occursin("Cn",st[1])
+
+            # Clean dictionary to store local data
+            empty!(localD_damp)
+
+            # Valor
+            localD_damp["value"] = parse(Float64,st[2])
+            
+            # Find nodes 
+            nodes_damp = Lgmsh.Readnodesgroup(meshfile,name)
+
+            # Find element and edges
+            eleedges,edges = FindElementsEdges(3,ne,etypes,connect,nodes_damp)
+
+            # Append
+            localD_damp["elements"] = [eleedges edges]
+
+            # Copy the dict to the vector of dampings
+            push!(damping,copy(localD_damp))
+
+
       end #if
 
     end 
@@ -152,6 +180,6 @@ function Parsemsh_Daniele(meshfile::String)
     end
 
     # Return processed data
-    return nn, coord, ne, connect2, materials2, nodes_open, velocities
+    return nn, coord, ne, connect2, materials2, nodes_open, velocities, damping
 
 end

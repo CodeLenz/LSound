@@ -7,6 +7,7 @@ module LSound
     using LinearMaps
     using ArnoldiMethod
     using ProgressMeter
+    using DelimitedFiles
     using Lgmsh
 
     include("parsemsh_daniele.jl")
@@ -15,6 +16,7 @@ module LSound
     include("autovalores.jl")
     include("newmark.jl")
     include("vetor_P.jl")
+    include("matriz_C.jl")
     include("U0.jl")
     include("bathe.jl")
 

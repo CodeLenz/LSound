@@ -6,7 +6,7 @@
 function Modal(meshfile::String, nev=4)
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities = Parsemsh_Daniele(meshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, damping = Parsemsh_Daniele(meshfile)
 
     # Calcula as matrizes globais
     K,M = Monta_KM(nn,ne,coord,connect,materials)

@@ -12,16 +12,21 @@ function Transiente(meshfile::String,metodo=:Newmark)
     metodo in [:Bathe, :Newmark] || error("Métodos disponíveis são :Bathe e :Newmark")
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities = Parsemsh_Daniele(meshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, damping = Parsemsh_Daniele(meshfile)
 
     # Aplica condição inicial de pressão
     # funcao(x,y) = Gauss(x,y,0.5,0.5,0.2)
-    funcao(x,y) = Zero(x,y)
-    #funcao(x,y) = Degrau(x,y,0.5,0.0005,50*0.0011,0.0011)
+    #funcao(x,y) = Zero(x,y)
+    funcao(x,y) = Degrau(x,y,0.5,0.01,5*0.009,0.01)
     U0 = Applica_U0(nn,coord,funcao)
 
     # Calcula as matrizes globais
     @time K,M = Monta_KM(nn,ne,coord,connect,materials)
+
+    # E a de amortecimento
+    C = Matriz_C(nn,damping,materials,coord,connect)
+
+    writedlm("C.txt",Array(C))
 
     # DOFs livres do problema
     livres = setdiff(collect(1:nn),nodes_open)
@@ -36,16 +41,15 @@ function Transiente(meshfile::String,metodo=:Newmark)
     F(t) = Vetor_P!(t,nn,materials,velocities,coord,connect,P)
 
     # Chama o Newmark
-    C = spzeros(nn,nn)
     Δt = 3E-6
     Tf = 0.1
 
     if metodo===:Newmark
-       println("Usando o método Newmark")
-       tempos, MP = Newmark(M, C, K, F, livres, Δt, Tf,U0=U0)
+        println("Usando o método Newmark")
+        tempos, MP = Newmark(M, C, K, F, livres, Δt, Tf,U0=U0)
     elseif metodo===:Bathe
-       println("Usando o método Bathe b1 b2")
-       tempos, MP = B1B2Bathe2d(M, C, K, F, livres, Δt, Tf,U0=U0)
+        println("Usando o método Bathe b1 b2")
+        tempos, MP = B1B2Bathe2d(M, C, K, F, livres, Δt, Tf,U0=U0)
     end
 
     # Inicializa um vetor com todos os gls
