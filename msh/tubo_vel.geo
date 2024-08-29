@@ -1,5 +1,5 @@
 //
-// Tube with normal velocity 
+// Tube with normal velocity and end with Yn
 //
 
 // Element size
@@ -25,15 +25,10 @@ Plane Surface(1) = {1};
 Physical Surface("Material,Ar,1,1.028,340.0,400.0") = {1};
 
 // Normal velocity (left)
-// closed-open
-// f1 = 85 Hz
-//Physical Curve("Vn,0.0,160.0,0.0") = {4};
+Physical Curve("Vn,1E-3,340.0,0.0") = {4};
 
 // Atenuation
-Physical Curve("Cn,1.0") = {2,4};
-
-// Boundary conditions - Open
-// Physical Curve("Open") = {2};
+Physical Curve("Yn,1.0") = {2,4};
 
 // Convert triangles to quads
 Recombine Surface{:};

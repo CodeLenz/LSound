@@ -18,7 +18,7 @@ function Parsemsh_Daniele(meshfile::String)
     nn, coord, ne, etypes, connect, etags = Readmesh(meshfile,et)
 
     #
-    # Expected Physical groups
+    # Expected/known Physical groups
     #
     # Material,nome,id,dens,c,Z [ surfaces (and volumes) ]
     #
@@ -26,7 +26,7 @@ function Parsemsh_Daniele(meshfile::String)
     # 
     # Vn,value,freq,phase (in degrees)
     #
-    # Cn, value
+    # Yn, value
     #
     pgroups, pgnames = Lgmsh_import_physical_groups(meshfile)
 
@@ -64,8 +64,6 @@ function Parsemsh_Daniele(meshfile::String)
 
       # Check if Material
       if occursin("Material",st[1])
-
-            println("reading ", st)
 
             # Clean dictionary to store local data
             empty!(localD_m)
@@ -122,7 +120,7 @@ function Parsemsh_Daniele(meshfile::String)
             # Copy the dict to the vector of velocities
             push!(velocities,copy(localD_vn))
 
-      elseif  occursin("Cn",st[1])
+      elseif  occursin("Yn",st[1])
 
             # Clean dictionary to store local data
             empty!(localD_damp)
@@ -171,8 +169,6 @@ function Parsemsh_Daniele(meshfile::String)
         connect2[elements,2] .= id
 
         v = [mat["dens"] mat["c"] mat["Z"]]
-
-        @show id, v
 
         # fill line of materials2
         materials2[id,:] = v

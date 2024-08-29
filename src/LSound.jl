@@ -20,9 +20,9 @@ module LSound
     include("U0.jl")
     include("bathe.jl")
 
-    include("main_modal.jl")
-    include("main_transiente.jl")
+    include("modal.jl")
+    include("main.jl")
 
-    export Transiente, Modal
+    export Analise
 
 end

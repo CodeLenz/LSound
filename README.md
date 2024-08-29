@@ -1,3 +1,3 @@
 # LSound
 
-[![Build Status](https://github.com/CodeLenz/LSound.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/CodeLenz/LSound.jl/actions/workflows/CI.yml?query=branch%3Amain)
+Código acadêmico para a simulação de problemas de acústica linear utilizando o método dos elementos finitos. 

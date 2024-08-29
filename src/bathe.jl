@@ -12,8 +12,8 @@
 function B1B2Bathe2d(M, C, K, F::Function,  livres, Δt, Tf;  U0=Float64[], V0=Float64[],
     γ  = 1/2, 
     δ  = 1/4,
-    β1 = 0.39,
-    β2 = 0.78)
+    β1 = 1/3,
+    β2 = 2/3)
 
     # Número de gls livres
     nl = length(livres) 

@@ -25,10 +25,10 @@
             mat = connect[ele,2]
 
             # Find material density
-            ρ = materials[mat,1]
-            #c = materials[mat,2]
+            # ρ = materials[mat,1]
+            # c = materials[mat,2]
 
-            # Cte de amortecimento
+            # Cte de amortecimento (passando o Y_n diretamente)
             damp = valor #ρ/valor
 
             # Find nodes and coordinates

@@ -1,0 +1,28 @@
+
+    # Inicializa um arquivo de pós-processamento do gmsh
+    nome = "modal.pos"
+    etype = connect[:,1]
+    Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
+
+    # Exporta os modos 1 até nev
+    for  i=1:nemodos
+
+        # Inicializa um vetor com todos os gls
+        vv = zeros(nn)
+
+        # Copia o modo para as posições livres
+        vv[livres] = X[:,i]
+
+        # Adiciona ao arquivo
+        Lgmsh_export_nodal_scalar(nome,vv,"Modo $i, freq $(freq[i])")
+
+    end
+
+
+
+     # Aplica condição inicial de pressão
+    # funcao(x,y) = Gauss(x,y,0.5,0.5,0.2)
+    funcao(x,y) = Zero(x,y)
+    # funcao(x,y) = Degrau(x,y,0.5,0.01,5*0.009,0.01)
+    U0 = Applica_U0(nn,coord,funcao)
+
