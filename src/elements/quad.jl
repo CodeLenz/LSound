@@ -1,7 +1,7 @@
 #
 # Devolve a matriz [N] para um  ponto r,s
 #
-function Matriz_N(r,s)
+function Matriz_N_bi4(r,s)
 
     N1 = (1/4)*(1-r)*(1-s)
     N2 = (1/4)*(1+r)*(1-s)
@@ -16,7 +16,7 @@ function Matriz_N(r,s)
   # Devolve as derivadas das funções de interpolação
   # em um ponto r,s
   #
-  function dNrs(r,s)
+  function dNrs_bi4(r,s)
       # Deriva das funções de interpolação em relação
       # a r e s
       #               N1     N2     N3       N4
@@ -29,11 +29,11 @@ function Matriz_N(r,s)
   #
   # Calcula a matriz Jacobiana do elemento
   #
-  function Jacobiana(r,s,X::Vector,Y::Vector)
+  function Jacobiana_bi4(r,s,X::Vector,Y::Vector)
   
       # Derivadas das funções de interpolação
       # em relação a    r e s
-      dNr, dNs = dNrs(r,s)
+      dNr, dNs = dNrs_bi4(r,s)
   
       # Inicializa a matriz J
       J = @MMatrix zeros(2,2)
@@ -55,14 +55,14 @@ function Matriz_N(r,s)
   #
   # Monta a matriz B de um elemento na posiçao r,s
   #
-  function Matriz_B(r,s,X::Vector,Y::Vector)
+  function Matriz_B_bi4(r,s,X::Vector,Y::Vector)
   
       # Derivadas das funções de interpolação
       # em relação a    r e s
-      dNr, dNs = dNrs(r,s)
+      dNr, dNs = dNrs_bi4(r,s)
   
       # Calcula a matriz Jacobiana no ponto r,s
-      J = Jacobiana(r,s,X,Y)
+      J = Jacobiana_bi4(r,s,X,Y)
   
       # Inicializa a matriz B
       B = @MMatrix zeros(2,4)
@@ -87,42 +87,11 @@ function Matriz_N(r,s)
   
   end
   
-  #
-  # Devolve os vetores nos, X e Y com os nós 
-  # e as coordenadas do elemento
-  #
-  function Nos_Coordenadas(ele,coord,connect)
-  
-      # Descobre os nós do elemento
-      nos = connect[ele,3:end]
-  
-      # Aloca vetores de coordenadas
-      X = zeros(4)
-      Y = zeros(4)
-  
-      # Descobre as coordenadas x e y de cada nó
-      # do elemento
-      for i=1:4
-  
-          # Nó
-          no = nos[i]
-  
-          # Coordenadas deste nó
-          x,y = coord[no,:]
-  
-          # Grava em X e Y
-          X[i] = x
-          Y[i] = y
-  
-      end
-  
-      return nos, X, Y
-  end
-  
+ 
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe(ele,c,X,Y)
+  function KMe_bi4(ele,c,X,Y)
   
       # Aloca as matrizes
       Ke = @MMatrix zeros(4,4)
@@ -143,10 +112,10 @@ function Matriz_N(r,s)
               ws = wg[j]
   
               # Calcula DJ e B 
-              B, dJ = Matriz_B(r,s,X,Y)
+              B, dJ = Matriz_B_bi4(r,s,X,Y)
   
               # Calcula N(r,s)
-              N = Matriz_N(r,s) 
+              N = Matriz_N_bi4(r,s) 
   
               # Somatórios
               Me = Me + N'*N*dJ
@@ -273,7 +242,7 @@ end
 # Force vector for a bi4 element 
 # local (normal) surface load.
 #
-function Edge_load_local(edge,qn,X,Y)
+function Edge_load_local_bi4(edge,qn,X,Y)
 
     # As we assume cte load
     # and the element is linear
@@ -293,7 +262,7 @@ end
 #
 # Damping matrix Ce
 #
-function Damping_local(edge,damp,X,Y)
+function Damping_local_bi4(edge,damp,X,Y)
 
     # As we assume cte damp
     # and the element is linear

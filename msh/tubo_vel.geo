@@ -8,8 +8,8 @@ lc = 0.01;
 // Corners
 Point(1) = { 0, 0,     0, lc};
 Point(2) = { 1, 0,     0, lc};
-Point(3) = { 1, 0.02,  0, lc};
-Point(4) = { 0, 0.02,  0, lc};
+Point(3) = { 1, 2*lc,  0, lc};
+Point(4) = { 0, 2*lc,  0, lc};
 
 // Edges
 Line(1) = {1, 2};

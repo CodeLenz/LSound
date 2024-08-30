@@ -10,17 +10,17 @@ module LSound
     using DelimitedFiles
     using Lgmsh
 
-    include("parsemsh_daniele.jl")
-    include("elemento.jl")
-    include("global.jl")
-    include("autovalores.jl")
-    include("newmark.jl")
-    include("vetor_P.jl")
-    include("matriz_C.jl")
-    include("U0.jl")
-    include("bathe.jl")
-
-    include("modal.jl")
+    include("parse/parsemsh_daniele.jl")
+    include("global/aux.jl")
+    include("elements/quad.jl")
+    include("global/global.jl")
+    include("solvers/autovalores.jl")
+    include("solvers/newmark.jl")
+    include("global/vetor_P.jl")
+    include("global/matriz_C.jl")
+    include("global/U0.jl")
+    include("solvers/bathe.jl")
+    include("solvers/modal.jl")
     include("main.jl")
 
     export Analise

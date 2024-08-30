@@ -9,7 +9,9 @@ using Lgmsh
 function Parsemsh_Daniele(meshfile::String)
 
     # Element types to  read
-    et = [3]
+    # 2 -> triangular (linear)
+    # 3 -> quadrangular (linear)
+    et = [2,3]
 
     # Maximum number of nodes in the elements of the mesh
     nmax = maximum(Lgmsh_nodemap()[et])

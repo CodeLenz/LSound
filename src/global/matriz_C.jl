@@ -21,6 +21,9 @@
             ele  = elements[e,1]
             edge = elements[e,2]
 
+            # Tipo de elemento
+            et = connect[ele,1]
+
             # Material for this element
             mat = connect[ele,2]
 
@@ -32,15 +35,15 @@
             damp = valor #ρ/valor
 
             # Find nodes and coordinates
-            nos,X,Y = Nos_Coordenadas(ele,coord,connect)
+            nos,X,Y = Nos_Coordenadas(ele,et,coord,connect)
 
             # Calcula a matriz local do elemento
-            Ce = Damping_local(edge,damp,X,Y)
+            Ce = Damping_local_bi4(edge,damp,X,Y)
 
             # Loop para informar o amortecimento
-            for i=1:4
+            for i in LinearIndices(nos)
                 ni = nos[i]
-                for j=1:4
+                for j in LinearIndices(nos)
                     nj = nos[j]
                     push!(I,ni)
                     push!(J,nj)
@@ -49,7 +52,6 @@
             end #i
         end #e
     end # dict (d)
-
 
    # Devolve a matriz esparsa de amortecimento
    return sparse(I,J,VC,nn,nn)

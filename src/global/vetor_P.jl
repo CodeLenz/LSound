@@ -24,6 +24,9 @@
         ele  = elements[i,1]
         edge = elements[i,2]
 
+        # Element type
+        et = connect[ele,1]
+
         # Material for this element
         mat = connect[ele,2]
 
@@ -31,10 +34,10 @@
         ρ = materials[mat,1]
 
         # Find nodes and coordinates
-        nos,X,Y = Nos_Coordenadas(ele,coord,connect)
+        nos,X,Y = Nos_Coordenadas(ele,et,coord,connect)
 
         # Local vector 
-        Pn = Edge_load_local(edge,-ρ*qn,X,Y)
+        Pn = Edge_load_local_bi4(edge,-ρ*qn,X,Y)
 
         # Add to the global vector
         P[nos] .+=  Pn

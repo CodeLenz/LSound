@@ -21,16 +21,19 @@ function Monta_KM(nn,ne,coord,connect,materials)
         # Velocidade
         c = materials[mat,2]
 
+        # Tipo de elemento
+        et = connect[ele,1]
+
         # Descobre nos, X e Y para este elemento
-        nos, X, Y = Nos_Coordenadas(ele,coord,connect) 
+        nos, X, Y = Nos_Coordenadas(ele,et,coord,connect) 
 
         # Monta as matrizes dos elementos
-        Ke, Me = KMe(ele,c,X,Y)
+        Ke, Me = KMe_bi4(ele,c,X,Y)
  
         # Sobreposição das locais nas globais
-        for i=1:4
+        for i in LinearIndices(nos)
             ni = nos[i]
-            for j=1:4
+            for j in LinearIndices(nos)
                 push!(I,ni)
                 push!(J,nos[j])
                 push!(VK,Ke[i,j])
