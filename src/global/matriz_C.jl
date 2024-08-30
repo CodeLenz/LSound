@@ -38,7 +38,13 @@
             nos,X,Y = Nos_Coordenadas(ele,et,coord,connect)
 
             # Calcula a matriz local do elemento
-            Ce = Damping_local_bi4(edge,damp,X,Y)
+            if et==3
+                Ce = Damping_local_bi4(edge,damp,X,Y)
+            elseif et==2
+                Ce = Damping_local_tri3(edge,damp,X,Y)
+            else
+                error("Tipo de elemento não definido")
+            end
 
             # Loop para informar o amortecimento
             for i in LinearIndices(nos)

@@ -1,7 +1,7 @@
 #
 # Versão lendo direto do .msh (gmsh)
 #
-function Analise(meshfile::String;nev=4,Tf=1.0,Δt=1E-6,metodo=:Newmark)
+function Analise(meshfile::String;nev=4,Tf=1.0,Δt=1E-6,metodo=:Newmark,output=true)
 
     # Evita chamar um .geo
     if occursin(".geo",meshfile)
@@ -13,6 +13,12 @@ function Analise(meshfile::String;nev=4,Tf=1.0,Δt=1E-6,metodo=:Newmark)
 
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, damping = Parsemsh_Daniele(meshfile)
+
+    # Teste até arrumarmos os cálculos com os triângulos
+    if any(connect[:,1].==2)
+        println("################# CUIDADO ::: Elemento triangular está sendo implementado ")
+        println("################# CUIDADO ::: resultados ainda não estão OK ")
+    end
 
     # Calcula as matrizes globais
     K,M = Monta_KM(nn,ne,coord,connect,materials)
@@ -37,20 +43,22 @@ function Analise(meshfile::String;nev=4,Tf=1.0,Δt=1E-6,metodo=:Newmark)
  
         # Exporta os modos para visualização no gmsh
         # Exporta os modos 1 até nev
-        for  i in LinearIndices(freq)
+        if output
+            for  i in LinearIndices(freq)
 
-            # Inicializa um vetor com todos os gls
-            vv = zeros(nn)
+                # Inicializa um vetor com todos os gls
+                vv = zeros(nn)
 
-            # Copia o modo para as posições livres
-            vv[livres] = X[:,i]
+                # Copia o modo para as posições livres
+                vv[livres] = X[:,i]
 
-            # Adiciona ao arquivo
-            Lgmsh_export_nodal_scalar(nome,vv,"Modo $i, freq $(freq[i]) Hz")
+                # Adiciona ao arquivo
+                Lgmsh_export_nodal_scalar(nome,vv,"Modo $i, freq $(freq[i]) Hz")
 
-        end # i 
+            end # i 
+        end
 
-        return nothing
+        return freq, X
 
     end # Modal
 
@@ -78,18 +86,20 @@ function Analise(meshfile::String;nev=4,Tf=1.0,Δt=1E-6,metodo=:Newmark)
     vv = zeros(nn)
 
     # Exporta os tempos
-    println("Escrevendo os dados transientes para o arquivo .pos")
-    for  i=1:1:size(MP,2)
+    if output
+        println("Escrevendo os dados transientes para o arquivo .pos")
+        for  i=1:1:size(MP,2)
 
-        # Copia o deslocamento para as posições livres
-        vv .= MP[:,i]
+            # Copia o deslocamento para as posições livres
+            vv .= MP[:,i]
 
-        # Adiciona ao arquivo
-        Lgmsh_export_nodal_scalar(nome,vv,"Pressão")
+            # Adiciona ao arquivo
+            Lgmsh_export_nodal_scalar(nome,vv,"Pressão")
 
+        end
     end
 
-    return nothing
+    return tempos, MP
 
 end
 

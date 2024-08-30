@@ -28,7 +28,13 @@ function Monta_KM(nn,ne,coord,connect,materials)
         nos, X, Y = Nos_Coordenadas(ele,et,coord,connect) 
 
         # Monta as matrizes dos elementos
-        Ke, Me = KMe_bi4(ele,c,X,Y)
+        if et==3
+           Ke, Me = KMe_bi4(ele,c,X,Y)
+        elseif et==2
+           Ke, Me = KMe_tri3(ele,c,X,Y)
+        else
+            error("Elemento não definido")
+        end
  
         # Sobreposição das locais nas globais
         for i in LinearIndices(nos)

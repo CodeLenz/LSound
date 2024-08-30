@@ -114,7 +114,13 @@ function Parsemsh_Daniele(meshfile::String)
             nodes_vn = Lgmsh.Readnodesgroup(meshfile,name)
 
             # Find element and edges
-            eleedges,edges = FindElementsEdges(3,ne,etypes,connect,nodes_vn)
+            eleedges = Int64[]
+            edges = Int64[]
+            for tt in et
+                eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_vn)
+                push!(eleedges,eleedges_...)
+                push!(edges,edges_...)
+            end
 
             # Append
             localD_vn["elements"] = [eleedges edges]
@@ -134,8 +140,14 @@ function Parsemsh_Daniele(meshfile::String)
             nodes_damp = Lgmsh.Readnodesgroup(meshfile,name)
 
             # Find element and edges
-            eleedges,edges = FindElementsEdges(3,ne,etypes,connect,nodes_damp)
-
+            eleedges = Int64[]
+            edges = Int64[]
+            for tt in et
+                eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_damp)
+                push!(eleedges,eleedges_...)
+                push!(edges,edges_...)
+            end
+            
             # Append
             localD_damp["elements"] = [eleedges edges]
 

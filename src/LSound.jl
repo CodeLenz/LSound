@@ -13,6 +13,7 @@ module LSound
     include("parse/parsemsh_daniele.jl")
     include("global/aux.jl")
     include("elements/quad.jl")
+    include("elements/tri.jl")
     include("global/global.jl")
     include("solvers/autovalores.jl")
     include("solvers/newmark.jl")

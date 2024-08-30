@@ -37,7 +37,13 @@
         nos,X,Y = Nos_Coordenadas(ele,et,coord,connect)
 
         # Local vector 
-        Pn = Edge_load_local_bi4(edge,-ρ*qn,X,Y)
+        if et==3
+            Pn = Edge_load_local_bi4(edge,-ρ*qn,X,Y)
+        elseif et==2
+            Pn = Edge_load_local_tri3(edge,-ρ*qn,X,Y)
+        else
+          error("Elemento não definido")
+        end
 
         # Add to the global vector
         P[nos] .+=  Pn
