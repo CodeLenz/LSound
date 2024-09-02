@@ -22,12 +22,17 @@ function Matriz_N_hex8(r,s,t)
   # em um ponto r,s,t
   #
   function dNrs_hex8(r,s,t)
-      # Deriva das funções de interpolação em relação
+      # Derivada das funções de interpolação em relação
       # a r, s e t
       #                    
-      dNr = SMatrix{8,1}([ -(((s-1)*t-s+1)/8) ; ((s-1)*t-s+1)/8; -(((s+1)*t-s-1)/8); ((s-1)*t+s-1)/8; -(((s-1)*t+s-1)/8); ((s+1)*t+s+1)/8 ; -(((s+1)*t+s+1)/8)  ])
-      dNs = SMatrix{8,1}([ ])
-      dNt = SMatrix{8,1}([ ])
+      dNr = SMatrix{8,1}([ -(((s-1)*t-s+1)/8) ; ((s-1)*t-s+1)/8; -(((s+1)*t-s-1)/8); ((s+1)*t-s-1)/8 ;
+                            ((s-1)*t+s-1)/8;  -(((s-1)*t+s-1)/8); ((s+1)*t+s+1)/8 ; -(((s+1)*t+s+1)/8)  ])
+      dNs = SMatrix{8,1}([ -(((r-1)*t-r+1)/8) ; ((r+1)*t-r-1)/8 ; -(((r+1)*t-r-1)/8) ;
+                            ((r-1)*t-r+1)/8 ; ((r-1)*t+r-1)/8 ; -(((r+1)*t+r+1)/8) ;
+                             ((r+1)*t+r+1)/8 ; -(((r-1)*t+r-1)/8) ])
+      dNt = SMatrix{8,1}([ -(((r-1)*s-r+1)/8) ; ((r+1)*s-r-1)/8 ; -(((r+1)*s+r+1)/8) ; 
+                             ((r-1)*s+r-1)/8; ((r-1)*s-r+1)/8; -(((r+1)*s-r-1)/8); 
+                             ((r+1)*s+r+1)/8 ; -(((r-1)*s+r-1)/8) ])
       
       return dNr,  dNs, dNt
   end
@@ -48,10 +53,16 @@ function Matriz_N_hex8(r,s,t)
       for i=1:8
           J[1,1] += dNr[i]*X[i]
           J[1,2] += dNr[i]*Y[i]
+          J[1,3] += dNr[i]*Z[i]
 
           J[2,1] += dNs[i]*X[i]
           J[2,2] += dNs[i]*Y[i]
-
+          J[2,3] += dNs[i]*Z[i]
+          
+          J[3,1] += dNt[i]*X[i]
+          J[3,2] += dNt[i]*Y[i]
+          J[3,3] += dNt[i]*Z[i]
+          
       end
    
       # Devolve a matriz Jacobiana para o elemento
@@ -63,30 +74,31 @@ function Matriz_N_hex8(r,s,t)
   #
   # Monta a matriz B de um elemento na posiçao r,s
   #
-  function Matriz_B_bi4(r,s,X::Vector,Y::Vector)
+  function Matriz_B_hex8(r,s,t,X::Vector,Y::Vector,Z::Vector)
   
       # Derivadas das funções de interpolação
-      # em relação a    r e s
-      dNr, dNs = dNrs_bi4(r,s)
+      # em relação a r,s,t
+      dNr, dNs, dNt = dNrs_hex8(r,s,t)
   
-      # Calcula a matriz Jacobiana no ponto r,s
-      J = Jacobiana_bi4(r,s,X,Y)
+      # Calcula a matriz Jacobiana no ponto r,s,t
+      J = Jacobiana_hex8(r,s,t,X,Y,Z)
   
       # Inicializa a matriz B
-      B = @MMatrix zeros(2,4)
+      B = @MMatrix zeros(3,8)
   
       # Inverte a J
       iJ = inv(J)
   
       # Loop pelas colunas de B
-      for i=1:4
+      for i=1:8
   
           # Corrige as derivadas de rs para xy
-          dNxy = iJ*[dNr[i];dNs[i]]
+          dNxy = iJ*[dNr[i];dNs[i];dNt[i]]
    
           # Posiciona na coluna
           B[1,i] = dNxy[1]
           B[2,i] = dNxy[2]
+          B[3,i] = dNxy[3]
   
       end
   
@@ -99,11 +111,11 @@ function Matriz_N_hex8(r,s,t)
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_bi4(ele,c,X,Y)
+  function KMe_hex8(ele,c,X,Y,Z)
   
       # Aloca as matrizes
-      Ke = @MMatrix zeros(4,4)
-      Me = @MMatrix zeros(4,4)
+      Ke = @MMatrix zeros(8,8)
+      Me = @MMatrix zeros(8,8)
   
       # Integração por quadratura de Gauss-Legendre
       pg = (1/sqrt(3))*[-1;1]
@@ -118,27 +130,34 @@ function Matriz_N_hex8(r,s,t)
               # Ponto e peso nesta dimensão
               s = pg[j]
               ws = wg[j]
-  
-              # Calcula DJ e B 
-              B, dJ = Matriz_B_bi4(r,s,X,Y)
-  
-              # Calcula N(r,s)
-              N = Matriz_N_bi4(r,s) 
-  
-              # Somatórios
-              Me = Me + N'*N*dJ
-              Ke = Ke + B'*B*dJ
-  
-          end
-      end
+
+              @inbounds for k=1:2
+                # Ponto e peso nesta dimensão
+                t = pg[k]
+                wt = wg[k]
+
+                # Calcula DJ e B 
+                B, dJ = Matriz_B_hex8(r,s,t,X,Y,Z)
+    
+                # Calcula N(r,s,t)
+                N = Matriz_N_hex8(r,s,t) 
+    
+                # Somatórios
+                Me = Me + N'*N*dJ
+                Ke = Ke + B'*B*dJ
+
+              end  #k 
+          end #j
+      end #i
   
       return Ke, (1/c^2)*Me
   
   end
   
-  
 
-  #
+  ############## MODIFICAR DAQUI PARA BAIXO #####################
+
+#
 #    Edges, normals and tangents
 #
 #               n
