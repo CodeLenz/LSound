@@ -80,35 +80,36 @@ end
 # Damping matrix Ce
 #
 function Damping_local_tri3(edge,damp,X,Y)
-    
-  # Cte
-  cte = damp*((X[2]-X[1])*Y[3]+(X[1]-X[3])*Y[2]+(X[3]-X[2])*Y[1]) 
-
+   
+  
   # Initialize the damping matrix
   C = zeros(3,3)
 
   # face 1 (12)
   if edge==1
-     C[1,1] = cte/6
-     C[1,2] = cte/12
+     cte1 = damp*sqrt(Y[2]^2-2*Y[1]*Y[2]+Y[1]^2+X[2]^2-2*X[1]*X[2]+X[1]^2)
+     C[1,1] = cte1/3
+     C[1,2] = cte1/6
      C[2,1] = C[1,2]
-     C[2,2] = cte/6
+     C[2,2] = cte1/3
   
   elseif edge==2
 
   # face 2 (23)
-     C[2,2] = cte/8
-     C[2,3] = cte/24
-     C[3,2] = C[1,2]
-     C[3,3] = cte/24
+     cte2 = damp*sqrt(Y[3]^2-2*Y[2]*Y[3]+Y[2]^2+X[3]^2-2*X[2]*X[3]+X[2]^2)
+     C[2,2] = cte2/3
+     C[2,3] = cte2/6
+     C[3,2] = C[2,3]
+     C[3,3] = cte2/3
   
   else
  
     # face 3 (13)
-    C[1,1] = cte/8
-    C[1,3] = cte/24
-    C[3,1] = C[1,2]
-    C[3,3] = cte/24
+    cte3 = damp*sqrt(Y[3]^2-2*Y[1]*Y[3]+Y[1]^2+X[3]^2-2*X[1]*X[3]+X[1]^2)
+    C[1,1] = cte3/3
+    C[1,3] = cte3/6
+    C[3,1] = C[1,3]
+    C[3,3] = cte3/3
 
   end
   

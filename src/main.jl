@@ -70,6 +70,9 @@ function Analise(meshfile::String;nev=4,Tf=1.0,Δt=1E-6,metodo=:Newmark,output=t
     # E a de amortecimento
     C = Matriz_C(nn,damping,materials,coord,connect)
 
+    #funcao(x,y) = Degrau(x,y,0.5,0.01,5*0.009,0.01)
+    #U0 = Applica_U0(nn,coord,funcao)
+
     # Faz a jogadinha para chamar os integradores no tempo
     P = zeros(nn)
     F(t) = Vetor_P!(t,nn,materials,velocities,coord,connect,P)
