@@ -13,8 +13,8 @@
     nos = connect[ele,3:2+nnos]
 
     # Aloca vetores de coordenadas
-    X = zeros(nnos)
-    Y = zeros(nnos)
+    X = Vector{Int64}(undef,nnos)
+    Y = Vector{Int64}(undef,nnos)
 
     # Descobre as coordenadas x e y de cada nó
     # do elemento
@@ -32,5 +32,6 @@
 
     end
 
+    # Retorns nós e coordenadas
     return nos, X, Y
 end
