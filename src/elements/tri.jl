@@ -2,11 +2,11 @@
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_tri3(ele,c,X,Y)
+  function KMe_tri3(ele,c,X)
   
     # Mapeamento para facilitar a notação
-    x1,x2,x3 = X
-    y1,y2,y3 = Y
+    x1,x2,x3 = X[:,1]
+    y1,y2,y3 = X[:,2]
 
     # Termo em comum para a rigidez
     comum = ((2*x2-2*x1)*y3+(2*x1-2*x3)*y2+(2*x3-2*x2)*y1)
@@ -32,7 +32,7 @@
 # Force vector for a bi3 element 
 # local (normal) surface load.
 #
-function Edge_load_local_tri3(edge,qn,X,Y)
+function Edge_load_local_tri3(edge,qn,X)
 
     # As we assume cte load
     # and the element is linear
@@ -45,22 +45,22 @@ function Edge_load_local_tri3(edge,qn,X,Y)
 
     if edge==1
 
-      dx = X[2]-X[1]
-      dy = Y[2]-Y[1]
+      dx = X[2,1]-X[1,1]
+      dy = X[2,2]-X[1,2]
       F3 = 0.0
 
     elseif edge==2
 
       # (2)->(3)
-      dx = X[3]-X[2]
-      dy = Y[3]-Y[2]
+      dx = X[3,1]-X[2,1]
+      dy = X[3,2]-X[2,2]
       F1 = 0.0
             
     else
 
       # (3)->(1)
-      dx = X[3]-X[1]
-      dy = Y[3]-Y[1]
+      dx = X[3,1]-X[1,1]
+      dy = X[3,2]-X[1,2]
       F2 = 0.0
     
     end
@@ -79,7 +79,7 @@ end
 #
 # Damping matrix Ce
 #
-function Damping_local_tri3(edge,damp,X,Y)
+function Damping_local_tri3(edge,damp,X)
    
   
   # Initialize the damping matrix
@@ -87,7 +87,7 @@ function Damping_local_tri3(edge,damp,X,Y)
 
   # face 1 (12)
   if edge==1
-     cte1 = damp*sqrt(Y[2]^2-2*Y[1]*Y[2]+Y[1]^2+X[2]^2-2*X[1]*X[2]+X[1]^2)
+     cte1 = damp*sqrt(X[2,2]^2-2*X[1,2]*X[2,2]+X[1,2]^2+X[2,1]^2-2*X[1,1]*X[2,1]+X[1,1]^2)
      C[1,1] = cte1/3
      C[1,2] = cte1/6
      C[2,1] = C[1,2]
@@ -96,7 +96,7 @@ function Damping_local_tri3(edge,damp,X,Y)
   elseif edge==2
 
   # face 2 (23)
-     cte2 = damp*sqrt(Y[3]^2-2*Y[2]*Y[3]+Y[2]^2+X[3]^2-2*X[2]*X[3]+X[2]^2)
+     cte2 = damp*sqrt(X[3,2]^2-2*X[2,2]*X[3,2]+X[2,2]^2+X[3,1]^2-2*X[2,1]*X[3,1]+X[2,1]^2)
      C[2,2] = cte2/3
      C[2,3] = cte2/6
      C[3,2] = C[2,3]
@@ -105,7 +105,7 @@ function Damping_local_tri3(edge,damp,X,Y)
   else
  
     # face 3 (13)
-    cte3 = damp*sqrt(Y[3]^2-2*Y[1]*Y[3]+Y[1]^2+X[3]^2-2*X[1]*X[3]+X[1]^2)
+    cte3 = damp*sqrt(X[3,2]^2-2*X[1,2]*X[3,2]+X[1,2]^2+X[3,1]^2-2*X[1,1]*X[3,1]+X[1,1]^2)
     C[1,1] = cte3/3
     C[1,3] = cte3/6
     C[3,1] = C[1,3]

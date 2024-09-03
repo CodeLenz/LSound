@@ -23,13 +23,13 @@ function Monta_KM(nn,ne,coord,connect,materials)
         et = connect[ele,1]
 
         # Descobre nos, X e Y para este elemento
-        nos, X, Y = Nos_Coordenadas(ele,et,coord,connect) 
+        nos, X = Nos_Coordenadas(ele,et,coord,connect) 
 
         # Monta as matrizes dos elementos
         if et==3
-           Ke, Me = KMe_bi4(ele,c,X,Y)
+           Ke, Me = KMe_bi4(ele,c,X)
         elseif et==2
-           Ke, Me = KMe_tri3(ele,c,X,Y)
+           Ke, Me = KMe_tri3(ele,c,X)
         else
             error("Elemento não definido")
         end
@@ -90,13 +90,13 @@ function Matriz_C(nn,damping,materials,coord,connect)
             damp = valor #ρ/valor
 
             # Find nodes and coordinates
-            nos,X,Y = Nos_Coordenadas(ele,et,coord,connect)
+            nos,X = Nos_Coordenadas(ele,et,coord,connect)
 
             # Calcula a matriz local do elemento
             if et==3
-                Ce = Damping_local_bi4(edge,damp,X,Y)
+                Ce = Damping_local_bi4(edge,damp,X)
             elseif et==2
-                Ce = Damping_local_tri3(edge,damp,X,Y)
+                Ce = Damping_local_tri3(edge,damp,X)
             else
                 error("Tipo de elemento não definido")
             end

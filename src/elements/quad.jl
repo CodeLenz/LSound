@@ -29,7 +29,7 @@ function Matriz_N_bi4(r,s)
   #
   # Calcula a matriz Jacobiana do elemento
   #
-  function Jacobiana_bi4(r,s,X::Vector,Y::Vector)
+  function Jacobiana_bi4(r,s,X::Array)
   
       # Derivadas das funções de interpolação
       # em relação a    r e s
@@ -40,10 +40,10 @@ function Matriz_N_bi4(r,s)
   
       # Loop pelos somatórios
       for i=1:4
-          J[1,1] += dNr[i]*X[i]
-          J[1,2] += dNr[i]*Y[i]
-          J[2,1] += dNs[i]*X[i]
-          J[2,2] += dNs[i]*Y[i]
+          J[1,1] += dNr[i]*X[i,1]
+          J[1,2] += dNr[i]*X[i,2]
+          J[2,1] += dNs[i]*X[i,1]
+          J[2,2] += dNs[i]*X[i,2]
       end
    
       # Devolve a matriz Jacobiana para o elemento
@@ -55,14 +55,14 @@ function Matriz_N_bi4(r,s)
   #
   # Monta a matriz B de um elemento na posiçao r,s
   #
-  function Matriz_B_bi4(r,s,X::Vector,Y::Vector)
+  function Matriz_B_bi4(r,s,X::Array)
   
       # Derivadas das funções de interpolação
       # em relação a    r e s
       dNr, dNs = dNrs_bi4(r,s)
   
       # Calcula a matriz Jacobiana no ponto r,s
-      J = Jacobiana_bi4(r,s,X,Y)
+      J = Jacobiana_bi4(r,s,X)
   
       # Inicializa a matriz B
       B = @MMatrix zeros(2,4)
@@ -91,7 +91,7 @@ function Matriz_N_bi4(r,s)
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_bi4(ele,c,X,Y)
+  function KMe_bi4(ele,c,X)
   
       # Aloca as matrizes
       Ke = @MMatrix zeros(4,4)
@@ -112,7 +112,7 @@ function Matriz_N_bi4(r,s)
               ws = wg[j]
   
               # Calcula DJ e B 
-              B, dJ = Matriz_B_bi4(r,s,X,Y)
+              B, dJ = Matriz_B_bi4(r,s,X)
   
               # Calcula N(r,s)
               N = Matriz_N_bi4(r,s) 
@@ -145,7 +145,7 @@ function Matriz_N_bi4(r,s)
 #
 #
 #
-function Map_edge_bi4(edge,ζ,X,Y)
+function Map_edge_bi4(edge,ζ,X)
 
     # Basic test
     edge in 1:4 || throw("Map_edge_bi4::Invalid edge")
@@ -169,8 +169,8 @@ function Map_edge_bi4(edge,ζ,X,Y)
         mult = 1.0
         dN1r = -1/2
         dN2r =  1/2
-        t1 = X[1]*dN1r + X[2]*dN2r
-        t2 = Y[1]*dN1r + Y[2]*dN2r
+        t1 = X[1,1]*dN1r + X[2,1]*dN2r
+        t2 = X[1,2]*dN1r + X[2,2]*dN2r
 
         # Functions
         N1 = Na
@@ -184,8 +184,8 @@ function Map_edge_bi4(edge,ζ,X,Y)
         mult = 1.0
         dN2s = -1/2
         dN3s =  1/2
-        t1 = X[2]*dN2s + X[3]*dN3s
-        t2 = Y[2]*dN2s + Y[3]*dN3s
+        t1 = X[2,1]*dN2s + X[3,1]*dN3s
+        t2 = X[2,2]*dN2s + X[3,2]*dN3s
 
         # Functions
         N2 = Na
@@ -199,8 +199,8 @@ function Map_edge_bi4(edge,ζ,X,Y)
         mult = -1.0
         dN3r =  1/2
         dN4r = -1/2
-        t1 = X[4]*dN4r + X[3]*dN3r
-        t2 = Y[4]*dN4r + Y[3]*dN3r
+        t1 = X[4,1]*dN4r + X[3,1]*dN3r
+        t2 = X[4,2]*dN4r + X[3,2]*dN3r
     
         # Functions
         N3 = Nb
@@ -214,8 +214,8 @@ function Map_edge_bi4(edge,ζ,X,Y)
         mult = -1.0
         dN4s =  1/2
         dN1s = -1/2
-        t1 = X[4]*dN4s + X[1]*dN1s
-        t2 = Y[4]*dN4s + Y[1]*dN1s
+        t1 = X[4,1]*dN4s + X[1,1]*dN1s
+        t2 = X[4,2]*dN4s + X[1,2]*dN1s
 
         # Functions
         N1 = Na
@@ -242,14 +242,14 @@ end
 # Force vector for a bi4 element 
 # local (normal) surface load.
 #
-function Edge_load_local_bi4(edge,qn,X,Y)
+function Edge_load_local_bi4(edge,qn,X)
 
     # As we assume cte load
     # and the element is linear
     # we can use one Gauss Point
 
     # Compute Mappings
-    n, t, dJ, N = Map_edge_bi4(edge,0.0,X,Y)
+    n, t, dJ, N = Map_edge_bi4(edge,0.0,X)
 
     # Sums
     F   = (N')*(qn*dJ)*2.0
@@ -262,14 +262,14 @@ end
 #
 # Damping matrix Ce
 #
-function Damping_local_bi4(edge,damp,X,Y)
+function Damping_local_bi4(edge,damp,X)
 
     # As we assume cte damp
     # and the element is linear
     # we can use one Gauss Point
 
     # Compute Mappings (edge's center)
-    n, t, dJ, N = Map_edge_bi4(edge,0.0,X,Y)
+    n, t, dJ, N = Map_edge_bi4(edge,0.0,X)
 
     # Matrix
     C   = (N'*N)*damp*(dJ*2.0)
