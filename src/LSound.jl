@@ -4,6 +4,7 @@ module LSound
     using LinearAlgebra
     using SparseArrays
     using StaticArrays
+    using LinearSolve
     using LinearMaps
     using ArnoldiMethod
     using ProgressMeter

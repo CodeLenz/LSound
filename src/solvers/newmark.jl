@@ -37,9 +37,12 @@ function Newmark(M, C, K, F::Function, livres, Δt, Tf;  U0=Float64[], V0=Float6
     KL =  K[livres,livres]
     CL =  C[livres,livres]
 
+    # Cache para o vetor de forças
+    forca =  F(0.0)[livres]
+
     # Calcula a aceleração no tempo 0
     A0 = zeros(nl)
-    A0 .= ML \ (F(0.0)[livres] .- CL*V0  .- KL*U0)
+    A0 .= ML \ (forca .- CL*V0  .- KL*U0)
 
     # Gera um lista de tempos discretos
     tempos = range(start=0.0, stop=Tf+Δt, step=Δt)
@@ -55,10 +58,10 @@ function Newmark(M, C, K, F::Function, livres, Δt, Tf;  U0=Float64[], V0=Float6
     # Calcula a Matriz de coeficientes
     MA = ML .+ (KL .* β .* Δt^2) .+ (CL .* γ .* Δt)
 
-    # Pre-fatora a matriz de coeficientes. Somente 
-    # posições livres
-    LMA = lu(MA)
-
+    # Inicializa o solver linear
+    prob = LinearProblem(MA, U0)
+    linsolve = init(prob)
+    
     # Pre-aloca Ut, Vt, A, U e V
     Ut = similar(U0)
     U  = similar(U0)
@@ -71,16 +74,20 @@ function Newmark(M, C, K, F::Function, livres, Δt, Tf;  U0=Float64[], V0=Float6
     @showprogress "Newmark... " for i in 1:length(tempos)-1
 
         # Calcula o preditor de deslocamento (Eq. a)
-        @. Ut = U0 + Δt * V0 + (Δt^2/2) * (1 - 2 * β) * A0
+        @. Ut = U0 + Δt*V0 + (Δt^2/2) * (1 - 2*β)*A0
         
         # Calcula o preditor da velocidade (Eq. b)
-        @. Vt = V0 + (1 - γ)*Δt.*A0
+        @. Vt = V0 + (1 - γ)*Δt*A0
 
-        # Calcula a aceleração para frente
-        A .= LMA \ (F(tempos[i+1])[livres] .- KL * Ut .- CL*Vt)
+        # Força equivalente 
+        linsolve.b =  (F(tempos[i+1])[livres] .- KL*Ut .- CL*Vt)
+
+        #Calcula a aceleração para frente
+        sol = solve!(linsolve)
+        A .= sol.u
         
         # Calcula o deslocamento em t+Δt
-        @. U = Ut + A * β * Δt^2
+        @. U = Ut + A*β*Δt^2
          
         # Guarda na coluna
         MU[livres, coluna] .= U
@@ -89,7 +96,7 @@ function Newmark(M, C, K, F::Function, livres, Δt, Tf;  U0=Float64[], V0=Float6
         coluna += 1
 
         # Calcula a velocidade em t+Δt
-        @. V = Vt + A .* γ .* Δt
+        @. V = Vt + A*γ* Δt
         
         # Adianta as medidas para o próximo tempo
         U0 .= U
@@ -99,4 +106,5 @@ function Newmark(M, C, K, F::Function, livres, Δt, Tf;  U0=Float64[], V0=Float6
     end
 
     return collect(tempos), MU
+
 end
