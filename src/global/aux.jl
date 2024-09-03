@@ -17,7 +17,7 @@
     nos = connect[ele,3:2+nnos]
 
     # Aloca as coordenadas
-    X = Array{Int64}(undef,nnos,2)
+    X = Array{Float64}(undef,nnos,3)
     
     # Descobre as coordenadas de cada nó do elemento
     for i in LinearIndices(nos)

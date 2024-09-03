@@ -40,7 +40,7 @@ function Matriz_N_hex8(r,s,t)
   #
   # Calcula a matriz Jacobiana do elemento
   #
-  function Jacobiana_hex8(r,s,t,X::Vector,Y::Vector,Z::Vector)
+  function Jacobiana_hex8(r,s,t,X::Array)
   
       # Derivadas das funções de interpolação
       # em relação a    r e s
@@ -51,17 +51,17 @@ function Matriz_N_hex8(r,s,t)
   
       # Loop pelos somatórios
       for i=1:8
-          J[1,1] += dNr[i]*X[i]
-          J[1,2] += dNr[i]*Y[i]
-          J[1,3] += dNr[i]*Z[i]
+          J[1,1] += dNr[i]*X[i,1]
+          J[1,2] += dNr[i]*X[i,2]
+          J[1,3] += dNr[i]*X[i,3]
 
-          J[2,1] += dNs[i]*X[i]
-          J[2,2] += dNs[i]*Y[i]
-          J[2,3] += dNs[i]*Z[i]
+          J[2,1] += dNs[i]*X[i,1]
+          J[2,2] += dNs[i]*X[i,2]
+          J[2,3] += dNs[i]*X[i,3]
           
-          J[3,1] += dNt[i]*X[i]
-          J[3,2] += dNt[i]*Y[i]
-          J[3,3] += dNt[i]*Z[i]
+          J[3,1] += dNt[i]*X[i,1]
+          J[3,2] += dNt[i]*X[i,2]
+          J[3,3] += dNt[i]*X[i,3]
           
       end
    
@@ -74,14 +74,14 @@ function Matriz_N_hex8(r,s,t)
   #
   # Monta a matriz B de um elemento na posiçao r,s
   #
-  function Matriz_B_hex8(r,s,t,X::Vector,Y::Vector,Z::Vector)
+  function Matriz_B_hex8(r,s,t,X::Array)
   
       # Derivadas das funções de interpolação
       # em relação a r,s,t
       dNr, dNs, dNt = dNrs_hex8(r,s,t)
   
       # Calcula a matriz Jacobiana no ponto r,s,t
-      J = Jacobiana_hex8(r,s,t,X,Y,Z)
+      J = Jacobiana_hex8(r,s,t,X)
   
       # Inicializa a matriz B
       B = @MMatrix zeros(3,8)
@@ -111,7 +111,7 @@ function Matriz_N_hex8(r,s,t)
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_hex8(ele,c,X,Y,Z)
+  function KMe_hex8(ele,c,X)
   
       # Aloca as matrizes
       Ke = @MMatrix zeros(8,8)
@@ -137,7 +137,7 @@ function Matriz_N_hex8(r,s,t)
                 wt = wg[k]
 
                 # Calcula DJ e B 
-                B, dJ = Matriz_B_hex8(r,s,t,X,Y,Z)
+                B, dJ = Matriz_B_hex8(r,s,t,X)
     
                 # Calcula N(r,s,t)
                 N = Matriz_N_hex8(r,s,t) 
