@@ -41,6 +41,8 @@
             Pn = Edge_load_local_bi4(edge,-ρ*qn,X)
         elseif et==2
             Pn = Edge_load_local_tri3(edge,-ρ*qn,X)
+        elseif et==5
+            println("Vetor_P! ainda não implementado para hexa8")
         else
           error("Elemento não definido")
         end

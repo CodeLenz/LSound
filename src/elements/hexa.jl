@@ -155,6 +155,8 @@ function Matriz_N_hex8(r,s,t)
   end
   
 
+#=
+
   ############## MODIFICAR DAQUI PARA BAIXO #####################
 
 #
@@ -305,3 +307,5 @@ function Damping_local_bi4(edge,damp,X,Y)
     return C
 
 end
+
+=#

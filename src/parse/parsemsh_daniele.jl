@@ -11,7 +11,8 @@ function Parsemsh_Daniele(meshfile::String)
     # Element types to  read
     # 2 -> triangular (linear)
     # 3 -> quadrangular (linear)
-    et = [2,3]
+    # 5 -> hexaedra (linear)
+    et = [2,3,5]
 
     # Maximum number of nodes in the elements of the mesh
     nmax = maximum(Lgmsh_nodemap()[et])
