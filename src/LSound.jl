@@ -15,6 +15,8 @@ module LSound
     include("global/auxiliar.jl")
     include("elements/quad.jl")
     include("elements/tri.jl")
+    include("elements/hexa.jl")
+    include("elements/tetra.jl")
     include("global/global.jl")
     include("solvers/autovalores.jl")
     include("solvers/newmark.jl")

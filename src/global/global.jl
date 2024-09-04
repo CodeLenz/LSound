@@ -30,6 +30,8 @@ function Monta_KM(nn,ne,coord,connect,materials)
            Ke, Me = KMe_bi4(ele,c,X)
         elseif et==2
            Ke, Me = KMe_tri3(ele,c,X)
+        elseif et==4
+            Ke, Me = KMe_tet4(ele,c,X)    
         elseif et==5
            Ke, Me = KMe_hex8(ele,c,X) 
         else
@@ -99,8 +101,12 @@ function Matriz_C(nn,damping,materials,coord,connect)
                 Ce = Damping_local_bi4(edge,damp,X)
             elseif et==2
                 Ce = Damping_local_tri3(edge,damp,X)
+            elseif et==4
+                println("C tetra ainda não implementado")    
+                Ce = zeros(4,4)
             elseif et==5
                 println("C Hexa ainda não implementado")
+                Ce = zeros(8,8)
             else
                 error("Tipo de elemento não definido")
             end

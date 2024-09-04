@@ -8,7 +8,7 @@ SetFactory("OpenCASCADE");
 //Mesh.CharacteristicLength{:} = 0.25;
 
 // Volume (box 3D)
-Box(1) = {0, 0, 0, 1, 0.5, 0.5};
+Box(1) = {0, 0, 0, 1, 0.1, 0.1};
 
 // Material
 Physical Volume("Material,Ar,1,1.028,340.0,400.0") = {1};
