@@ -12,7 +12,7 @@ module LSound
     using Lgmsh
 
     include("parse/parsemsh_daniele.jl")
-    include("global/aux.jl")
+    include("global/auxiliar.jl")
     include("elements/quad.jl")
     include("elements/tri.jl")
     include("global/global.jl")

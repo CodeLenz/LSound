@@ -9,10 +9,29 @@ using Lgmsh
 function Parsemsh_Daniele(meshfile::String)
 
     # Element types to  read
+    #          2D
     # 2 -> triangular (linear)
     # 3 -> quadrangular (linear)
+    #
+    #          3D
+    # 4 -> Tetrahedra (linear)
     # 5 -> hexaedra (linear)
-    et = [2,3,5]
+
+    # Primeiro precisamos definir se a malha é 2D ou 3D
+    elist = Lgmsh_import_etypes(meshfile)
+
+    # Se tivermos elementos do 4/5, então é 3D. Do contrário,
+    # é 2D. Observe que ter 2/3 não é uma indicação direta de 
+    # que a malha é 2D, pois o gmsh também gera esses elementos
+    # para malhas 3D.
+    dimensao = 2
+    et = [2,3]
+    if (4 in elist) || (5 in elist)
+        dimensao = 3
+        et = [4,5]
+    end
+
+    println("Solucionando um problema de dimensão $dimensao")
 
     # Maximum number of nodes in the elements of the mesh
     nmax = maximum(Lgmsh_nodemap()[et])
@@ -32,8 +51,6 @@ function Parsemsh_Daniele(meshfile::String)
     # Yn, value
     #
     pgroups, pgnames = Lgmsh_import_physical_groups(meshfile)
-
-    @show pgroups, pgnames
 
     # Vector with Dicts of materials
     materials = Dict{String,Union{Float64,Int64,Vector{Int64}}}[]
@@ -114,13 +131,22 @@ function Parsemsh_Daniele(meshfile::String)
             # Find nodes 
             nodes_vn = Lgmsh.Readnodesgroup(meshfile,name)
 
-            # Find element and edges
+            # If 2D  - Find element and edges
+            # else   - Find element faces
+            # Vamos continuar chamando de edges, mesmo em 3D
             eleedges = Int64[]
             edges = Int64[]
             for tt in et
-                eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_vn)
-                push!(eleedges,eleedges_...)
-                push!(edges,edges_...)
+                if dimensao==2
+                   eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_vn)
+                else
+                    eleedges_,edges_ = FindElementsFaces(tt,ne,etypes,connect,nodes_vn)
+                end
+                @show tt,eleedges_, edges_
+                if !isempty(eleedges_)
+                    push!(eleedges,eleedges_...)
+                    push!(edges,edges_...)
+                end
             end
 
             # Append
@@ -144,7 +170,11 @@ function Parsemsh_Daniele(meshfile::String)
             eleedges = Int64[]
             edges = Int64[]
             for tt in et
-                eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_damp)
+                if dimensao==2
+                   eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_damp)
+                else
+                   eleedges_,edges_ = FindElementsFaces(tt,ne,etypes,connect,nodes_damp)
+                end
                 push!(eleedges,eleedges_...)
                 push!(edges,edges_...)
             end
