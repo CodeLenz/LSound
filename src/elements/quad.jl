@@ -91,7 +91,7 @@ function Matriz_N_bi4(r,s)
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_bi4(ele,c,X)
+  function KMe_bi4(c,X)
   
       # Aloca as matrizes
       Ke = @MMatrix zeros(4,4)

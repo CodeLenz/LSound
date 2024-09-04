@@ -111,7 +111,7 @@ function Matriz_N_hex8(r,s,t)
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_hex8(ele,c,X)
+  function KMe_hex8(c,X)
   
       # Aloca as matrizes
       Ke = @MMatrix zeros(8,8)

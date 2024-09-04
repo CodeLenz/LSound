@@ -27,13 +27,13 @@ function Monta_KM(nn,ne,coord,connect,materials)
 
         # Monta as matrizes dos elementos
         if et==3
-           Ke, Me = KMe_bi4(ele,c,X)
+           Ke, Me = KMe_bi4(c,X)
         elseif et==2
-           Ke, Me = KMe_tri3(ele,c,X)
+           Ke, Me = KMe_tri3(c,X)
         elseif et==4
-            Ke, Me = KMe_tet4(ele,c,X)    
+            Ke, Me = KMe_tet4(c,X)    
         elseif et==5
-           Ke, Me = KMe_hex8(ele,c,X) 
+           Ke, Me = KMe_hex8(c,X) 
         else
             error("Elemento não definido")
         end

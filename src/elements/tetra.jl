@@ -102,11 +102,16 @@
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_tet4(ele,c,X)
-  
+  function KMe_tet4(c,X)
+
+      # Coordinates
+      x1,x2,x3,x4 = X[:,1] 
+      y1,y2,y3,y4 = X[:,2]
+      z1,z2,z3,z4 = X[:,3]
+
       # A matriz de rigidez pode ser calculada de maneira bem rápida,
       # pois B é cte (não depende de r,s,t)
-      
+  
       # Volume do tetraedro
       V = Vol_tet4(X)
 
@@ -117,18 +122,19 @@
       Ke = transpose(B)*B*V
 
       # Calculo da matriz da massa
+      cte = (((x2-x1)*y3+(x1-x3)*y2+(x3-x2)*y1)*z4+((x1-x2)*y4+(x4-x1)*y2+
+             (x2-x4)*y1)*z3+((x3-x1)*y4+(x1-x4)*y3+(x4-x3)*y1)*z2+
+             ((x2-x3)*y4+(x4-x2)*y3+(x3-x4)*y2)*z1) / c^2
 
-      # Aqui devemos integrar, mas como é com um ponto de Gauss
-      # podemos resolver com 
-      N = Matriz_N_tet4(1/3,1/3,1/3)
+      cte1 = cte / 60
+      cte2 = cte1 / 2       
+     
+      Me = @SMatrix [cte1 cte2 cte2 cte2 ;
+                     cte2 cte1 cte2 cte2 ; 
+                     cte2 cte2 cte1 cte2 ; 
+                     cte2 cte2 cte2 cte1 ]
 
-      # Calcula a matriz Jacobiana neste mesmo ponto
-      J = Jacobiana_tetra4(1/3,1/3,1/3,X)
-
-      # Matriz de massa
-      Me = transpose(N)*N*det(J)
-  
-      return Ke, (1/c^2)*Me
+      return Ke, Me
   
   end
   

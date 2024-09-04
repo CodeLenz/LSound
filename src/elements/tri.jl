@@ -2,7 +2,7 @@
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_tri3(ele,c,X)
+  function KMe_tri3(c,X)
   
     # Mapeamento para facilitar a notação
     x1,x2,x3 = X[:,1]

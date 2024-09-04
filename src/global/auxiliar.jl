@@ -9,8 +9,6 @@
   function Nos_Coordenadas(ele,etype,coord,connect)
   
     # Mapeia o número de nós pelo etype
-    # 2 - tri - 3nós
-    # 3 - quad - 4nós
     nnos = Lgmsh_nodemap()[etype]
 
     # Descobre os nós do elemento
