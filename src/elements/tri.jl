@@ -37,7 +37,7 @@ function Edge_load_local_tri3(edge,qn,X)
     # As we assume cte load
     # and the element is linear
     # Basic test
-    edge in 1:3 || throw("Map_edge_tri3::Invalid edge")
+    edge in 1:3 || throw("Map_load_local_tri3::Invalid edge")
 
     F1 = 1.0
     F2 = 1.0

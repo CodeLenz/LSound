@@ -36,14 +36,16 @@
         # Find nodes and coordinates
         nos,X = Nos_Coordenadas(ele,et,coord,connect)
 
+        # value
+        val =  -ρ*qn
+
         # Local vector 
         if et==3
-            Pn = Edge_load_local_bi4(edge,-ρ*qn,X)
+            Pn = Edge_load_local_bi4(edge,val,X)
         elseif et==2
-            Pn = Edge_load_local_tri3(edge,-ρ*qn,X)
+            Pn = Edge_load_local_tri3(edge,val,X)
         elseif et==4
-            println("Vetor_P! ainda não implementado para tetra4")
-            Pn = zeros(4)
+            Pn = Face_load_local_tet4(edge,val,X)
         elseif et==5
             println("Vetor_P! ainda não implementado para hexa8")
             Pn = zeros(8)

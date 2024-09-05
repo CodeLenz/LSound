@@ -14,13 +14,18 @@ Box(1) = {0, 0, 0, 1, 0.1, 0.1};
 Physical Volume("Material,Ar,1,1.028,340.0,400.0") = {1};
 
 // Normal velocity (left)
-Physical Surface("Vn,1E-3,340.0,0.0") = {4};
+Physical Surface("Vn,1E-3,340.0,0.0") = {1};
 
 // Atenuation
-Physical Surface("Yn,1.0") = {2,4};
+Physical Surface("Yn,1.0") = {1,2};
+
+// Convert triangles to quads
+//Recombine Surface{:};
+
+// Better quad algorithm
+Mesh.Algorithm = 8;
 
 // Para gerar a malha
-Mesh.Algorithm = 9;
 Mesh.Algorithm3D = 9;
 
 // Build mesh

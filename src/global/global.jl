@@ -102,8 +102,7 @@ function Matriz_C(nn,damping,materials,coord,connect)
             elseif et==2
                 Ce = Damping_local_tri3(edge,damp,X)
             elseif et==4
-                println("C tetra ainda não implementado")    
-                Ce = zeros(4,4)
+                Ce = Damping_local_tet4(edge,damp,X)
             elseif et==5
                 println("C Hexa ainda não implementado")
                 Ce = zeros(8,8)
