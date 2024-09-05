@@ -270,8 +270,8 @@ function Map_face_hex8(face,ζ,η,X)
          # Map the N's
          N1 = Na
          N4 = Nb
-         N7 = Nc
-         N8 = Nd
+         N8 = Nc
+         N5 = Nd
 
 
     end
