@@ -104,8 +104,7 @@ function Matriz_C(nn,damping,materials,coord,connect)
             elseif et==4
                 Ce = Damping_local_tet4(edge,damp,X)
             elseif et==5
-                println("C Hexa ainda não implementado")
-                Ce = zeros(8,8)
+                Ce = Damping_local_hex8(edge,damp,X)
             else
                 error("Tipo de elemento não definido")
             end

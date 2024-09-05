@@ -155,130 +155,150 @@ function Matriz_N_hex8(r,s,t)
   end
   
 
-#=
-
-  ############## MODIFICAR DAQUI PARA BAIXO #####################
-
 #
-#    Edges, normals and tangents
-#
-#               n
-#          t_ 3 |
-#       (4)-------(3)
-#    n _ |         | | t
-#      4 |         | 2 
-#      | |         | _ n 
-#      t(1)-------(2)
-#           | 1 -t
-#           n
+# Faces
+# 1) 1 2 3 4 ;
+# 2) 5 6 7 8 ;
+# 3) 1 2 6 5 ;
+# 4) 2 3 7 6 ;
+# 5) 4 3 7 8 ;
+# 6) 1 4 8 5 
 #
 #
-#
-function Map_edge_bi4(edge,ζ,X,Y)
+function Map_face_hex8(face,ζ,η,X)
 
     # Basic test
-    edge in 1:4 || throw("Map_edge_bi4::Invalid edge")
+    edge in 1:6 || throw("Map_face_hex8::Invalid face")
 
-    # N at each node of the edge
-    Na = (1/2)*(1-ζ)
-    Nb = (1/2)*(1+ζ)
-
+    # N at each node of the face
+    Na = (1/4)*(1-ζ)*(1-η)
+    Nb = (1/4)*(1+ζ)*(1-η)
+    Nc = (1/4)*(1+ζ)*(1+η)
+    Nd = (1/4)*(1-ζ)*(1+η)
+    
     # N's
     N1 = 0.0
     N2 = 0.0
     N3 = 0.0
     N4 = 0.0
+    N5 = 0.0
+    N6 = 0.0
+    N7 = 0.0
+    N8 = 0.0
 
     # Test for each case
-    if edge==1 
+    if face==1 
 
-        # bottom
-        # s = -1
-        # r free
-        mult = 1.0
-        dN1r = -1/2
-        dN2r =  1/2
-        t1 = X[1]*dN1r + X[2]*dN2r
-        t2 = Y[1]*dN1r + Y[2]*dN2r
+        # Jacobian matrix 
+        J_ = Jacobiana_hex8(ζ,η,-1,X)
 
-        # Functions
+        # We use just the block 1:2, 1:2
+        J = J_[1:2,1:2]
+        
+        # Map the N's
         N1 = Na
         N2 = Nb
+        N3 = Nc
+        N4 = Nd
+
+    elseif face==2
+
+        # Jacobian matrix 
+        J_ = Jacobiana_hex8(ζ,η,1,X)
+
+        # We use just the block 1:2, 1:2
+        J = J_[1:2,1:2]
         
-    elseif edge==2
+        # Map the N's
+        N5 = Na
+        N6 = Nb
+        N7 = Nc
+        N8 = Nd
+                  
+    elseif face==3
 
-        # right
-        # r = 1
-        # s free
-        mult = 1.0
-        dN2s = -1/2
-        dN3s =  1/2
-        t1 = X[2]*dN2s + X[3]*dN3s
-        t2 = Y[2]*dN2s + Y[3]*dN3s
+        # Jacobian matrix 
+        J_ = Jacobiana_hex8(ζ,-1,η,X)
 
-        # Functions
+        # We use just positions 1 3
+        p = [1;3]
+        J = J_[p,p]
+        
+        # Map the N's
+        N1 = Na
+        N2 = Nb
+        N6 = Nc
+        N5 = Nd
+      
+    elseif face==4
+
+        # Jacobian matrix 
+        J_ = Jacobiana_hex8(1,ζ,η,X)
+
+        # We use just positions 2:3
+        J = J_[2:3,2:3]
+        
+        # Map the N's
         N2 = Na
         N3 = Nb
-            
-    elseif edge==3
-
-        # top
-        # s = 1
-        # r free
-        mult = -1.0
-        dN3r =  1/2
-        dN4r = -1/2
-        t1 = X[4]*dN4r + X[3]*dN3r
-        t2 = Y[4]*dN4r + Y[3]*dN3r
+        N7 = Nc
+        N6 = Nd
     
-        # Functions
-        N3 = Nb
-        N4 = Na
+    elseif face==5
 
-    else
+         # Jacobian matrix 
+         J_ = Jacobiana_hex8(ζ,1,η,X)
 
-        # left
-        # r = -1
-        # s free
-        mult = -1.0
-        dN4s =  1/2
-        dN1s = -1/2
-        t1 = X[4]*dN4s + X[1]*dN1s
-        t2 = Y[4]*dN4s + Y[1]*dN1s
+         # We use just positions 1 and 3
+         p = [1;3]
+         J = J_[p,p]
+         
+         # Map the N's
+         N4 = Na
+         N3 = Nb
+         N7 = Nc
+         N8 = Nd
 
-        # Functions
-        N1 = Na
-        N4 = Nb
-            
+    else 
+
+         # Jacobian matrix 
+         J_ = Jacobiana_hex8(-1,ζ,η,X)
+
+         # We use just positions 2:3
+         J = J_[2:3,2:3]
+         
+         # Map the N's
+         N1 = Na
+         N4 = Nb
+         N7 = Nc
+         N8 = Nd
+
+
     end
 
-    # Determinant of the Jacobian
-    dJ = sqrt(t1^2 + t2^2)
-
-    # Normalize and compute t and n
-    t = mult*[t1;t2]./dJ
-    n = [t[2];-t[1]]
+    # Determinant is
+    dJ = det(J)
 
     # Matriz N
-    N = [N1 N2 N3 N4]
+    N = [N1 N2 N3 N4 N5 N6 N7 N8]
 
-    # Return n, t, dJ and N
-    return n, t, dJ, N
+    # Return N and dJ
+    return N, dJ
 
 end
 
+
 #
-# Force vector for a bi4 element 
-# local (normal) surface load.
+# Force vector for a hex8 element 
 #
-function Edge_load_local_bi4(edge,qn,X,Y)
+function Face_load_local_hex8(face,qn,X)
 
     # As we assume cte load
     # and the element is linear
     # we can use one Gauss Point
 
     # Compute Mappings
-    n, t, dJ, N = Map_edge_bi4(edge,0.0,X,Y)
+    N, dJ = Map_face_hex8(face,0.0,0.0,X)
 
     # Sums
     F   = (N')*(qn*dJ)*2.0
@@ -291,14 +311,14 @@ end
 #
 # Damping matrix Ce
 #
-function Damping_local_bi4(edge,damp,X,Y)
+function Damping_local_hex8(edge,damp,X)
 
     # As we assume cte damp
     # and the element is linear
     # we can use one Gauss Point
 
     # Compute Mappings (edge's center)
-    n, t, dJ, N = Map_edge_bi4(edge,0.0,X,Y)
+    dJ, N = Map_face_hex8(face,0.0,0.0,X)
 
     # Matrix
     C   = (N'*N)*damp*(dJ*2.0)
@@ -307,5 +327,3 @@ function Damping_local_bi4(edge,damp,X,Y)
     return C
 
 end
-
-=#

@@ -47,8 +47,7 @@
         elseif et==4
             Pn = Face_load_local_tet4(edge,val,X)
         elseif et==5
-            println("Vetor_P! ainda não implementado para hexa8")
-            Pn = zeros(8)
+            Pn = Face_load_local_hex8(edge,val,X)
         else
           error("Elemento não definido")
         end
