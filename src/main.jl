@@ -46,6 +46,14 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe = Parsemsh_Daniele(meshfile)
 
+    # Vamos evitar coordenadas negativas 
+    for i=1:3  
+        minx = minimum(coord[:,i])
+        if minx<0
+           coord[:,i] .= coord[:,i] .- minx 
+        end
+    end
+
     # Precisamos de um material
     if isempty(materials)
         error("Analise:: at least one material is necessary")
