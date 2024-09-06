@@ -168,7 +168,7 @@ function Matriz_N_hex8(r,s,t)
 function Map_face_hex8(face,ζ,η,X)
 
     # Basic test
-    edge in 1:6 || throw("Map_face_hex8::Invalid face")
+    face in 1:6 || throw("Map_face_hex8::Invalid face")
 
     # N at each node of the face
     Na = (1/4)*(1-ζ)*(1-η)
@@ -317,7 +317,7 @@ function Damping_local_hex8(face,damp,X)
     # and the element is linear
     # we can use one Gauss Point
 
-    # Compute Mappings (edge's center)
+    # Compute Mappings (face's center)
     dJ, N = Map_face_hex8(face,0.0,0.0,X)
 
     # Matrix
