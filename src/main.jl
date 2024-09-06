@@ -10,6 +10,8 @@
 
  metodo   -> :Modal, :Harmonic, :Bathe, :Newmark, 
 
+ scale -> [1.0 ; 1.0 ; 1.0] scale to apply to the geometry (1.0 meter)
+
  :Modal
 
  only additional input is the number of eigenvalues to compute - nev
@@ -33,7 +35,8 @@
  Outputs -> vector of discrete times and matrix with the response at each time
 
 """
-function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U0=[],V0=[],output=true)
+function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,
+                 freqs=[],U0=[],V0=[],output=true,scale=[1.0;1.0;1.0])
 
     # Evita chamar um .geo
     if occursin(".geo",meshfile)
@@ -53,6 +56,11 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U
            coord[:,i] .= coord[:,i] .- minx 
         end
     end
+
+    # Apply scale to the coordinates
+    coord[:,1] ./= scale[1]
+    coord[:,2] ./= scale[2]
+    coord[:,3] ./= scale[3]
 
     # Precisamos de um material
     if isempty(materials)
