@@ -280,7 +280,7 @@ function Map_face_hex8(face,ζ,η,X)
     dJ = det(J)
 
     # Matriz N
-    N = [N1 N2 N3 N4 N5 N6 N7 N8]
+    N = @SMatrix [N1 N2 N3 N4 N5 N6 N7 N8]
 
     # Return N and dJ
     return N, dJ
@@ -318,7 +318,7 @@ function Damping_local_hex8(face,damp,X)
     # we can use one Gauss Point
 
     # Compute Mappings (face's center)
-    dJ, N = Map_face_hex8(face,0.0,0.0,X)
+    N, dJ = Map_face_hex8(face,0.0,0.0,X)
 
     # Matrix
     C   = (N'*N)*damp*(dJ*2.0)
