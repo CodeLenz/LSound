@@ -1,6 +1,38 @@
 #
-# Versão lendo direto do .msh (gmsh)
+# Rotina principal
 #
+"""
+ Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U0=[],V0=[],output=true)
+
+ Basic input:
+
+ meshfile -> arquivo de entrada (.msh)
+
+ metodo   -> :Modal, :Harmonic, :Bathe, :Newmark, 
+
+ :Modal
+
+ only additional input is the number of eigenvalues to compute - nev
+
+ outputs -> vector with frequencies and matrix with eigenvectors
+
+ :Harmonic
+
+ Inputs -> freqs, a vector with the frequencies to sweep
+
+ Outputs -> Vector with the nodes being monitored (probe)
+            complex matrix with probed nodes for each frequency 
+
+ :Newmark or :Bathe
+
+ Inputs -> Final time  - Tf 
+           Time step - Δt
+           Initial conditions - U0 and V0 
+           Flag to write output to gmsh - output
+
+ Outputs -> vector of discrete times and matrix with the response at each time
+
+"""
 function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U0=[],V0=[],output=true)
 
     # Evita chamar um .geo
@@ -13,6 +45,11 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U
 
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe = Parsemsh_Daniele(meshfile)
+
+    # Precisamos de um material
+    if isempty(materials)
+        error("Analise:: at least one material is necessary")
+    end
 
     # Calcula as matrizes globais
     K,M = Monta_KM(nn,ne,coord,connect,materials)
@@ -84,9 +121,6 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U
         # Número de nós a monitorar
         np = length(nodes_probe) 
 
-
-        @show nodes_probe
-        
         # Se não temos nós a monitorar, então monitoramos 
         # todos os livres
         if isempty(nodes_probe)
@@ -124,7 +158,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U
 
         end #f
 
-        return monitor
+        return nodes_probe, monitor
         
     end
 
@@ -135,9 +169,13 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U
     
     # Chama o integrador
     if metodo===:Newmark
-        tempos, MP = Newmark(M, C, K, F, livres, Δt, Tf,U0=U0,V0=V0)
+
+        tempos, MP = Newmark(M, C, K, F, livres, Δt, Tf, U0=U0, V0=V0)
+
     elseif metodo===:Bathe
-        tempos, MP = B1B2Bathe2d(M, C, K, F, livres, Δt, Tf,U0=U0,V0=V0)
+
+        tempos, MP = B1B2Bathe2d(M, C, K, F, livres, Δt, Tf, U0=U0, V0=V0)
+
     end
 
     # Inicializa um vetor com todos os gls, pois se tivermos paredes 
