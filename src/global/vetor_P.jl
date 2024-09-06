@@ -1,5 +1,5 @@
  # Rotina que monta o vetor de "forças" para um determinando tempo t
- function Vetor_P!(t,nn,materials,velocities,coord,connect,P)
+ function Vetor_P!(t,nn,materials,velocities,coord,connect,P;ω=-1.0)
 
     # Zera todo o vetor 
     fill!(P,0.0)
@@ -9,8 +9,15 @@
 
       # Recover data from Dictionary
       valor = dvn["value"]
-      freq  = 2*pi*dvn["freq"]  
-      fase  = 2*pi*dvn["phase"]
+
+      # We also allow an imposed frequency, for harmonic analysis
+      if ω==-1.0
+         freq  = 2*pi*dvn["freq"]  
+         fase  = 2*pi*dvn["phase"]
+      else
+         freq = ω
+         fase = 0.0
+      end
       elements   = dvn["elements"] 
 
       # Derivative of vn w.r.t time

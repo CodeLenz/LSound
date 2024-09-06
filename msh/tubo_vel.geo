@@ -27,6 +27,9 @@ Physical Surface("Material,Ar,1,1.028,340.0,400.0") = {1};
 // Normal velocity (left)
 Physical Curve("Vn,1E-3,340.0,0.0") = {4};
 
+// Probe nodes
+Physical Curve("Probe") = {1};
+
 // Atenuation
 Physical Curve("Yn,1.0") = {2,4};
 

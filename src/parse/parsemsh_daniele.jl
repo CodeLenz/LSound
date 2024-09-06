@@ -50,6 +50,9 @@ function Parsemsh_Daniele(meshfile::String)
     #
     # Yn, value
     #
+    # Probe 
+    #
+    #
     pgroups, pgnames = Lgmsh_import_physical_groups(meshfile)
 
     # Vector with Dicts of materials
@@ -72,6 +75,9 @@ function Parsemsh_Daniele(meshfile::String)
 
     # Vector of OPEN nodes
     nodes_open = Int64[]
+
+    # Vector of Probe nodes
+    nodes_probe = Int64[]
 
     # Loop over groups
     for g=1:length(pgnames)
@@ -117,6 +123,14 @@ function Parsemsh_Daniele(meshfile::String)
 
             # Append
             nodes_open = vcat(nodes_open,nodes)
+
+      elseif  occursin("Probe",st[1])
+
+            # Find nodes 
+            nodes = Lgmsh.Readnodesgroup(meshfile,name)
+
+            # Append
+            nodes_probe = vcat(nodes_probe,nodes)
 
       elseif  occursin("Vn",st[1])
 
@@ -221,6 +235,6 @@ function Parsemsh_Daniele(meshfile::String)
     end
 
     # Return processed data
-    return nn, coord, ne, connect2, materials2, nodes_open, velocities, damping
+    return nn, coord, ne, connect2, materials2, nodes_open, velocities, damping, nodes_probe
 
 end
