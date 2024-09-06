@@ -311,7 +311,7 @@ end
 #
 # Damping matrix Ce
 #
-function Damping_local_hex8(edge,damp,X)
+function Damping_local_hex8(face,damp,X)
 
     # As we assume cte damp
     # and the element is linear

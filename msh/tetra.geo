@@ -12,4 +12,9 @@ Physical Curve("Probe") = {9};
 // Atenuation
 Physical Surface("Yn,1.0") = {1,14};
 
+// Make Mesh
+Mesh 3;
+
+// Refine 
+RefineMesh;
 
