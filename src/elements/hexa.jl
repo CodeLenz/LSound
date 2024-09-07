@@ -164,123 +164,118 @@ function Matriz_N_hex8(r,s,t)
 # 5) 4 3 7 8 ;
 # 6) 1 4 8 5 
 #
+# ######################################################
 #
+# Determinante do Jacobiano estava completamente errado 
+# 
+# Revisar para termos um cálculo mais geral por corrdenada
+# normalizada
+#
+# ######################################################
 function Map_face_hex8(face,ζ,η,X)
 
     # Basic test
     face in 1:6 || throw("Map_face_hex8::Invalid face")
 
-    # N at each node of the face
-    Na = (1/4)*(1-ζ)*(1-η)
-    Nb = (1/4)*(1+ζ)*(1-η)
-    Nc = (1/4)*(1+ζ)*(1+η)
-    Nd = (1/4)*(1-ζ)*(1+η)
-    
-    # N's
-    N1 = 0.0
-    N2 = 0.0
-    N3 = 0.0
-    N4 = 0.0
-    N5 = 0.0
-    N6 = 0.0
-    N7 = 0.0
-    N8 = 0.0
-
     # Test for each case
     if face==1 
 
-        # Jacobian matrix 
-        J_ = Jacobiana_hex8(ζ,η,-1,X)
+        v12 = @SVector [X[2,1] - X[1,1] ;  X[2,2] - X[1,2]; X[2,3] - X[1,3]]
+        v14 = @SVector [X[4,1] - X[1,1] ;  X[4,2] - X[1,2]; X[4,3] - X[1,3]]
+        A1 = 0.5*norm(cross(v12,v14))
 
-        # We use just the block 1:2, 1:2
-        J = J_[1:2,1:2]
+        v23 = @SVector [X[3,1] - X[2,1] ;  X[3,2] - X[2,2]; X[3,3] - X[2,3]]
+        v24 = @SVector [X[4,1] - X[2,1] ;  X[4,2] - X[2,2]; X[4,3] - X[2,3]]
+        A2 = 0.5*norm(cross(v23,v24))
+
+        # Determinante do Jacobiano para essa face
+        dJ = (A1+A2)/4
         
-        # Map the N's
-        N1 = Na
-        N2 = Nb
-        N3 = Nc
-        N4 = Nd
+        # N
+        N = Matriz_N_hex8(ζ,η,-1) 
 
     elseif face==2
 
-        # Jacobian matrix 
-        J_ = Jacobiana_hex8(ζ,η,1,X)
+        v54 = @SVector [X[4,1] - X[5,1] ;  X[4,2] - X[5,2]; X[4,3] - X[5,3]]
+        v58 = @SVector [X[8,1] - X[5,1] ;  X[8,2] - X[5,2]; X[8,3] - X[5,3]]
+        A1 = 0.5*norm(cross(v54,v58))
 
-        # We use just the block 1:2, 1:2
-        J = J_[1:2,1:2]
+        v47 = @SVector [X[7,1] - X[4,1] ;  X[7,2] - X[4,2]; X[7,3] - X[4,3]]
+        v48 = @SVector [X[8,1] - X[4,1] ;  X[8,2] - X[4,2]; X[8,3] - X[4,3]]
+        A2 = 0.5*norm(cross(v47,v48))
+
+        # Determinante do Jacobiano para essa face
+        dJ = (A1+A2)/4
         
-        # Map the N's
-        N5 = Na
-        N6 = Nb
-        N7 = Nc
-        N8 = Nd
+        # N
+        N = Matriz_N_hex8(ζ,η,1) 
                   
     elseif face==3
 
-        # Jacobian matrix 
-        J_ = Jacobiana_hex8(ζ,-1,η,X)
+        v12 = @SVector [X[2,1] - X[1,1] ;  X[2,2] - X[1,2]; X[2,3] - X[1,3]]
+        v15 = @SVector [X[5,1] - X[1,1] ;  X[5,2] - X[1,2]; X[5,3] - X[1,3]]
+        A1 = 0.5*norm(cross(v12,v15))
 
-        # We use just positions 1 3
-        p = [1;3]
-        J = J_[p,p]
+        v26 = @SVector [X[6,1] - X[2,1] ;  X[6,2] - X[2,2]; X[6,3] - X[2,3]]
+        v25 = @SVector [X[5,1] - X[2,1] ;  X[5,2] - X[2,2]; X[5,3] - X[2,3]]
+        A2 = 0.5*norm(cross(v26,v25))
+
+        # Determinante do Jacobiano para essa face
+        dJ = (A1+A2)/4
         
-        # Map the N's
-        N1 = Na
-        N2 = Nb
-        N6 = Nc
-        N5 = Nd
+        # N
+        N = Matriz_N_hex8(ζ,-1,η) 
+
       
     elseif face==4
 
-        # Jacobian matrix 
-        J_ = Jacobiana_hex8(1,ζ,η,X)
+        v23 = @SVector [X[3,1] - X[2,1] ;  X[3,2] - X[2,2]; X[3,3] - X[2,3]]
+        v26 = @SVector [X[6,1] - X[2,1] ;  X[6,2] - X[2,2]; X[6,3] - X[2,3]]
+        A1 = 0.5*norm(cross(v23,v26))
 
-        # We use just positions 2:3
-        J = J_[2:3,2:3]
-        
-        # Map the N's
-        N2 = Na
-        N3 = Nb
-        N7 = Nc
-        N6 = Nd
-    
+        v37 = @SVector [X[7,1] - X[3,1] ;  X[7,2] - X[3,2]; X[7,3] - X[3,3]]
+        v36 = @SVector [X[6,1] - X[3,1] ;  X[6,2] - X[3,2]; X[6,3] - X[3,3]]
+        A2 = 0.5*norm(cross(v37,v36))
+
+        # Determinante do Jacobiano para essa face
+        dJ = (A1+A2)/4
+
+        # N
+        N = Matriz_N_hex8(1,ζ,η) 
+            
     elseif face==5
 
-         # Jacobian matrix 
-         J_ = Jacobiana_hex8(ζ,1,η,X)
+        v43 = @SVector [X[3,1] - X[4,1] ;  X[3,2] - X[4,2]; X[3,3] - X[4,3]]
+        v48 = @SVector [X[8,1] - X[4,1] ;  X[8,2] - X[4,2]; X[8,3] - X[4,3]]
+        A1 = 0.5*norm(cross(v43,v48))
 
-         # We use just positions 1 and 3
-         p = [1;3]
-         J = J_[p,p]
+        v37 = @SVector [X[7,1] - X[3,1] ;  X[7,2] - X[3,2]; X[7,3] - X[3,3]]
+        v38 = @SVector [X[8,1] - X[3,1] ;  X[8,2] - X[3,2]; X[8,3] - X[3,3]]
+        A2 = 0.5*norm(cross(v37,v38))
+
+        # Determinante do Jacobiano para essa face
+        dJ = (A1+A2)/4
          
-         # Map the N's
-         N4 = Na
-         N3 = Nb
-         N7 = Nc
-         N8 = Nd
-
+         # N
+         N = Matriz_N_hex8(ζ,1,η) 
+        
     else 
 
-         # Jacobian matrix 
-         J_ = Jacobiana_hex8(-1,ζ,η,X)
+        v14 = @SVector [X[4,1] - X[1,1] ;  X[4,2] - X[1,2]; X[4,3] - X[1,3]]
+        v15 = @SVector [X[5,1] - X[1,1] ;  X[5,2] - X[1,2]; X[5,3] - X[1,3]]
+        A1 = 0.5*norm(cross(v14,v15))
 
-         # We use just positions 2:3
-         J = J_[2:3,2:3]
+        v48 = @SVector [X[8,1] - X[4,1] ;  X[8,2] - X[4,2]; X[8,3] - X[4,3]]
+        v45 = @SVector [X[5,1] - X[4,1] ;  X[5,2] - X[4,2]; X[5,3] - X[4,3]]
+        A2 = 0.5*norm(cross(v48,v45))
+
+        # Determinante do Jacobiano para essa face
+        dJ = (A1+A2)/4
          
-         # Map the N's
-         N1 = Na
-         N4 = Nb
-         N8 = Nc
-         N5 = Nd
-
+         # N
+         N = Matriz_N_hex8(-1,ζ,η) 
 
     end
-
-    # Determinant is
-    dJ = det(J)
-
-    # Matriz N
-    N = @SMatrix [N1 N2 N3 N4 N5 N6 N7 N8]
 
     # Return N and dJ
     return N, dJ

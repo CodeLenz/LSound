@@ -56,7 +56,7 @@
         elseif et==5
             Pn = Face_load_local_hex8(edge,val,X)
         else
-          error("Elemento não definido")
+          error("Vetor_P!:: Tipo de elemento não definido")
         end
 
         # Add to the global vector

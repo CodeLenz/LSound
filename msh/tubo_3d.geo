@@ -10,6 +10,10 @@ SetFactory("OpenCASCADE");
 // Volume (box 3D)
 Box(1) = {0, 0, 0, 1, 0.1, 0.1};
 
+Transfinite Surface "*";
+Recombine Surface "*";
+Transfinite Volume "*";
+
 // Material
 Physical Volume("Material,Ar,1,1.028,340.0,400.0") = {1};
 
@@ -21,9 +25,6 @@ Physical Curve("Probe") = {10};
 
 // Atenuation
 Physical Surface("Yn,1.0") = {1,2};
-
-// Convert triangles to quads
-//Recombine Surface{:};
 
 // Better quad algorithm
 Mesh.Algorithm = 8;
