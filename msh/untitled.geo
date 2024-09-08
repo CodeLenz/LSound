@@ -1,0 +1,2 @@
+//+
+SetFactory("OpenCASCADE");
