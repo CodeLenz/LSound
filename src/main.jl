@@ -113,13 +113,13 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,
     #                       Hamonic e Transiente
     ##############################################################
     
+    # Aloca o vetor de forças (para Harmônico e transiente)
+    P = zeros(nn)
+
     # E a de amortecimento
     C = Matriz_C(nn,damping,materials,coord,connect)
 
-    # Faz a jogadinha para chamar os integradores no tempo
-    P = zeros(nn)
-    F(t) = Vetor_P!(t,nn,materials,velocities,coord,connect,P)
-
+   
 
     ##############################################################
     #                       Harmonic
@@ -182,7 +182,11 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,
     ##############################################################
     #                       Transiente
     ##############################################################
-    
+
+    # Faz a jogadinha para chamar os integradores no tempo
+    F(t) = Vetor_P!(t,nn,materials,velocities,coord,connect,P)
+ 
+
     # Chama o integrador
     if metodo===:Newmark
 

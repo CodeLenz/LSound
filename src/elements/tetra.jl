@@ -28,14 +28,11 @@
                     1 x3 y3 z3 ;
                     1 x4 y4 z4]
 
+  
+      # Return the volume 
       return det(V)/6
 
   end
-
-
-  #
-  # Determinante da matriz Jacobiana
-  # 
 
   #
   # Calcula a matriz Jacobiana do elemento

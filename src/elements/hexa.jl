@@ -196,13 +196,13 @@ function Map_face_hex8(face,ζ,η,X)
 
     elseif face==2
 
-        v54 = @SVector [X[4,1] - X[5,1] ;  X[4,2] - X[5,2]; X[4,3] - X[5,3]]
+        v56 = @SVector [X[6,1] - X[5,1] ;  X[6,2] - X[5,2]; X[6,3] - X[5,3]]
         v58 = @SVector [X[8,1] - X[5,1] ;  X[8,2] - X[5,2]; X[8,3] - X[5,3]]
-        A1 = 0.5*norm(cross(v54,v58))
+        A1 = 0.5*norm(cross(v56,v58))
 
-        v47 = @SVector [X[7,1] - X[4,1] ;  X[7,2] - X[4,2]; X[7,3] - X[4,3]]
-        v48 = @SVector [X[8,1] - X[4,1] ;  X[8,2] - X[4,2]; X[8,3] - X[4,3]]
-        A2 = 0.5*norm(cross(v47,v48))
+        v67 = @SVector [X[7,1] - X[6,1] ;  X[7,2] - X[6,2]; X[7,3] - X[6,3]]
+        v68 = @SVector [X[8,1] - X[6,1] ;  X[8,2] - X[6,2]; X[8,3] - X[6,3]]
+        A2 = 0.5*norm(cross(v67,v68))
 
         # Determinante do Jacobiano para essa face
         dJ = (A1+A2)/4

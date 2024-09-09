@@ -36,10 +36,10 @@ Mesh.Algorithm3D = 9;
 Mesh 3;
 
 // Refine 
-RefineMesh;
+// RefineMesh;
 
 // Refine 
-RefineMesh;
+//RefineMesh;
 
 // Save the mesh
 Save "tubo_3d.msh";
