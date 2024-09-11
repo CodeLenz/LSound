@@ -7,7 +7,7 @@
 #       Δt = Intervalo de Tempo
 #       TF = Tempo Final de simulação
 
-function Newmark(M, C, K, F::Function, livres, Δt, Tf;  U0=Float64[], V0=Float64[])
+function Newmark(M, C, K, F::Function, livres, Δt, Tf;  U0=Float64[], V0=Float64[], γ = 1/2, β = 1/4)
 
     # Vamos trabalhar somente com os gls livres
     nl = length(livres)
@@ -29,8 +29,7 @@ function Newmark(M, C, K, F::Function, livres, Δt, Tf;  U0=Float64[], V0=Float6
     end
 
     # Constantes do método 
-    γ = 1/2 
-    β = 1/4
+    
 
     # Alias para as coordenadas livres
     ML =  M[livres,livres]

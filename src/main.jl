@@ -2,7 +2,9 @@
 # Rotina principal
 #
 """
- Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,freqs=[],U0=[],V0=[],output=true)
+ Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,
+         γ = 1/2, β = 1/4, δ  = 1/4, β1 = 1/3,  β2 = 2/3,
+         freqs=[],U0=[],V0=[],output=true)
 
  Basic input:
 
@@ -31,11 +33,14 @@
            Time step - Δt
            Initial conditions - U0 and V0 
            Flag to write output to gmsh - output
+           Newmark -> γ = 1/2, β = 1/4
+           Bathe   -> γ = 1/2, δ  = 1/4, β1 = 1/3,  β2 = 2/3
 
  Outputs -> vector of discrete times and matrix with the response at each time
 
 """
-function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,
+function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, β = 1/4,
+                 δ  = 1/4, β1 = 1/3,  β2 = 2/3,
                  freqs=[],U0=[],V0=[],output=true,scale=[1.0;1.0;1.0])
 
     # Evita chamar um .geo
@@ -190,11 +195,11 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,
     # Chama o integrador
     if metodo===:Newmark
 
-        tempos, MP = Newmark(M, C, K, F, livres, Δt, Tf, U0=U0, V0=V0)
+        tempos, MP = Newmark(M, C, K, F, livres, Δt, Tf, U0=U0, V0=V0,γ=γ,β=β)
 
     elseif metodo===:Bathe
 
-        tempos, MP = B1B2Bathe2d(M, C, K, F, livres, Δt, Tf, U0=U0, V0=V0)
+        tempos, MP = B1B2Bathe2d(M, C, K, F, livres, Δt, Tf, U0=U0, V0=V0,γ=γ,δ=δ,β1=β1,β2=β2)
 
     end
 
