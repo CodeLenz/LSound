@@ -1,6 +1,9 @@
 # LSound
-
-Código acadêmico para a simulação de problemas de acústica linear utilizando o método dos elementos finitos. 
+Código acadêmico para a simulação de problemas de acústica linear utilizando o método dos elementos finitos.
+<p align="center">
+<img src="./img/cow.jpg" alt="Designed by catalyststuff / Freepik" width="300">
+</p>
+ 
 
 
 ## Instalação
