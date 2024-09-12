@@ -9,7 +9,7 @@ Código acadêmico para a simulação de problemas de acústica linear utilizand
 ## Instalação
 
 ```julia
-using PKg
+using Pkg
 Pkg.add(url="https://github.com/CodeLenz/LSound.git")
 ```
 
