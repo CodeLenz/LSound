@@ -1,5 +1,5 @@
 # LSound
-Código acadêmico para a simulação de problemas de acústica linear utilizando o método dos elementos finitos.
+Código acadêmico para a simulação de problemas de acústica linear 2D e 3D utilizando o método dos elementos finitos.
 <p align="center">
 <img src="./img/cow.jpg" alt="Designed by catalyststuff / Freepik" width="300">
 </p>
@@ -15,6 +15,10 @@ Pkg.add(url="https://github.com/CodeLenz/LSound.git")
 
 O pré e o pós processamento são realizados utilizando o gmsh (https://gmsh.info/).
 
+## Teoria
+
+Em breve
+
 ## Informações Gerais
 
 Os seguintes elementos são disponíveis: 
@@ -29,9 +33,9 @@ Os seguintes elementos são disponíveis:
 
 Materiais e condição de contorno são informadas por meio de Physical Groups do gmsh. O programa atualmente reconhece as seguintes informações:
 
-> Material, $id$, $\rho$, $c$, $Z$
+> Material, nome, $id$, $\rho$, $c$, $Z$
 
-Informa as propriedades do material. $id$ é um inteiro utilizado para identificar o material, $\rho$ a densidade, $c$ a velocidade do som e $Z$ a impedância acústica (não está sendo utilizado no momento).
+Informa as propriedades do material. Nome é uma string, $id$ é um inteiro utilizado para identificar o material, $\rho$ a densidade, $c$ a velocidade do som e $Z$ a impedância acústica (não está sendo utilizado no momento).
 
 > Open
 
@@ -93,7 +97,7 @@ $T$ é um vetor com os tempos discretos que foram analisados e $X$ uma matriz co
 
  # Tubo com pistão e terminação anecóica
 
-Copiar esse arquivo para tubo_vel.geo e rodar o gmsh
+Copiar esse arquivo para tubo_vel.geo e rodar o gmsh com ```gmsh -2 tubo_vel.geo```
 
 ```
 // Tamanho dos elementos
@@ -127,7 +131,7 @@ Physical Curve("Probe") = {1};
 // Atribui admitância unitária nas linhas 2 e 4
 Physical Curve("Yn,1.0") = {2,4};
 
-// Gera uma malha com elementos qudrilaterais
+// Gera uma malha com elementos quadrilaterais
 Recombine Surface{:};
 Mesh.Algorithm = 8;
 Mesh 2;
