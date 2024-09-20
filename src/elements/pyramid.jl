@@ -1,4 +1,6 @@
 #
+# Ainda falta testar!
+
 # Devolve a matriz [N] para um  ponto r,s,t
 #
 function Matriz_N_pyr5(r,s,t)
