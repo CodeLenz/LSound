@@ -34,7 +34,9 @@ function Monta_KM(nn,ne,coord,connect,materials)
             Ke, Me = KMe_tet4(c,X)    
         elseif et==5
            Ke, Me = KMe_hex8(c,X) 
-        else
+        elseif et==7
+            Ke, Me = KMe_pyr5(c,X)     # 7  5-node pyramid.
+         else
             error("Elemento não definido")
         end
  
@@ -105,6 +107,8 @@ function Matriz_C(nn,damping,materials,coord,connect)
                 Ce = Damping_local_tet4(edge,damp,X)
             elseif et==5
                 Ce = Damping_local_hex8(edge,damp,X)
+            elseif et==7
+                Ce = Damping_local_pyr5(edge,damp,X)   # 7  5-node pyramid.
             else
                 error("Tipo de elemento não definido")
             end

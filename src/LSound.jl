@@ -17,6 +17,7 @@ module LSound
     include("elements/tri.jl")
     include("elements/hexa.jl")
     include("elements/tetra.jl")
+    include("elements/pyramid.jl")
     include("global/global.jl")
     include("solvers/autovalores.jl")
     include("solvers/newmark.jl")
@@ -25,6 +26,7 @@ module LSound
     include("solvers/bathe.jl")
     include("solvers/modal.jl")
     include("main.jl")
+
 
     export Analise
 

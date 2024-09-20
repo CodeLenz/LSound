@@ -55,7 +55,9 @@
             Pn = Face_load_local_tet4(edge,val,X)
         elseif et==5
             Pn = Face_load_local_hex8(edge,val,X)
-        else
+        elseif et==7
+          Pn = Face_load_local_pyr5(edge,val,X)# 7  5-node pyramid.
+      else
           error("Vetor_P!:: Tipo de elemento não definido")
         end
 
