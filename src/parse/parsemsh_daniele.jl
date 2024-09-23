@@ -16,7 +16,7 @@ function Parsemsh_Daniele(meshfile::String)
     #          3D
     # 4 -> Tetrahedra (linear)
     # 5 -> hexaedra (linear)
-    # 7  -> pyramid (linear)
+    # 7 -> pyramid (linear)
 
     # Primeiro precisamos definir se a malha é 2D ou 3D
     elist = Lgmsh_import_etypes(meshfile)
@@ -27,9 +27,9 @@ function Parsemsh_Daniele(meshfile::String)
     # para malhas 3D.
     dimensao = 2
     et = [2,3]
-    if (4 in elist) || (7 in elist)
+    if (4 in elist) || (5 in elist) || (7 in elist)
         dimensao = 3
-        et = [4,7]
+        et = [4,5,7]
     end
 
     println("Solucionando um problema de dimensão $dimensao")

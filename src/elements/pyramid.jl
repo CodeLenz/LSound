@@ -82,7 +82,7 @@ function Matriz_N_pyr5(r,s,t)
       J = Jacobiana_pyr5(r,s,t,X)
   
       # Inicializa a matriz B
-      B = @MMatrix zeros(3,8)
+      B = @MMatrix zeros(3,5)
   
       # Inverte a J
       iJ = inv(J)
@@ -156,10 +156,10 @@ function Matriz_N_pyr5(r,s,t)
 #
 # Faces
 # 1) 1 2 3 4 ; <-- Esta face permanece
-# 2) 2 3 5 ;   <-- Conferir estas faces 
-# 3) 3 4 5 ;
-# 4) 4 1 5 ;
-# 5) 1 2 5 ;
+# 2) 1 2 5                    2 3 5 ;   <-- Conferir estas faces 
+# 3) 2 3 5                    3 4 5 ;
+# 4) 3 4 5                    4 1 5 ;
+# 5) 4 1 5                    1 2 5 ;
 # 
 #
 # ######################################################
@@ -171,7 +171,7 @@ function Map_face_pyr5(face,ζ,η,X)
     face in 1:5 || throw("Map_face_hex8::Invalid face")
 
     # Test for each case 
-    if face==1 
+    if face==1 # t=-1
 
         v12 = @SVector [X[2,1] - X[1,1] ;  X[2,2] - X[1,2]; X[2,3] - X[1,3]]
         v14 = @SVector [X[4,1] - X[1,1] ;  X[4,2] - X[1,2]; X[4,3] - X[1,3]]
@@ -187,19 +187,31 @@ function Map_face_pyr5(face,ζ,η,X)
         # N
         N = Matriz_N_pyr5(ζ,η,-1) 
 
-    elseif face==2
+    elseif face==2 # s = -1
 
-        v23 = @SVector [X[3,1] - X[2,1] ;  X[3,2] - X[2,2]; X[3,3] - X[2,3]]
-        v25 = @SVector [X[5,1] - X[2,1] ;  X[5,2] - X[2,2]; X[5,3] - X[2,3]]
-        A1 = 0.5*norm(cross(v23,v25))
+        v12 = @SVector [X[2,1] - X[1,1] ;  X[2,2] - X[1,2]; X[2,3] - X[1,3]]
+        v15 = @SVector [X[5,1] - X[1,1] ;  X[5,2] - X[1,2]; X[5,3] - X[1,3]]
+        A1 = 0.5*norm(cross(v12,v15))
 
         # Determinante do Jacobiano para essa face <-- Conferir 
         dJ = A1/2
         
         # N
-        N = Matriz_N_pyr5(ζ,η,1) 
+        N = Matriz_N_pyr5(ζ,-1,η) 
                   
-    elseif face==3
+    elseif face==3 # r = 1
+
+        v23 = @SVector [X[3,1] - X[2,1] ;  X[3,2] - X[2,2]; X[3,3] - X[2,3]]
+        v25 = @SVector [X[5,1] - X[2,1] ;  X[5,2] - X[2,2]; X[5,3] - X[2,3]]
+        A1 = 0.5*norm(cross(v23,v25))
+
+        # Determinante do Jacobiano para essa face
+        dJ = A1/2
+        
+        # N
+        N = Matriz_N_pyr5(1,ζ,η) 
+      
+    elseif face==4 # s = 1
 
         v34 = @SVector [X[4,1] - X[3,1] ;  X[4,2] - X[3,2]; X[4,3] - X[3,3]]
         v35 = @SVector [X[5,1] - X[3,1] ;  X[5,2] - X[3,2]; X[5,3] - X[3,3]]
@@ -207,33 +219,21 @@ function Map_face_pyr5(face,ζ,η,X)
 
         # Determinante do Jacobiano para essa face
         dJ = A1/2
-        
-        # N
-        N = Matriz_N_pyr5(ζ,-1,η) 
-
-      
-    elseif face==4
-
-        v41 = @SVector [X[1,1] - X[4,1] ;  X[1,2] - X[4,2]; X[1,3] - X[4,3]]
-        v45 = @SVector [X[5,1] - X[4,1] ;  X[5,2] - X[4,2]; X[5,3] - X[4,3]]
-        A1 = 0.5*norm(cross(v41,v45))
-
-        # Determinante do Jacobiano para essa face
-        dJ = A1/2
 
         # N
-        N = Matriz_N_pyr5(1,ζ,η) 
+        N = Matriz_N_pyr5(ζ,1,η) 
             
-    elseif face==5
+    elseif face==5 # r = -1
 
-        v12 = @SVector [X[2,1] - X[1,1] ;  X[2,2] - X[1,2]; X[2,3] - X[1,3]]
+        v14 = @SVector [X[4,1] - X[1,1] ;  X[4,2] - X[1,2]; X[4,3] - X[1,3]]
         v15 = @SVector [X[5,1] - X[1,1] ;  X[5,2] - X[1,2]; X[5,3] - X[1,3]]
-        A1 = 0.5*norm(cross(v12,v15))
+        A1 = 0.5*norm(cross(v14,v15))
+
         # Determinante do Jacobiano para essa face
         dJ = A1/2 
          
-         # N
-         N = Matriz_N_pyr5(ζ,1,η) 
+        # N
+        N = Matriz_N_pyr5(-1,ζ,η) 
 
     end
 
