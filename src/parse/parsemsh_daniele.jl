@@ -32,6 +32,10 @@ function Parsemsh_Daniele(meshfile::String)
         et = [4,5,7]
     end
 
+    #if 7 in elist
+    #    error("Arrumar o Lgmsh")
+    #end
+
     println("Solucionando um problema de dimensão $dimensao")
 
     # Maximum number of nodes in the elements of the mesh

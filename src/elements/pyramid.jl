@@ -48,7 +48,7 @@ function Matriz_N_pyr5(r,s,t)
       J = @MMatrix zeros(3,3)
   
       # Loop pelos somatórios
-      for i=1:8
+      for i=1:5
           J[1,1] += dNr[i]*X[i,1]
           J[1,2] += dNr[i]*X[i,2]
           J[1,3] += dNr[i]*X[i,3]

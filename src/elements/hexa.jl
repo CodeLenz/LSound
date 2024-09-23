@@ -193,7 +193,7 @@ function Map_face_hex8(face,ζ,η,X)
         
         # N
         N = Matriz_N_hex8(ζ,η,-1) 
-
+        quad
     elseif face==2
 
         v56 = @SVector [X[6,1] - X[5,1] ;  X[6,2] - X[5,2]; X[6,3] - X[5,3]]
