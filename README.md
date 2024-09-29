@@ -7,6 +7,12 @@ Código acadêmico para a simulação de problemas de acústica linear 2D e 3D u
 
 
 ## Instalação
+( Antes, instale Lgmsh:
+```julia
+using Pkg
+Pkg.add("url=https://github.com/CodeLenz/Lgmsh")
+```
+para mais detalhes, consulte https://github.com/CodeLenz/Lgmsh.git).
 
 ```julia
 using Pkg
