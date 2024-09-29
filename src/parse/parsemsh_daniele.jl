@@ -21,7 +21,7 @@ function Parsemsh_Daniele(meshfile::String)
     # Primeiro precisamos definir se a malha é 2D ou 3D
     elist = Lgmsh_import_etypes(meshfile)
 
-    # Se tivermos elementos do 4/7, então é 3D. Do contrário,
+    # Se tivermos elementos do 4/5/7, então é 3D. Do contrário,
     # é 2D. Observe que ter 2/3 não é uma indicação direta de 
     # que a malha é 2D, pois o gmsh também gera esses elementos
     # para malhas 3D.
@@ -31,10 +31,6 @@ function Parsemsh_Daniele(meshfile::String)
         dimensao = 3
         et = [4,5,7]
     end
-
-    #if 7 in elist
-    #    error("Arrumar o Lgmsh")
-    #end
 
     println("Solucionando um problema de dimensão $dimensao")
 
