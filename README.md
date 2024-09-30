@@ -35,7 +35,7 @@ Os seguintes elementos são disponíveis:
 
 + piramide linear de 5 nós
 
-e a teoria de cada elemento pode ser encontrada em [teoria](https://github.com/CodeLenz/LSound/doc/theory.pdf)
+e a teoria de cada elemento pode ser encontrada em [teoria](https://github.com/CodeLenz/LSound/blob/main/doc/theory.pdf)
 
 ## Entrada de dados
 
