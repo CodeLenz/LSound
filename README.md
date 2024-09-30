@@ -21,11 +21,7 @@ Pkg.add(url="https://github.com/CodeLenz/LSound.git")
 
 O pré e o pós processamento são realizados utilizando o gmsh (https://gmsh.info/).
 
-## Teoria
-
-Em breve
-
-## Informações Gerais
+## Elementos Finitos 
 
 Os seguintes elementos são disponíveis: 
 
@@ -38,6 +34,10 @@ Os seguintes elementos são disponíveis:
 + tetraedro linear de 4 nós
 
 + piramide linear de 5 nós
+
+e a teoria de cada elemento pode ser encontrada em [teoria](https://github.com/CodeLenz/LSound/doc/theory.pdf)
+
+## Entrada de dados
 
 Materiais e condição de contorno são informadas por meio de Physical Groups do gmsh. O programa atualmente reconhece as seguintes informações:
 
