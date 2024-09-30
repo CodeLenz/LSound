@@ -30,12 +30,6 @@ Physical Curve("Vn,1E-3,340.0,0.0") = {4};
 // Atenuation
 Physical Curve("Yn,1.0") = {2,4};
 
-// Convert triangles to quads
-// Recombine Surface{:};
-
-// Better quad algorithm
-// Mesh.Algorithm = 8;
-
 // Build mesh
 Mesh 2;
 
