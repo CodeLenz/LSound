@@ -35,7 +35,9 @@ Os seguintes elementos são disponíveis:
 
 + trilinear hexaédrico de 8 nós 
 
-+ tetraedro linear de 4 nós. 
++ tetraedro linear de 4 nós
+
++ piramide linear de 5 nós
 
 Materiais e condição de contorno são informadas por meio de Physical Groups do gmsh. O programa atualmente reconhece as seguintes informações:
 
@@ -86,13 +88,13 @@ onde $nev$ é o número de autovalores a serem calculados, $f$ um vetor com as f
 
 onde $freqs$ é uma lista com frequências a serem analizadas (em Hz). $monitor$ é um vetor com os nós que estão sendo monitorados e $X$ é uma matriz complexa com os nós como linhas e frequências como colunas. 
 
-> $T$,$X$ = Analise(meshfile,:Newmark,Tf,$\Delta t$, $U0$, $V0$, output, $\gamma$,$\beta$ )
+> $T$, $X$ = Analise(meshfile,:Newmark,Tf, $\Delta t$, $U0$, $V0$, output, $\gamma$, $\beta$ )
 
 onde $Tf$ é o tempo final, $\Delta t$ a discretização no tempo, $U0$ e $V0$ as condições iniciais e $output$ um flag lógico para gravar ou não gravar as informações no gmsh (o arquivo pode ser bem grande...). 
 Os parâmetros $\gamma$ e $\beta$ são os parâmetros de controle do método.
 $T$ é um vetor com os tempos discretos que foram analisados e $X$ uma matriz com os nós (linhas) em cada tempo (colunas). 
 
-> $T$,$X$ = Analise(meshfile,:Bathe,Tf,$\Delta t$, $U0$, $V0$, output, $\gamma$, $\delta$, $\beta_1$, $\beta_2$)
+> $T$, $X$ = Analise(meshfile,:Bathe,Tf, $\Delta t$, $U0$, $V0$, output, $\gamma$, $\delta$, $\beta_1$, $\beta_2$)
 
 onde $Tf$ é o tempo final, $\Delta t$ a discretização no tempo, $U0$ e $V0$ as condições iniciais e $output$ um flag lógico para gravar ou não gravar as informações no gmsh (o arquivo pode ser bem grande...). 
 Os parâmetros $\gamma$, $\delta$, $\beta_1$ e $\beta_2$ controlam as características do método. Mais detalhes sobre a implementação podem ser encontrados em https://www.sciencedirect.com/science/article/pii/S0045794920302364.
