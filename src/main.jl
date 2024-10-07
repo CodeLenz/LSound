@@ -173,7 +173,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
 
             # Adiciona ao arquivo
             if output
-               Lgmsh_export_nodal_scalar(nome,U,"Pressão em $f Hz")
+               Lgmsh_export_nodal_scalar(nome,abs.(U),"Pressão em $f Hz [abs]")
             end
 
             # Armazena os resultados na matriz de monitoramento
