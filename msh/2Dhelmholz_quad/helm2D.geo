@@ -24,13 +24,13 @@ Hc = 5E-2;
 Point(1) = { 0,        0,     0, lc};
 Point(2) = { L,        0,     0, lc};
 Point(3) = { L+2*rp,   0,     0, lc};
-Point(4) = { L+2*rp+4*L, 0,     0, lc};
+Point(4) = { L+2*rp+L, 0,     0, lc};
 
 // top of the Tube
 Point(5) = { 0,        2*r,     0, lc};
 Point(6) = { L,        2*r,     0, lc};
 Point(7) = { L+2*rp,   2*r,     0, lc};
-Point(8) = { L+2*rp+4*L, 2*r,     0, lc};
+Point(8) = { L+2*rp+L, 2*r,     0, lc};
 
 // Bottom of Cavity
 Point(9)  = { L-rc,        2*r+Lp,     0, lc};
@@ -77,7 +77,7 @@ Physical Surface("Material,Ar,1,1.028,340.0,400.0") = {1};
 Physical Curve("Vn,1E-3,741.0,0.0") = {16};
 
 // Probe nodes
-//Physical Curve("Probe") = {2};
+Physical Curve("Probe") = {2};
 
 //Physical Curve("Open") = {4};
 
