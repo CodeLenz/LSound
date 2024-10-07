@@ -90,7 +90,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
 
         println("Análise Modal com ", nev, " autovalores")
 
-        # Chama a rotina de solução
+        # Chama a rotinaYn, de solução
         freq, X = Modal(K,M,livres,nev)
  
         # Exporta os modos para visualização no gmsh
@@ -170,6 +170,9 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
 
             # Soluciona 
             U[livres] .= Kd\P
+
+            # Adiciona ao arquivo
+            Lgmsh_export_nodal_scalar(nome,U,"Pressão")
 
             # Armazena os resultados na matriz de monitoramento
             monitor[:,contador] .= U[nodes_probe]
