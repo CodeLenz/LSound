@@ -6,7 +6,7 @@
 
 using Lgmsh
 
-function Parsemsh_Daniele(meshfile::String)
+function Parsemsh_Daniele(meshfile::String,verbose=false)
 
     # Element types to  read
     #          2D
@@ -32,7 +32,9 @@ function Parsemsh_Daniele(meshfile::String)
         et = [4,5,7]
     end
 
-    println("Solucionando um problema de dimensão $dimensao")
+    if verbose
+        println("Solucionando um problema de dimensão $dimensao")
+    end
 
     # Maximum number of nodes in the elements of the mesh
     nmax = maximum(Lgmsh_nodemap()[et])
@@ -157,7 +159,6 @@ function Parsemsh_Daniele(meshfile::String)
                 else
                     eleedges_,edges_ = FindElementsFaces(tt,ne,etypes,connect,nodes_vn)
                 end
-                @show tt,eleedges_, edges_
                 if !isempty(eleedges_)
                     push!(eleedges,eleedges_...)
                     push!(edges,edges_...)
