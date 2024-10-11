@@ -79,9 +79,11 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     livres = setdiff(collect(1:nn),nodes_open)
     
     # Inicializa um arquivo de pós-processamento do gmsh
-    nome = "$(metodo).pos"
-    etype = connect[:,1]
-    Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
+    if output
+        nome = "$(metodo).pos"
+        etype = connect[:,1]
+        Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
+    end
 
     ###############################################################
     #                           Modal
@@ -105,7 +107,9 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
                 vv[livres] = X[:,i]
 
                 # Adiciona ao arquivo
-                Lgmsh_export_nodal_scalar(nome,vv,"Modo $i, freq $(freq[i]) Hz")
+                if output
+                   Lgmsh_export_nodal_scalar(nome,vv,"Modo $i, freq $(freq[i]) Hz")
+                end
 
             end # i 
         end
