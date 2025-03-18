@@ -1,7 +1,7 @@
 # LSound
 Código acadêmico para a simulação de problemas de acústica linear 2D e 3D utilizando o método dos elementos finitos.
 <p align="center">
-<img src="./img/LSound_capa.png" alt="LSound" width="1000">
+<img src="img/LSound_capa_nova.png" alt="LSound" width="1000">
 </p>
  
 
