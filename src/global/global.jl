@@ -1,7 +1,10 @@
 #
 # Monta as matrizes globais K e M
 #
-function Monta_KM(nn,ne,coord,connect,materials)
+function Monta_KM(nn,ne,coord,connect,materials)  
+    #  function Monta_KM(nn,ne,coord,connect,materials,ρ = 1.204)
+    # Qual é a posição na entrada de dados em que está o ρ  (como o c) ?    
+    # A 101325 Pa e 20 °C = 293,15 K, ρ = 101325 / (287,058 ⋅ 293,15) = 1,204 kg/m³
 
     # Aloca vetores para a montagem eficiente 
     # das matrizes esparsas
@@ -12,6 +15,9 @@ function Monta_KM(nn,ne,coord,connect,materials)
  
     # Loop pelos elementos
     for ele=1:ne
+
+        # Find material density
+        ρ = materials[mat,1]
 
         # Material
         mat = connect[ele,2] 
@@ -27,15 +33,15 @@ function Monta_KM(nn,ne,coord,connect,materials)
 
         # Monta as matrizes dos elementos
         if et==3
-           Ke, Me = KMe_bi4(c,X)
+           Ke, Me = KMe_bi4(c,ρ,X)
         elseif et==2
-           Ke, Me = KMe_tri3(c,X)
+           Ke, Me = KMe_tri3(c,ρ,X)
         elseif et==4
-            Ke, Me = KMe_tet4(c,X)    
+            Ke, Me = KMe_tet4(c,ρ,X)    
         elseif et==5
-           Ke, Me = KMe_hex8(c,X) 
+           Ke, Me = KMe_hex8(c,ρ,X) 
         elseif et==7
-            Ke, Me = KMe_pyr5(c,X)     # 7  5-node pyramid.
+            Ke, Me = KMe_pyr5(c,ρ,X)     # 7  5-node pyramid.
          else
             error("Elemento não definido")
         end
@@ -93,7 +99,8 @@ function Matriz_C(nn,damping,materials,coord,connect)
             # c = materials[mat,2]
 
             # Cte de amortecimento (passando o Y_n diretamente)
-            damp = valor #ρ/valor
+            damp = 1/valor # ρ/valor * 1/ρ
+            #damp = valor # ρ/valor
 
             # Find nodes and coordinates
             nos,X = Nos_Coordenadas(ele,et,coord,connect)
