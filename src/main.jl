@@ -119,7 +119,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     end # Modal
 
     ##############################################################
-    #                       Hamonic e Transiente
+    #                       Harmônico e Transiente
     ##############################################################
     
     # Aloca o vetor de forças (para Harmônico e transiente)
