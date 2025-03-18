@@ -91,8 +91,11 @@ function Matriz_N_bi4(r,s)
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_bi4(c,X)
-  
+  function KMe_bi4(c,ρ,X)
+      
+      # Calculando κ
+      κ = (ρ*c^2) 
+
       # Aloca as matrizes
       Ke = @MMatrix zeros(4,4)
       Me = @MMatrix zeros(4,4)
@@ -124,7 +127,7 @@ function Matriz_N_bi4(r,s)
           end
       end
   
-      return Ke, (1/c^2)*Me
+      return (1/ρ)*Ke, (1/κ)*Me
   
   end
   
