@@ -44,7 +44,8 @@
         nos,X = Nos_Coordenadas(ele,et,coord,connect)
 
         # value
-        val =  -ρ*qn
+        val =  -qn
+        # val =  -ρ*qn
 
         # Local vector 
         if et==3
