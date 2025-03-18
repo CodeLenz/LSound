@@ -111,8 +111,11 @@ function Matriz_N_hex8(r,s,t)
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_hex8(c,X)
-  
+  function KMe_hex8(c,ρ,X)
+      
+      # Calculando κ
+      κ = (ρ*c^2) 
+    
       # Aloca as matrizes
       Ke = @MMatrix zeros(8,8)
       Me = @MMatrix zeros(8,8)
@@ -150,7 +153,7 @@ function Matriz_N_hex8(r,s,t)
           end #j
       end #i
   
-      return Ke, (1/c^2)*Me
+      return  (1/ρ)*Ke, (1/κ)*Me
   
   end
   
