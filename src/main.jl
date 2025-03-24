@@ -173,7 +173,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
             Vetor_P!(0.0,nn,materials,velocities,coord,connect,P,ω=ω)
 
             # Soluciona 
-            U[livres] .= Kd\P
+            U[livres] .= Kd\P[livres]
 
             # Adiciona ao arquivo
             if output
