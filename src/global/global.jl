@@ -16,15 +16,23 @@ function Monta_KM(nn,ne,coord,connect,materials)
     # Loop pelos elementos
     for ele=1:ne
 
-        # Find material density
-        ρ = materials[mat,1]
-
         # Material
         mat = connect[ele,2] 
 
+        # Find material density
+        ρ = materials[mat,1]
+
         # Velocidade
         c = materials[mat,2]
+        
+        # Calcula o módulo de compressibilidade κ
+        # bulk modulus
+        κ = ρ*c^2
 
+        # Calcula as inversas 
+        iρ = 1/ρ
+        iκ = 1/κ    
+        
         # Tipo de elemento
         et = connect[ele,1]
 
@@ -33,15 +41,15 @@ function Monta_KM(nn,ne,coord,connect,materials)
 
         # Monta as matrizes dos elementos
         if et==3
-           Ke, Me = KMe_bi4(c,ρ,X)
+           Ke, Me = KMe_bi4(iρ,iκ,X)
         elseif et==2
-           Ke, Me = KMe_tri3(c,ρ,X)
+           Ke, Me = KMe_tri3(iρ,iκ,X)
         elseif et==4
-            Ke, Me = KMe_tet4(c,ρ,X)    
+            Ke, Me = KMe_tet4(iρ,iκ,X)   
         elseif et==5
-           Ke, Me = KMe_hex8(c,ρ,X) 
+           Ke, Me = KMe_hex8(iρ,iκ,X)
         elseif et==7
-            Ke, Me = KMe_pyr5(c,ρ,X)     # 7  5-node pyramid.
+            Ke, Me = KMe_pyr5(iρ,iκ,X)    # 7  5-node pyramid.
          else
             error("Elemento não definido")
         end
@@ -66,7 +74,7 @@ end
 
 
 
-function Matriz_C(nn,damping,materials,coord,connect)
+function Matriz_C(nn,damping,coord,connect)
 
     # Aloca os vetores para a matriz de amortecimento
     I = Int64[]
@@ -91,16 +99,8 @@ function Matriz_C(nn,damping,materials,coord,connect)
             # Tipo de elemento
             et = connect[ele,1]
 
-            # Material for this element
-            mat = connect[ele,2]
-
-            # Find material density
-            # ρ = materials[mat,1]
-            # c = materials[mat,2]
-
             # Cte de amortecimento (passando o Y_n diretamente)
-            damp = 1/valor # ρ/valor * 1/ρ
-            #damp = valor # ρ/valor
+            damp = 1/valor 
 
             # Find nodes and coordinates
             nos,X = Nos_Coordenadas(ele,et,coord,connect)
