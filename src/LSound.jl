@@ -27,7 +27,11 @@ module LSound
     include("solvers/modal.jl")
     include("main.jl")
 
+    # Otimização
+    include("otim/global_otim.jl")
+    include("otim/main_otim.jl")
 
+    
     export Analise
 
 end
