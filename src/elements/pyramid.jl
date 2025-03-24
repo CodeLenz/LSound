@@ -109,11 +109,8 @@ function Matriz_N_pyr5(r,s,t)
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
-  function KMe_pyr5(c,ρ,X)
+  function KMe_pyr5(iρ,iκ,X)
 
-      # Calculando κ
-      κ = (ρ*c^2) 
-      
       # Aloca as matrizes
       Ke = @MMatrix zeros(5,5)
       Me = @MMatrix zeros(5,5)
@@ -151,7 +148,7 @@ function Matriz_N_pyr5(r,s,t)
           end #j
       end #i
   
-      return (1/ρ)*Ke, (1/κ)*Me
+      return iρ*Ke, iκ*Me
   
   end
   
