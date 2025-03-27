@@ -1,3 +1,12 @@
+//
+//
+// Arquivo utilizado para testar a resposta de um tubo fechado - aberto
+// submetido a uma excitação de velocidade normal na face fechada da esquerda.
+// O material é ar, com as propriedades rho = 1.21 e c = 342.57 (k = 1.42E5)
+//
+//
+//
+
 //                   ________________
 // Tubo:      Vn ---|________________   -- aberto 
 //
@@ -40,4 +49,4 @@ Mesh.Algorithm = 8;
 Mesh 2;
 
 // Save the mesh
-Save "tubo_teste.msh";
+Save "tubo_fechado_aberto.msh";

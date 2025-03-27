@@ -48,6 +48,9 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
         error("Chamar com .msh..")
     end
 
+    # Extrai o nome do arquivo para gerar o nome dos arquivos de saída
+    nome_arquivo_entrada = meshfile[1:end-4]
+
     # Verifica se o método é válido
     metodo in [:Modal, :Bathe, :Newmark, :Harmonic] || error("Métodos disponíveis são :Modal, :Bathe, :Newmark e :Harmonic")
 
@@ -80,7 +83,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     
     # Inicializa um arquivo de pós-processamento do gmsh
     if output
-        nome = "$(metodo).pos"
+        nome = "$(nome_arquivo_entrada)_$(metodo).pos"
         etype = connect[:,1]
         Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
     end
