@@ -126,10 +126,8 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     P = zeros(nn)
 
     # E a de amortecimento
-    C = Matriz_C(nn,damping,materials,coord,connect)
-
-   
-
+    C = Matriz_C(nn,damping,coord,connect)
+ 
     ##############################################################
     #                       Harmonic
     ##############################################################
