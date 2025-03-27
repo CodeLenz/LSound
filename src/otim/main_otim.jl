@@ -103,7 +103,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         # Monta o vetor de forças, que depende da frequência  
         Vetor_P!(0.0,velocities,coord,connect,P,ω=ω)
 
-        # Soluciona 
+        # Soluciona apenas para os gls livres do problema
         U[livres] .= Kd\P[livres]
 
         # Adiciona ao arquivo
