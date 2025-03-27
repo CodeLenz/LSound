@@ -66,7 +66,7 @@ function Monta_KM2(ne,coord,connect,γ::Vector,fρ::Function,fκ::Function)
         elseif et==5
            Ke, Me = KMe_hex8(iρ,iκ,X) 
         elseif et==7
-            Ke, Me = KMe_pyr5(iρ,iκ,X)     # 7  5-node pyramid.
+            Ke, Me = KMe_pyr5(iρ,iκ,X)    
          else
             error("Elemento não definido")
         end

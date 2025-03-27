@@ -23,7 +23,14 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     end
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe = Parsemsh_Daniele(meshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
+
+    # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
+    # que vai funcionar como nodes_probe aqui
+    isempty(nodes_target) && error("Otim:: nodes_target deve ter ao menos um nó informado")
+
+    # Número de nós em nodes_target
+    nt = length(nodes_target)
 
     # Vamos evitar coordenadas negativas 
     for i=1:3  
@@ -76,15 +83,8 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Número de nós a monitorar
     np = length(nodes_probe) 
 
-    # Se não temos nós a monitorar, então monitoramos 
-    # todos os livres
-    if isempty(nodes_probe)
-        nodes_probe = livres
-        np = length(livres)
-    end
-        
     # Aloca matriz com os valores a serem monitorados
-    monitor = zeros(ComplexF64,np,nω)
+    target = zeros(ComplexF64,nt,nω)
 
     # pre-aloca vetor de resposta
     U = zeros(ComplexF64, nn)
@@ -110,13 +110,16 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         Lgmsh_export_nodal_scalar(nome,abs.(U),"Pressão em $f Hz [abs]")
         
         # Armazena os resultados na matriz de monitoramento
-        monitor[:,contador] .= U[nodes_probe]
+        target[:,contador] .= U[nodes_target]
 
         # Incrementa o contador
         contador += 1
 
     end
 
-    return monitor
+    # Calcula a função objetivo SPL_w
+    objetivo = Objetivo(target)
+
+    return target, objetivo
 
 end

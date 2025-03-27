@@ -30,8 +30,8 @@ module LSound
     # Otimização
     include("otim/global_otim.jl")
     include("otim/main_otim.jl")
+    include("otim/objetivo.jl")
 
-    
     export Analise
 
 end

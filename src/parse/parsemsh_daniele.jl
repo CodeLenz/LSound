@@ -47,14 +47,17 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     #
     # Material,nome,id,dens,c,Z [ surfaces (and volumes) ]
     #
-    # Open [ lines and/or nodes]
+    # Open [ lines and/or nodes and/or surfaces]
     # 
-    # Vn,value,freq,phase (in degrees)
+    # Vn,value,freq,phase (in degrees) [ lines and/or nodes and/or surfaces]
     #
-    # Yn, value
+    # Yn, value [ lines and/or nodes and/or surfaces]
     #
-    # Probe 
+    # Probe [ lines and/or nodes and/or surfaces]
     #
+    # For optimization, there are some specific phisical groups
+    #
+    # Target [ lines and/or nodes and/or surfaces]
     #
     pgroups, pgnames = Lgmsh_import_physical_groups(meshfile)
 
@@ -81,6 +84,9 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
 
     # Vector of Probe nodes
     nodes_probe = Int64[]
+
+    # Vector of Target nodes
+    nodes_target = Int64[]
 
     # Loop over groups
     for g=1:length(pgnames)
@@ -134,6 +140,14 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
 
             # Append
             nodes_probe = vcat(nodes_probe,nodes)
+
+       elseif  occursin("Target",st[1])
+
+            # Find nodes 
+            nodes = Lgmsh.Readnodesgroup(meshfile,name)
+
+            # Append
+            nodes_target = vcat(nodes_target,nodes)
 
       elseif  occursin("Vn",st[1])
 
@@ -237,6 +251,6 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     end
 
     # Return processed data
-    return nn, coord, ne, connect2, materials2, nodes_open, velocities, damping, nodes_probe
+    return nn, coord, ne, connect2, materials2, nodes_open, velocities, damping, nodes_probe, nodes_target
 
 end
