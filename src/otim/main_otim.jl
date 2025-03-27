@@ -58,13 +58,12 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     etype = connect[:,1]
     Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
     
-    
     # Aloca o vetor de forças (para Harmônico e transiente)
     P = zeros(nn)
 
     # E a de amortecimento
+    # TODO adicionar amortecimento depois
     # C = Matriz_C(nn,damping,coord,connect)
-
     
     # Verificamos se existem frequências sendo informadas
     if isempty(freqs)
@@ -102,7 +101,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         Kd = K[livres,livres]  .- (ω^2)*M[livres,livres]
 
         # Monta o vetor de forças, que depende da frequência  
-        Vetor_P!(0.0,nn,materials,velocities,coord,connect,P,ω=ω)
+        Vetor_P!(0.0,velocities,coord,connect,P,ω=ω)
 
         # Soluciona 
         U[livres] .= Kd\P[livres]

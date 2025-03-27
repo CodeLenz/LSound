@@ -168,7 +168,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
             Kd = K[livres,livres] .+ im*ω*C[livres,livres] .- (ω^2)*M[livres,livres]
 
             # Monta o vetor de forças, que depende da frequência  
-            Vetor_P!(0.0,nn,materials,velocities,coord,connect,P,ω=ω)
+            Vetor_P!(0.0,velocities,coord,connect,P,ω=ω)
 
             # Soluciona 
             U[livres] .= Kd\P[livres]
@@ -196,7 +196,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     ##############################################################
 
     # Faz a jogadinha para chamar os integradores no tempo
-    F(t) = Vetor_P!(t,nn,materials,velocities,coord,connect,P)
+    F(t) = Vetor_P!(t,velocities,coord,connect,P)
  
 
     # Chama o integrador

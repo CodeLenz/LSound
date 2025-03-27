@@ -1,5 +1,5 @@
  # Rotina que monta o vetor de "forças" para um determinando tempo t
- function Vetor_P!(t,nn,materials,velocities,coord,connect,P;ω=-1.0)
+ function Vetor_P!(t,velocities,coord,connect,P;ω=-1.0)
 
     # Zera todo o vetor 
     fill!(P,0.0)
@@ -12,12 +12,18 @@
 
       # We also allow an imposed frequency, for harmonic analysis
       if ω==-1.0
+
+         # Frequency informed in the input file
          freq  = 2*pi*dvn["freq"]  
          fase  = 2*pi*dvn["phase"]
       else
+
+         # Frequency informed as (optional) argument to this function
          freq = ω
          fase = 0.0
       end
+
+      # Elementos em que a condição de contorno está sendo imposta
       elements   = dvn["elements"] 
 
       # Derivative of vn w.r.t time
@@ -37,15 +43,11 @@
         # Material for this element
         mat = connect[ele,2]
 
-        # Find material density
-        ρ = materials[mat,1]
-
         # Find nodes and coordinates
         nos,X = Nos_Coordenadas(ele,et,coord,connect)
 
         # value
         val =  -qn
-        # val =  -ρ*qn
 
         # Local vector 
         if et==3
@@ -57,7 +59,7 @@
         elseif et==5
             Pn = Face_load_local_hex8(edge,val,X)
         elseif et==7
-            Pn = Face_load_local_pyr5(edge,val,X)# 7  5-node pyramid.
+            Pn = Face_load_local_pyr5(edge,val,X)
       else
           error("Vetor_P!:: Tipo de elemento não definido")
         end
