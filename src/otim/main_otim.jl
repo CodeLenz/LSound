@@ -84,7 +84,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     np = length(nodes_probe) 
 
     # Aloca matriz com os valores a serem monitorados
-    target = zeros(ComplexF64,nt,nω)
+    target = zeros(ComplexF64,nn,nω)
 
     # pre-aloca vetor de resposta
     U = zeros(ComplexF64, nn)
@@ -110,7 +110,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         Lgmsh_export_nodal_scalar(nome,abs.(U),"Pressão em $f Hz [abs]")
         
         # Armazena os resultados na matriz de monitoramento
-        target[:,contador] .= U[nodes_target]
+        target[:,contador] .= U
 
         # Incrementa o contador
         contador += 1
@@ -118,8 +118,11 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     end
 
     # Calcula a função objetivo SPL_w
-    objetivo = Objetivo(target)
+    objetivo = Objetivo(target,nodes_target)
 
-    return target, objetivo
+    # Calcula a derivada da função objetivo em relação ao vetor γ
+    dΦ = Derivada(ne,nn,γ,connect,K,M,livres,freqs,dfρ,dfκ,nodes_target,target) 
+
+    return target, objetivo, dΦ
 
 end

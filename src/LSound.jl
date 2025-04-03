@@ -28,9 +28,11 @@ module LSound
     include("main.jl")
 
     # Otimização
+    include("otim/parametrizacao.jl")
     include("otim/global_otim.jl")
     include("otim/main_otim.jl")
     include("otim/objetivo.jl")
+    include("otim/adjunto.jl")
 
     export Analise
 

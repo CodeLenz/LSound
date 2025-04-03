@@ -1,30 +1,3 @@
-
-
-# Parametrização do inverso de ρ
-function fρ(γe,ψ=2.0)
-
-    # ρ do ar
-    ρa = 1.21
-    ρr = ρa*1E7
-
-    # Calcula a parametrização
-    return (1/ρa) + (γe^ψ)*(1/ρr - 1/ρa)
-
-end 
-
-# Parametrização do inverso de κ
-function fκ(γe,ψ=2.0)
-
-    # κ do ar
-    κa = 1.42E5
-    κr = κa*1E9
-
-    # Calcula a parametrização
-    return (1/κa) + (γe^ψ)*(1/κr - 1/κa)
-
-end 
-
-
 #
 # Monta_KM, versão para otimização
 #
