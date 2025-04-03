@@ -2,7 +2,7 @@
 # Calcula o SPL (Sound Pressure Level) para uma dada distribuição de pressao p
 
 #
-function SPL(::Vector,p0)
+function SPL(p::Vector,p0)
 
     # Número de pontos 
     nn = length(p)
