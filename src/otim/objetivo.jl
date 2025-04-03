@@ -26,7 +26,7 @@ end
 #
 # p0 é a pressão de referência (20μ Pa)
 #
-function Objetivo(target::Matrix, nodes_target::Vector p0=20E-6)
+function Objetivo(target::Matrix, nodes_target::Vector, p0=20E-6)
 
     # Incializa a soma
     soma = 0.0
