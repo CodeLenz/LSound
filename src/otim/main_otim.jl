@@ -52,42 +52,70 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
 
     # Vamos inicializar o vetor de variáveis de projeto toda em 0.0
     # ou seja, ar
-    γ = zeros(ne) 
-
-    # Calcula as matrizes globais
-    K,M = Monta_KM2(ne,coord,connect,γ,fρ,fκ)
+    γ = 0.1*rand(ne) #zeros(ne) 
 
     # DOFs livres do problema
     livres = setdiff(collect(1:nn),nodes_open)
-    
-    # Inicializa um arquivo de pós-processamento do gmsh
-    nome = "otim.pos"
-    etype = connect[:,1]
-    Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
-    
-    # Aloca o vetor de forças (para Harmônico e transiente)
-    P = zeros(nn)
 
-    # E a de amortecimento
-    # TODO adicionar amortecimento depois
-    # C = Matriz_C(nn,damping,coord,connect)
-    
     # Verificamos se existem frequências sendo informadas
     if isempty(freqs)
         error("Analise Harmonica:: freqs deve ser um vetor não vazio")
     end
 
+    # Inicializa um arquivo de pós-processamento do gmsh
+    nome = "otim.pos"
+    etype = connect[:,1]
+    Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
+    
+    # Faz o sweep
+    target,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities) 
+
+    # Gera a visualização 
+    # Lgmsh_export_nodal_scalar(nome,abs.(U),"Pressão em $f Hz [abs]") 
+
+    # Calcula a função objetivo SPL_w
+    objetivo = Objetivo(target,nodes_target)
+
+    # Calcula a derivada da função objetivo em relação ao vetor γ
+    dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,dfρ,dfκ,nodes_target,target) 
+
+    # Vamos validar a derivada usando diferenças finitas
+    function f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities)
+
+        target,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities) 
+
+        # Calcula a função objetivo SPL_w
+        objetivo = Objetivo(target,nodes_target)
+
+        return objetivo
+
+    end
+    f(γ) = f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities)
+    d_numerica = df(γ,f)
+    
+
+    return target, objetivo, dΦ, d_numerica
+
+end
+
+
+function Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
+
+    # Calcula as matrizes globais
+    K,M = Monta_KM2(ne,coord,connect,γ,fρ,fκ)
+    
+    # E a de amortecimento
+    # TODO adicionar amortecimento depois
+    # C = Matriz_C(nn,damping,coord,connect)
+
     # Número de frequências
     nω = length(freqs)
-        
-    # Número de nós a monitorar
-    np = length(nodes_probe) 
 
     # Aloca matriz com os valores a serem monitorados
     target = zeros(ComplexF64,nn,nω)
 
-    # pre-aloca vetor de resposta
-    U = zeros(ComplexF64, nn)
+    # Aloca o vetor de forças 
+    P = zeros(nn)
 
     # Loop pelas frequências
     contador = 1
@@ -104,25 +132,14 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         Vetor_P!(0.0,velocities,coord,connect,P,ω=ω)
 
         # Soluciona apenas para os gls livres do problema
-        U[livres] .= Kd\P[livres]
-
-        # Adiciona ao arquivo
-        Lgmsh_export_nodal_scalar(nome,abs.(U),"Pressão em $f Hz [abs]")
-        
-        # Armazena os resultados na matriz de monitoramento
-        target[:,contador] .= U
-
+        target[livres,contador] .= Kd\P[livres]
+  
         # Incrementa o contador
         contador += 1
 
     end
 
-    # Calcula a função objetivo SPL_w
-    objetivo = Objetivo(target,nodes_target)
-
-    # Calcula a derivada da função objetivo em relação ao vetor γ
-    dΦ = Derivada(ne,nn,γ,connect,K,M,livres,freqs,dfρ,dfκ,nodes_target,target) 
-
-    return target, objetivo, dΦ
+    # Retorna target, K e M
+    return target, K, M
 
 end

@@ -33,6 +33,7 @@ module LSound
     include("otim/main_otim.jl")
     include("otim/objetivo.jl")
     include("otim/adjunto.jl")
+    include("otim/df.jl")
 
     export Analise
 
