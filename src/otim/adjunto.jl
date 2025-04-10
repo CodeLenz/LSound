@@ -12,7 +12,7 @@ function F_adj(nodes_target::Vector{T1},P::Vector{T2}) where {T1,T2}
     # Somatório nas posições de nodes_target
     for p in nodes_target
 
-        F[p] += 2*conj(P[p])
+        F[p] += -2*conj(P[p])
 
     end
 
@@ -68,36 +68,45 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix,
     # Como estamos assumindo que todos os nós target tem o mesmo p0
     P02 = p0^2 
 
-    # Calcula a constante -10/(ln(10)*nt*P02)
-    cte = -10/(log(10)*length(nodes_target))
-
     # Número de frequências
     Nf = length(freqs)
 
+    # Número de nós para monitorar a pressão
+    nt = length(nodes_target)
+
+    # Calcula a constante 10/(ln(10)*nt)
+    cte = 10/(log(10)*nt)
+
     # Define λ fora do loop, para reaproveitar
-    λ = zeros(T2,nn)
+    λn = zeros(T2,nn)
 
     # Loop pelas frequências
     coluna = 1
     for f in freqs
         
         # Converte a freq para rad/s
-        ω = 2*pi*f
+        ωn = 2*pi*f
 
         # Recupera as pressões para essa frequência (coluna de target)
         P = target[:,coluna]
 
         # Monta a matriz de rigidez dinâmica
-        Kd = K[livres,livres]  .- (ω^2)*M[livres,livres]
+        Kd = K[livres,livres]  .- (ωn^2)*M[livres,livres]
 
         # Monta o vetor adjunto para essa frequência
-        F = F_adj(nodes_target,P)
+        Fn = (1/2)*F_adj(nodes_target,P)
+
+        # Calcula o Pn2
+        P2 = sum((abs.(P)).^2)
+
+        # Média (pelo número de pontos em nodes_target)
+        P2avg = P2 / nt
 
         # Escalona F pela cte e pelo Nf
-        F .= F*cte/Nf
+        Fn .= Fn*cte/(P2avg)
         
         # Soluciona o problema adjunto, obtendo λ^n
-        λ[livres] .= Kd[livres,livres]\F[livres]
+        λn[livres] .= Kd[livres,livres]\Fn[livres]
 
         # Loop pelos elementos
         for ele = 1:ne
@@ -112,7 +121,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix,
             pe = P[nos]
 
             # Vetor adjunto nos nós do elemento
-            λe = λ[nos]
+            λe = λn[nos]
 
             # Variável de projeto do elemento
             γe = γ[ele]
@@ -121,19 +130,20 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix,
             dKe, dMe = Derivada_KM(etype,γe,dfρ,dfκ,X)
 
             # Derivada da matriz dinâmica do elemento
-            dKde = dKe - dMe*ω^2  
+            dKde = dKe - dMe*ωn^2  
 
             # Calcula a derivada e sobrepõe na posição do elemento
             d[ele] += 2*real(λe'*dKde*pe)
 
-        end
+        end # Elemento
 
         # Atualiza a coluna em target
         coluna += 1
 
-    end
+    end # Frequência
 
-    # Retorna a derivada
-    return d
+    # Retorna a derivada, lembrando de dividir pelo número de 
+    # frequências
+    return d/Nf
          
 end

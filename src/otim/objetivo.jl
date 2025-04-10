@@ -8,7 +8,7 @@ function SPL(p::Vector,p0)
     nn = length(p)
 
     # Calcula a soma das pressões em nodes_target ao quadrado 
-    P2 = sum(abs.(p).^2)
+    P2 = sum((abs.(p)).^2)
 
     # Média (pelo número de pontos em nodes_target)
     P2avg = P2 / nn
@@ -37,8 +37,11 @@ function Objetivo(target::Matrix, nodes_target::Vector, p0=20E-6)
         soma = soma + SPL(coluna[nodes_target],p0)
     end
 
+    # Número de frequências é o número de colunas em target
+    Nf = size(target,2)
+
     # Retorna o valor médio (média pelo número de frequências)
-    return soma / size(target,2)
+    return soma / Nf
 
 
 end
