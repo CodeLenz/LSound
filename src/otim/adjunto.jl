@@ -12,7 +12,7 @@ function F_adj(nodes_target::Vector{T1},P::Vector{T2}) where {T1,T2}
     # Somatório nas posições de nodes_target
     for p in nodes_target
 
-        F[p] += -2*conj(P[p])
+        F[p] += -conj(P[p])
 
     end
 
@@ -94,7 +94,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix,
         Kd = K[livres,livres]  .- (ωn^2)*M[livres,livres]
 
         # Monta o vetor adjunto para essa frequência
-        Fn = (1/2)*F_adj(nodes_target,P)
+        Fn = F_adj(nodes_target,P)
 
         # Calcula o Pn2
         P2 = sum((abs.(P)).^2)
@@ -133,7 +133,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix,
             dKde = dKe - dMe*ωn^2  
 
             # Calcula a derivada e sobrepõe na posição do elemento
-            d[ele] += 2*real(λe'*dKde*pe)
+            d[ele] += 2*real(transpose(λe)*dKde*pe)
 
         end # Elemento
 
