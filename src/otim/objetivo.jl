@@ -1,17 +1,18 @@
 #
 # Calcula o SPL (Sound Pressure Level) para uma dada distribuição de pressao p
+# equivalente a uma frequência ω_n
 
 #
-function SPL(p::Vector,p0)
+function SPLn(p::Vector,p0)
 
     # Número de pontos 
-    nn = length(p)
+    nt = length(p)
 
     # Calcula a soma das pressões em nodes_target ao quadrado 
     P2 = sum((abs.(p)).^2)
 
     # Média (pelo número de pontos em nodes_target)
-    P2avg = P2 / nn
+    P2avg = P2 / nt
 
     # Como estamos calculando as integrais e as médias por nós, ao invés de 
     # efetivamente considerar comprimentos e áreas, podemos simplificar o P2ref
@@ -34,7 +35,7 @@ function Objetivo(target::Matrix, nodes_target::Vector, p0=20E-6)
     # Para cada linha em target, calcula o SPL
     # Cada coluna em target é p[nodes_target] para uma frequência específica
     for coluna in eachcol(target)
-        soma = soma + SPL(coluna[nodes_target],p0)
+        soma = soma + SPLn(coluna[nodes_target],p0)
     end
 
     # Número de frequências é o número de colunas em target
