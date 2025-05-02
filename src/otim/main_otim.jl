@@ -67,30 +67,33 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     etype = connect[:,1]
     Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
     
-    # Faz o sweep
-    target,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities) 
+    # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
+    # cada coluna é o vetor P para uma frequência de excitação
+    MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities) 
 
     # Gera a visualização 
     # Lgmsh_export_nodal_scalar(nome,abs.(U),"Pressão em $f Hz [abs]") 
 
     # Calcula a função objetivo SPL_w
-    objetivo = Objetivo(target,nodes_target)
+    objetivo = Objetivo(MP,nodes_target)
 
     # Calcula a derivada da função objetivo em relação ao vetor γ
-    dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,dfρ,dfκ,nodes_target,target) 
+    dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,dfρ,dfκ,nodes_target,MP) 
 
     # Vamos validar a derivada usando diferenças finitas
     function f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities)
 
-        target,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities) 
+        MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities) 
 
         # Calcula a função objetivo SPL_w
-        objetivo = Objetivo(target,nodes_target)
+        objetivo = Objetivo(MP,nodes_target)
 
         return objetivo
 
     end
     f(γ) = f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities)
+
+    # Calcula a derivada por DFC
     d_numerica = df(γ,f,1E-8)
     
 
@@ -115,7 +118,7 @@ function Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
     nf = length(freqs)
 
     # Aloca matriz com os valores a serem monitorados
-    target = zeros(ComplexF64,nn,nf)
+    MP = zeros(ComplexF64,nn,nf)
 
     # Aloca o vetor de forças 
     P = Array{Float64}(undef,nn)
@@ -135,14 +138,14 @@ function Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
         Vetor_P!(0.0,velocities,coord,connect,P,ω=ω)
 
         # Soluciona apenas para os gls livres do problema
-        target[livres,contador] .= Kd\P[livres]
+        MP[livres,contador] .= Kd\P[livres]
   
         # Incrementa o contador
         contador += 1
 
     end
 
-    # Retorna target, K e M
-    return target, K, M
+    # Retorna MP, K e M
+    return MP, K, M
 
 end
