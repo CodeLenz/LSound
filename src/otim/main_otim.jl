@@ -109,10 +109,10 @@ function Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
     # C = Matriz_C(nn,damping,coord,connect)
 
     # Número de frequências
-    nω = length(freqs)
+    nf = length(freqs)
 
     # Aloca matriz com os valores a serem monitorados
-    target = zeros(ComplexF64,nn,nω)
+    target = zeros(ComplexF64,nn,nf)
 
     # Aloca o vetor de forças 
     P = zeros(nn)
