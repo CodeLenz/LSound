@@ -68,8 +68,6 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
                   livres::Vector{T1},freqs::Vector{T0}, dfρ::Function, dfκ::Function,
                   nodes_target::Vector{T1},MP::Matrix{T2},p0=20E-6) where {T0,T1,T2}
 
-                  dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,dfρ,dfκ,nodes_target,MP) 
-
     # Define o vetor de derivadas
     d = zeros(ne)
 
@@ -88,6 +86,15 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
     # Define λ fora do loop, para reaproveitar
     λn = zeros(T2,nn)
 
+    # Aloca antes do loop
+    P = MP[:,1]
+
+    # Aloca Fn 
+    Fn = similar(P)
+
+    # Aloca antes do loop
+    Kd = similar(K[livres,livres])
+
     # Loop pelas frequências
     coluna = 1
     for f in freqs
@@ -96,13 +103,13 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
         ωn = 2*pi*f
 
         # Recupera as pressões para essa frequência (coluna de target)
-        P = MP[:,coluna]
+        P .= MP[:,coluna]
 
         # Monta a matriz de rigidez dinâmica
-        Kd = K[livres,livres]  .- (ωn^2)*M[livres,livres]
+        Kd .= K[livres,livres]  .- (ωn^2)*M[livres,livres]
 
         # Monta o vetor adjunto para essa frequência
-        Fn = F_adj(nodes_target,P)
+        Fn .= F_adj(nodes_target,P)
 
         # Calcula o Pn2
         P2 = sum((abs.(P[nodes_target])).^2)
@@ -152,6 +159,6 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
 
     # Retorna a derivada, lembrando de dividir pelo número de 
     # frequências
-    return d/Nf
+    return d./Nf
          
 end

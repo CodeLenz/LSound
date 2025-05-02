@@ -85,11 +85,12 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     f(γ) = f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities)
 
     # Calcula a derivada por DFC
+    println("Entrando em numérica")
     d_numerica = df(γ,f,1E-8)
     
 
-    return target, objetivo, dΦ, d_numerica
-
+    return MP, objetivo, dΦ, d_numerica
+    
 end
 
 #
