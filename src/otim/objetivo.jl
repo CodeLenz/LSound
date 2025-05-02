@@ -25,17 +25,19 @@ end
 
 # Média dos SPL em cada uma das frequências consideradas
 #
+# MP é uma matriz nn × nf com pressões em diferentes frequências
+#
 # p0 é a pressão de referência (20μ Pa)
 #
-function Objetivo(target::Matrix, nodes_target::Vector, p0=20E-6)
+function Objetivo(MP::Matrix, nodes_target::Vector, p0=20E-6)
 
     # Incializa a soma
     soma = 0.0
 
-    # Para cada linha em target, calcula o SPL
-    # Cada coluna em target é p[nodes_target] para uma frequência específica
-    for coluna in eachcol(target)
-        soma = soma + SPLn(coluna[nodes_target],p0)
+    # Para cada coluna em MP, calcula o SPL
+    # Cada coluna em MP é P[nodes_target] para uma frequência específica
+    for P in eachcol(MP)
+        soma = soma + SPLn(P[nodes_target],p0)
     end
 
     # Número de frequências é o número de colunas em target
