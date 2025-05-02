@@ -32,7 +32,7 @@ module LSound
     include("otim/global_otim.jl")
     include("otim/main_otim.jl")
     include("otim/objetivo.jl")
-    include("otim/adjunto.jl")
+    include("otim/sensibilidade.jl")
     include("otim/df.jl")
 
     export Analise
