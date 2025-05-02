@@ -24,6 +24,12 @@ end
 #
 # Calcula a derivada da matriz de rigidez dinâmica
 #
+# et -> tipo de elemento
+# γe -> variável de projeto do elemento
+# dfρ -> função que parametriza a derivada da densidade 
+# dfκ -> função que parametriza a derivada do módulo de compressibilidade
+# X   -> matriz com as coordenadas do elemento 
+#
 function Derivada_KM(et,γe,dfρ::Function,dfκ::Function,X::Array)
 
     # Calcular as derivadas da inversa de ρ e da inversa
@@ -60,7 +66,7 @@ end
 function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix,
                   K::AbstractMatrix{T0},M::AbstractMatrix{T0},
                   livres::Vector{T1},freqs::Vector{T0}, dfρ::Function, dfκ::Function,
-                  nodes_target::Vector{T1},target::Array{T2},p0=20E-6) where {T0,T1,T2}
+                  nodes_target::Vector{T1},MP::Array{T2},p0=20E-6) where {T0,T1,T2}
 
     # Define o vetor de derivadas
     d = zeros(ne)
@@ -88,7 +94,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix,
         ωn = 2*pi*f
 
         # Recupera as pressões para essa frequência (coluna de target)
-        P = target[:,coluna]
+        P = MP[:,coluna]
 
         # Monta a matriz de rigidez dinâmica
         Kd = K[livres,livres]  .- (ωn^2)*M[livres,livres]
