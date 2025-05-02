@@ -18,19 +18,20 @@
 function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
 
     # Evita chamar um .geo
-    if occursin(".geo",meshfile)
-        error("Chamar com .msh..")
-    end
+    occursin(".geo",meshfile) || error("Chamar com .msh..")
+    
+    # Verificamos se existem frequências sendo informadas
+    isempty(freqs) && error("Analise Harmonica:: freqs deve ser um vetor não vazio")
 
+    # Evita passar as frequências como algo diferente de um Vetor de floats
+    isa(freqs,Vector{Float64}) || error("freqs deve ser um vetor de floats")
+    
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
 
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
     # que vai funcionar como nodes_probe aqui
     isempty(nodes_target) && error("Otim:: nodes_target deve ter ao menos um nó informado")
-
-    # Número de nós em nodes_target
-    nt = length(nodes_target)
 
     # Vamos evitar coordenadas negativas 
     for i=1:3  
@@ -46,21 +47,14 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     coord[:,3] ./= scale[3]
 
     # Precisamos de um material
-    if isempty(materials)
-        error("Analise:: at least one material is necessary")
-    end
-
+    isempty(materials) && error("Analise:: at least one material is necessary")
+    
     # Vamos inicializar o vetor de variáveis de projeto toda em 0.0
     # ou seja, ar
     γ = 0.1*rand(ne) #zeros(ne) 
 
     # DOFs livres do problema
     livres = setdiff(collect(1:nn),nodes_open)
-
-    # Verificamos se existem frequências sendo informadas
-    if isempty(freqs)
-        error("Analise Harmonica:: freqs deve ser um vetor não vazio")
-    end
 
     # Inicializa um arquivo de pós-processamento do gmsh
     nome = "otim.pos"
@@ -70,9 +64,6 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
     # cada coluna é o vetor P para uma frequência de excitação
     MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities) 
-
-    # Gera a visualização 
-    # Lgmsh_export_nodal_scalar(nome,abs.(U),"Pressão em $f Hz [abs]") 
 
     # Calcula a função objetivo SPL_w
     objetivo = Objetivo(MP,nodes_target)
