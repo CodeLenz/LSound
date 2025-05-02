@@ -98,7 +98,10 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
 
 end
 
-
+#
+# Realiza uma sequência de análises harmônicas em uma lista de nf 
+# frequências de excitação e guarda a solução em uma matriz nn × nf 
+#
 function Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
 
     # Calcula as matrizes globais
@@ -115,13 +118,13 @@ function Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
     target = zeros(ComplexF64,nn,nf)
 
     # Aloca o vetor de forças 
-    P = zeros(nn)
+    P = Array{Float64}(undef,nn)
 
     # Loop pelas frequências
     contador = 1
     for f in freqs
 
-        # Converte a freq para rad/s
+        # Converte a freq de Hz para rad/s
         ω = 2*pi*f
 
         # Monta a matriz de rigidez dinâmica
