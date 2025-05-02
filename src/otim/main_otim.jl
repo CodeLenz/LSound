@@ -18,7 +18,7 @@
 function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
 
     # Evita chamar um .geo
-    occursin(".geo",meshfile) || error("Chamar com .msh..")
+    occursin(".geo",meshfile) && error("Chamar com .msh..")
     
     # Verificamos se existem frequências sendo informadas
     isempty(freqs) && error("Analise Harmonica:: freqs deve ser um vetor não vazio")
