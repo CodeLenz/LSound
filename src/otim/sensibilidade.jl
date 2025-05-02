@@ -103,7 +103,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix,
         Fn = F_adj(nodes_target,P)
 
         # Calcula o Pn2
-        P2 = sum((abs.(P)).^2)
+        P2 = sum((abs.(P[nodes_target])).^2)
 
         # Média (pelo número de pontos em nodes_target)
         P2avg = P2 / nt
