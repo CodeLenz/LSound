@@ -1,15 +1,15 @@
 #
 # Calcula o SPL (Sound Pressure Level) para uma dada distribuição de pressao p
-# equivalente a uma frequência ω_n
+# equivalente a uma frequência ω_n. O vetor P foi obtido via Sweep
 
 #
-function SPLn(p::Vector,p0)
+function SPLn(P::Vector,p0)
 
     # Número de pontos 
-    nt = length(p)
+    nt = length(P)
 
     # Calcula a soma das pressões em nodes_target ao quadrado 
-    P2 = sum((abs.(p)).^2)
+    P2 = sum((abs.(P)).^2)
 
     # Média (pelo número de pontos em nodes_target)
     P2avg = P2 / nt
