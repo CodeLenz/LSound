@@ -63,10 +63,12 @@ end
 # Calcula a derivada da função objetivo
 # Média simples do SPL em cada frequência
 #
-function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix,
+function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
                   K::AbstractMatrix{T0},M::AbstractMatrix{T0},
                   livres::Vector{T1},freqs::Vector{T0}, dfρ::Function, dfκ::Function,
-                  nodes_target::Vector{T1},MP::Array{T2},p0=20E-6) where {T0,T1,T2}
+                  nodes_target::Vector{T1},MP::Matrix{T2},p0=20E-6) where {T0,T1,T2}
+
+                  dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,dfρ,dfκ,nodes_target,MP) 
 
     # Define o vetor de derivadas
     d = zeros(ne)
