@@ -41,7 +41,7 @@ function Objetivo(MP::Matrix, nodes_target::Vector, p0=20E-6)
     end
 
     # Número de frequências é o número de colunas em target
-    Nf = size(target,2)
+    Nf = size(MP,2)
 
     # Retorna o valor médio (média pelo número de frequências)
     return soma / Nf
