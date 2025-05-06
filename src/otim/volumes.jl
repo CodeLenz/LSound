@@ -1,0 +1,50 @@
+#
+# Retorna um vetor com o volume (ou área se 2D) de cada elemento 
+# da malha
+#
+function Volumes(ne,connect,coord)
+
+    # Inicializa o vetor de saída
+    V = zeros(ne)
+
+    # A primeira coluna em coonect tem o tipo de elemento
+    # 2 -> triangular (linear)
+    # 3 -> quadrangular (linear)
+    #
+    #          3D
+    # 4 -> Tetrahedra (linear)
+    # 5 -> hexaedra (linear)
+    # 7 -> pyramid (linear)
+
+    # Loop em cada elemento, identificado o tipo e chamando a função 
+    # correta
+
+    for ele = 1:ne 
+
+        # Tipo de elemento
+        et = connect[ele,1]
+
+        # Descobre nos, X e Y para este elemento
+        nos, X = Nos_Coordenadas(ele,et,coord,connect) 
+
+        # Calcula a área ou o volume de cada elemento
+        if et==3
+            V = Area_bi4(X)
+        elseif et==2
+            V = Area_tri3(X)
+        elseif et==4
+            error("Volumes::tipo 4 ainda não programado")
+        elseif et==5
+            error("Volumes::tipo 5 ainda não programado")
+        elseif et==7
+            error("Volumes::tipo 7 ainda não programado")    
+        else
+            error("Volumes::Elemento não definido")
+        end
+
+    end #ele
+    
+    # Retorna o vetor com os volumes de cada um dos elementos da malha
+    return V
+
+end

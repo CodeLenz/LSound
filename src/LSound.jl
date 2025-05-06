@@ -4,6 +4,7 @@ module LSound
     using LinearAlgebra
     using SparseArrays
     using StaticArrays
+    using Statistics
     using LinearSolve
     using LinearMaps
     using ArnoldiMethod
@@ -34,6 +35,11 @@ module LSound
     include("otim/objetivo.jl")
     include("otim/sensibilidade.jl")
     include("otim/df.jl")
+    include("otim/volumes.jl")
+    include("otim/centroides.jl")
+    include("otim/vizinhanca.jl")
+    include("otim/filtro_espacial.jl")
+    include("otim/BESO.jl")
 
     export Analise
 

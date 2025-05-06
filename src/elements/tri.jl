@@ -32,7 +32,7 @@
 # Force vector for a bi3 element 
 # local (normal) surface load.
 #
-function Edge_load_local_tri3(edge,qn,X)
+function Edge_load_local_tri3(edge,qn,X::Matrix)
 
     # As we assume cte load
     # and the element is linear
@@ -115,5 +115,20 @@ function Damping_local_tri3(edge,damp,X)
   
   # Return C
   return C
+
+end
+
+#
+# Calcula a área do elemento
+#
+function Area_tri3(X::Matrix)
+
+    # Monta a matriz para o cálculo do determinante
+    MA = @Smatrix    [1 X[1,1] X[1,2] ;
+                      1 X[2,1] X[2,2] ;
+                      1 X[3,1] X[3,2] ]
+
+    # Retorna o determinante
+    det(0.5*MA)
 
 end

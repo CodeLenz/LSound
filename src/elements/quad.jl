@@ -278,3 +278,38 @@ function Damping_local_bi4(edge,damp,X)
     return C
 
 end
+
+
+#
+# Calcula a área do elemento
+#
+function Area_bi4(X::Matrix)
+
+    # Inicializa o somatório da área
+    A = 0.0 
+
+    # Integração por quadratura de Gauss-Legendre
+    pg = (1/sqrt(3))*[-1;1]
+    
+    for i=1:2
+        # Ponto e peso nesta dimensão
+        r = pg[i]
+        
+        for j=1:2
+            # Ponto e peso nesta dimensão
+            s = pg[j]
+        
+            # Calcula a matriz Jacobiana no ponto r,s
+            J = Jacobiana_bi4(r,s,X)
+
+            # Adiciona o determinante do Jacobiano para o ponto
+            A = A + det(J)
+
+        end # j
+
+    end #i
+
+    # Retorna a área
+    return A
+
+end

@@ -89,7 +89,7 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     nodes_target = Int64[]
 
     # Loop over groups
-    for g=1:length(pgnames)
+    for g in LinearIndices(pgnames)
 
       # Name
       name = pgnames[g]
