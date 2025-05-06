@@ -251,16 +251,16 @@ function Damping_local_tet4(face,damp,X)
 end
 
 #
-# Calcula a área do elemento
+# Calcula a volume do elemento
 #
-function Area_tet4(X::Matrix)
+function Volume_tet4(X::Matrix)
 
   # Monta a matriz para o cálculo do determinante
-  MA = @Smatrix    [X[1,1] X[1,2] X[1,3];
+  MV = @Smatrix    [X[1,1] X[1,2] X[1,3];
                     X[2,1] X[2,2] X[2,3];
                     X[3,1] X[3,2] X[3,3]]
 
   # Retorna o determinante
-  det((1/6)*MA)
+  det((1/6)*MV)
 
 end
