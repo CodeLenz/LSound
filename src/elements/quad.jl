@@ -292,11 +292,11 @@ function Area_bi4(X::Matrix)
     pg = (1/sqrt(3))*[-1;1]
     
     for i=1:2
-        # Ponto e peso nesta dimensão
+        # Ponto nesta dimensão
         r = pg[i]
         
         for j=1:2
-            # Ponto e peso nesta dimensão
+            # Ponto nesta dimensão
             s = pg[j]
         
             # Calcula a matriz Jacobiana no ponto r,s

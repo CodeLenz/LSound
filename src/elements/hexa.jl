@@ -322,3 +322,47 @@ function Damping_local_hex8(face,damp,X)
     return C
 
 end
+
+#
+# Calcula a volume do elemento
+#
+function Volume_hex8(X::Matrix)
+
+    # Inicializa o somatório da área
+    V = 0.0 
+
+    # Integração por quadratura de Gauss-Legendre
+    pg = (1/sqrt(3))*[-1;1]
+    wg = ones(2)
+    
+    for i=1:2
+        # Ponto e peso nesta dimensão
+        r = pg[i]
+        wr = wg[i]
+        
+        for j=1:2
+            # Ponto e peso nesta dimensão
+            s = pg[j]
+            ws = wg[j]
+            
+            for k=1:2
+                #Ponto e peso nesta dimensão
+                t = pg[k]
+                wt = wg[k]
+
+                # Calcula a matriz Jacobiana no ponto r,s
+                J = Jacobiana_hex8(r,s,t,X)
+
+                # Adiciona o determinante do Jacobiano para o ponto
+                V = V + det(J)
+
+            end # k
+
+        end # j
+
+    end #i
+
+    # Retorna a área
+    return V
+
+end
