@@ -328,7 +328,7 @@ end
 #
 function Volume_hex8(X::Matrix)
 
-    # Inicializa o somatório da área
+    # Inicializa o somatório do volume
     V = 0.0 
 
     # Integração por quadratura de Gauss-Legendre
@@ -353,7 +353,7 @@ function Volume_hex8(X::Matrix)
                 # Calcula a matriz Jacobiana no ponto r,s
                 J = Jacobiana_hex8(r,s,t,X)
 
-                # Adiciona o determinante do Jacobiano para o ponto
+                # Adiciona o determinante do Jacobiano 
                 V = V + det(J)
 
             end # k
@@ -362,7 +362,7 @@ function Volume_hex8(X::Matrix)
 
     end #i
 
-    # Retorna a área
+    # Retorna o volume
     return V
 
 end
