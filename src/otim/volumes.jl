@@ -33,11 +33,11 @@ function Volumes(ne,connect,coord)
         elseif et==2
             V = Area_tri3(X)
         elseif et==4
-            error("Volumes::tipo 4 ainda não programado")
+            V = Volume_tet4(X)                     #error("Volumes::tipo 4 ainda não programado")
         elseif et==5
-            error("Volumes::tipo 5 ainda não programado")
+            V = Volume_hex8(X)
         elseif et==7
-            error("Volumes::tipo 7 ainda não programado")    
+            V = Volume_pyr5(X)    
         else
             error("Volumes::Elemento não definido")
         end
