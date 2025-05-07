@@ -124,7 +124,7 @@ end
 function Area_tri3(X::Matrix)
 
     # Monta a matriz para o cálculo do determinante
-    MA = @Smatrix    [1 X[1,1] X[1,2] ;
+    MA = @SMatrix    [1 X[1,1] X[1,2] ;
                       1 X[2,1] X[2,2] ;
                       1 X[3,1] X[3,2] ]
 
