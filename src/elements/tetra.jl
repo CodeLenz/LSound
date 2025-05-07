@@ -250,17 +250,47 @@ function Damping_local_tet4(face,damp,X)
 
 end
 
+
 #
 # Calcula a volume do elemento
 #
 function Volume_tet4(X::Matrix)
 
-  # Monta a matriz para o cálculo do determinante
-  MV = @Smatrix    [X[1,1] X[1,2] X[1,3];
-                    X[2,1] X[2,2] X[2,3];
-                    X[3,1] X[3,2] X[3,3]]
+  # Inicializa o somatório do volume
+  V = 0.0 
 
-  # Retorna o determinante
-  det((1/6)*MV)
+  # Integração por quadratura de Gauss-Legendre
+  pg = (1/sqrt(3))*[-1;1]
+  wg = ones(2)
+  
+  for i=1:2
+    # Ponto e peso nesta dimensão
+    r = pg[i]
+    wr = wg[i]
+      
+    for j=1:2
+      # Ponto e peso nesta dimensão
+      s = pg[j]
+      ws = wg[j]
+          
+      for k=1:2
+        #Ponto e peso nesta dimensão 
+        t = pg[k]
+        wt = wg[k]
+
+        # Calcula a matriz Jacobiana no ponto r,s
+        J = Jacobiana_tetra4(r,s,t,X)
+
+        # Adiciona o determinante do Jacobiano 
+        V = V + det(J)
+
+      end # k
+
+    end # j
+
+  end #i
+
+  # Retorna o volume
+  return V/6
 
 end
