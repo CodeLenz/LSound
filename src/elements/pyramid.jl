@@ -156,10 +156,10 @@ function Matriz_N_pyr5(r,s,t)
 #
 # Faces
 # 1) 1 2 3 4 ; <-- Esta face permanece
-# 2) 1 2 5                    2 3 5 ;   <-- Conferir estas faces 
-# 3) 2 3 5                    3 4 5 ;
-# 4) 3 4 5                    4 1 5 ;
-# 5) 4 1 5                    1 2 5 ;
+# 2) 2 3 5 ;   
+# 3) 3 4 5 ;
+# 4) 4 1 5 ;
+# 5) 1 2 5 ;
 # 
 #
 # ######################################################
@@ -244,7 +244,7 @@ end
 
 
 #
-# Force vector for a hex8 element 
+# Force vector for a pyramid element 
 #
 function Face_load_local_pyr5(face,qn,X)
 
@@ -280,5 +280,49 @@ function Damping_local_pyr5(face,damp,X)
   
     # Return C
     return C
+
+end
+
+#
+# Calcula a volume do elemento
+#
+function Volume_pyr5(X::Matrix)
+
+    # Inicializa o somatório do volume
+    V = 0.0 
+
+    # Integração por quadratura de Gauss-Legendre
+    pg = (1/sqrt(3))*[-1;1]
+    wg = ones(2)
+    
+    for i=1:2
+        # Ponto e peso nesta dimensão
+        r = pg[i]
+        wr = wg[i]
+        
+        for j=1:2
+            # Ponto e peso nesta dimensão
+            s = pg[j]
+            ws = wg[j]
+            
+            for k=1:2
+                #Ponto e peso nesta dimensão
+                t = pg[k]
+                wt = wg[k]
+
+                # Calcula a matriz Jacobiana no ponto r,s
+                J = Jacobiana_pyr5(r,s,t,X)
+
+                # Adiciona o determinante do Jacobiano 
+                V = V + det(J)
+
+            end # k
+
+        end # j
+
+    end #i
+
+    # Retorna o volume  ("o volume da pirâmide será igual a 1/3 do volume do hex8")
+    return V/3
 
 end
