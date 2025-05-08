@@ -37,11 +37,17 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Evita passar as frequências como algo diferente de um Vetor de floats
     isa(freqs,Vector{Float64}) || error("freqs deve ser um vetor de floats")
     
+    # Verifica se os arquivos de entrada existem
+    isfile(meshfile) || throw("Otim:: arquivo de entrada $meshfile não existe")
+
+    # Arquivo .yaml
+    arquivo_yaml = meshfile[1:end-3]*"yaml"
+    isfile(arquivo_yaml) || throw("Otim:: arquivo de entrada $(arquivo_yaml) não existe")
+
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
 
     # Le os dados do arquivo yaml
-    aquivo_yaml = meshfile[1:end-3]*"yaml"
     raio_filtro, niter, er = Le_YAML(arquivo_yaml)
 
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,

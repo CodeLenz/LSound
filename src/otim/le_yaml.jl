@@ -10,7 +10,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     #
 
     # Evolution Rate
-    er= 0.01
+    er = 0.01
 
     # Número de iterações 
     niter = 100
@@ -31,13 +31,18 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     end
      
     # Recupera raio do filtro
+    raio = 0.0
     if haskey(dados,"raio")
 
         # recupera como string
         string_raio = dados["raio"]
 
-        # Tenta converter para float
-        raio =  parse(Float64,string_raio)
+        # Se foi informado como string, convertemos
+        if isa(string_raio,String)
+           raio =  parse(Float64,string_raio)
+        else
+           raio = string_raio
+        end
 
         # Testa consistência da informação 
         raio<0 && throw("Le_YAML::raio deve ser >=0") 
@@ -52,9 +57,13 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         # recupera como string
         string_er = dados["er"]
 
-        # Tenta converter para float
-        er =  parse(Float64,string_er)
-
+        # Se foi informado como string, convertemos
+        if isa(string_er,String)
+            er =  parse(Float64,string_er)
+        else
+            er = string_er
+        end
+ 
         # Testa consistência da informação 
         (er<=0||er>=1) && throw("Le_YAML::Evolution Rate raio deve estar em (0,1) ") 
         
@@ -68,9 +77,13 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         # recupera como string
         string_niter = dados["niter"]
 
-        # Tenta converter para Int
-        niter =  parse(Int64,string_niter)
-
+        # Se foi informado como string, convertemos
+        if isa(string_er,String)
+            niter =  parse(Int64,string_niter)
+        else
+            niter = string_niter
+        end
+ 
         # Testa consistência da informação 
         niter>=1 || throw("Le_YAML::Número de iterações deve ser >=1") 
         
@@ -80,6 +93,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
 
 
    # Retorna os dados 
-   return raio_filtro, niter, er 
+   return raio, niter, er 
 
 end
