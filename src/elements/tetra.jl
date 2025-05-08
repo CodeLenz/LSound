@@ -15,7 +15,7 @@
   #
   # Volume do tetraedro
   #
-  function Vol_tet4(X::Array)
+  function Volume_tet4(X::Array)
 
       # Coordinates
       x1,x2,x3,x4 = X[:,1] 
@@ -110,7 +110,7 @@
       # pois B é cte (não depende de r,s,t)
   
       # Volume do tetraedro
-      V = Vol_tet4(X)
+      V = Volume_tet4(X)
 
       # Calcula a matriz B (cte)
       B = Matriz_B_tet4(X)

@@ -21,10 +21,22 @@ function BESO(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64,  tol=1
     # Copia o vetor atual para um novo vetor
     xn = copy(x)
 
+    # Inicializa o volume fora do loop para podermos 
+    # recuperar depois
+    volume = 0.0
+
+    # Contador de iterações do loop de biseção
+    # Se o contador for zero, então não fizemos nenhuma modificação 
+    # na malha
+    contador = 0
+
     # Loop de atualização, mantendo a restrição de volume
     # vamos usar um método de biseção, como no critério de
     # ótimo
     while (D_max - D_min)/D_max > tol
+
+        # Atualiza o contador 
+        contador += 1
 
         # Valor de corte, interpolando pelos valores limites
         corte = (D_min + D_max)/2 
@@ -63,9 +75,9 @@ function BESO(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64,  tol=1
         end
 
     end # while
-
-    # Retorna o novo vetor de variáveis de projeto
-    return xn
+    
+    # Retorna o novo vetor de variáveis de projeto e o contador
+    return xn, contador
 
 end
 

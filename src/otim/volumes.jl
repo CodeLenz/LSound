@@ -29,15 +29,15 @@ function Volumes(ne,connect,coord)
 
         # Calcula a área ou o volume de cada elemento
         if et==3
-            V = Area_bi4(X)
+            V[ele] = Area_bi4(X)
         elseif et==2
-            V = Area_tri3(X)
+            V[ele] = Area_tri3(X)
         elseif et==4
-            V = Volume_tet4(X)                     #error("Volumes::tipo 4 ainda não programado")
+            V[ele] = Volume_tet4(X)
         elseif et==5
-            V = Volume_hex8(X)
+            V[ele] = Volume_hex8(X)
         elseif et==7
-            V = Volume_pyr5(X)    
+            V[ele] = Volume_pyr5(X)    
         else
             error("Volumes::Elemento não definido")
         end

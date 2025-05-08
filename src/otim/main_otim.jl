@@ -1,4 +1,10 @@
 #
+# TODO
+#
+# raio_filtro -> pensar em uma maneira de entrar com este dado
+#
+
+#
 # Rotina principal
 #
 """
@@ -55,14 +61,27 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     isempty(materials) && error("Analise:: at least one material is necessary")
     
     # Calcula a matriz com os centróides de cada elemento da malha
-    centroides = Centroides(ne,connect,coord)
+    @time centroides = Centroides(ne,connect,coord)
+
+    # O raio do filtro
+    # Específico para o problema sala_quadrada.msh
+    # que tem 1 × 1 m^2 de dimensão e tamanho de 
+    # elemento de 1E-2 m 
+    raio_filtro = 4E-2
 
     # Obtém os vizinhos de cada elemento da malha
-    vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro)
+    @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro)
 
-    # Vamos inicializar o vetor de variáveis de projeto toda em 0.0
-    # ou seja, ar
-    γ = zeros(ne)
+    # Vamos inicializar o vetor de variáveis de projeto.
+    # γ = 0 --> ar
+    # γ = 1 --> sólido
+    #
+    # Não podemos começar com todas as posições nulas, pois 
+    # isso vai fazer com que a atualização de volume seja 
+    # 0*(1+er) = sempre zero.
+    # Então, podemos começar com um padrão que seja fisicamente
+    # adequado para o problema em questão.
+    γ = rand(ne)
 
     # DOFs livres do problema
     livres = setdiff(collect(1:nn),nodes_open)
@@ -72,6 +91,9 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     etype = connect[:,1]
     Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
     
+    # Grava a topologia inicial 
+    Lgmsh_export_element_scalar(nome,γ,"Iter 0")
+
     # Começo do loop principal de otimização topológica
 
     # Dados para o BESO
@@ -80,7 +102,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     er = 0.01
 
     # Number of iterations
-    niter = 150
+    niter = 50
 
     # Volume of each element
     V = Volumes(ne,connect,coord)
@@ -94,11 +116,25 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Sensitivity index in the last iteration
     ESED_F_ANT = zeros(ne)
 
+    # Valor médio da sensibilidade (entre duas iterações)
+    ESED_F_media = zeros(ne)
+
+    # Define vol fora do loop para podermos recuperar depois
+    vol = 0.0
+
+    # Monitora o histórico de volume e de SPL ao longo das 
+    # iterações 
+    historico_V   = zeros(niter)
+    historico_SLP = zeros(niter)
+
     #############################  Main loop ###########################
     for iter = 1:niter
 
         # Volume atual da estrutura
         volume_atual = sum(γ.*V)
+
+        # Armazena o volume no histório de volumes
+        historico_V[iter] = volume_atual
 
         # Volume a ser utilizado como limite para esta iteração
         # Este é o principal parâmetro de controle para a estabilidade
@@ -108,8 +144,14 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         elseif volume_atual < Vast
            vol = min(Vast,volume_atual*(1 + er))
         else
-            vol = Vast
+           vol = Vast
         end 
+
+        println("Iteração       ", iter)
+        println("Volume atual   ", volume_atual)
+        println("Volume próxima ", vol)
+        println("Volume target  ", Vast)
+        println()
 
         # Agora podemos calcular a resposta do problema - Equilíbrio
 
@@ -117,25 +159,67 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         # cada coluna é o vetor P para uma frequência de excitação
         MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
 
+        # Calcula o SPL para esta iteração 
+        objetivo = Objetivo(MP,nodes_target)
+
+        # Armazena no historico de SPL
+        historico_SLP[iter] = objetivo
+
         # Calcula a derivada da função objetivo em relação ao vetor γ
         dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,dfρ,dfκ,nodes_target,MP) 
   
+        # Valores extremos da derivada
+        max_dΦ = maximum(dΦ)
+
+        # Se o valor máximo for positivo, transladamos todos os valores para 
+        # ficarem negativos
+        #if max_dΦ > 0 
+        #    dΦ = dΦ .- 1.1*max_dΦ
+        #end
+    
+
+        # Como podemos ter variação de sinal na derivada, devemos tomar cuidado 
+        # com a lógica dos esquemas que funcionam para compliance (derivadas sempre
+        # negativas)
+
         # ESED - Normaliza a derivada do objetivo
-        SN = dΦ ./ V
+        #        e corrige o sinal para a definição do Índice de Sensibilidade
+        SN = -dΦ ./ V
         
         # Filtro de vizinhança espacial
         ESED_F =  Filtro(ne,vizinhos,pesos,SN)
 
         # Mean value using the last iteration
-        ESED_F_media = (ESED_F .+ ESED_F_ANT)./2
+        if iter > 1
+           ESED_F_media .= (ESED_F .+ ESED_F_ANT)./2
+        else
+           ESED_F_media .= ESED_F
+        end
 
         # Store the value for the next iteration
         ESED_F_ANT .= ESED_F_media 
 
         # Update the relative densities
-        ρ = BESO(γ, ESED_F_media, V, vol)
+        γn, niter_beso = BESO(γ, ESED_F_media, V, vol)
+
+        # Se niter_beso for nula, então o problema stagnou
+        if niter_beso==0
+           println("BESO não atualizou as variáveis")
+        end
+
+        # Grava a topologia para visualização 
+        Lgmsh_export_element_scalar(nome,γn,"Iter $iter")
+
+        # Compara a variação de variáveis de projeto
+        # entre as duas iterações
+        println("Variação máxima de γ ", norm(γn-γ,Inf))
+
+        # Atualiza o γ para a próxima iteração 
+        γ .= γn
      
     end # iterações externas
+
+    return historico_V, historico_SLP
 
     # Calcula a função objetivo SPL_w
     # objetivo = Objetivo(MP,nodes_target)

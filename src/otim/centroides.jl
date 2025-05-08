@@ -27,7 +27,7 @@ function Centroides(ne,connect,coord)
         nos, X = Nos_Coordenadas(ele,et,coord,connect) 
 
         # Média em cada uma das dimensões
-        C[ele,:] .= mean(X,dims=1)
+        C[ele,:] .= mean(X,dims=1)'
 
     end #ele
     
