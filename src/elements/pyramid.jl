@@ -117,23 +117,19 @@ function Matriz_N_pyr5(r,s,t)
   
       # Integração por quadratura de Gauss-Legendre
       pg = (1/sqrt(3))*[-1;1]
-      wg = ones(2)
-  
+      
       @inbounds for i=1:2
           # Ponto e peso nesta dimensão
           r = pg[i]
-          wr = wg[i]
-  
+      
           @inbounds for j=1:2
               # Ponto e peso nesta dimensão
               s = pg[j]
-              ws = wg[j]
-
+      
               @inbounds for k=1:2
                 # Ponto e peso nesta dimensão
                 t = pg[k]
-                wt = wg[k]
-
+      
                 # Calcula DJ e B 
                 B, dJ = Matriz_B_pyr5(r,s,t,X)
     
@@ -293,23 +289,19 @@ function Volume_pyr5(X::Matrix)
 
     # Integração por quadratura de Gauss-Legendre
     pg = (1/sqrt(3))*[-1;1]
-    wg = ones(2)
     
     for i=1:2
         # Ponto e peso nesta dimensão
         r = pg[i]
-        wr = wg[i]
         
         for j=1:2
             # Ponto e peso nesta dimensão
             s = pg[j]
-            ws = wg[j]
             
             for k=1:2
                 #Ponto e peso nesta dimensão
                 t = pg[k]
-                wt = wg[k]
-
+    
                 # Calcula a matriz Jacobiana no ponto r,s
                 J = Jacobiana_pyr5(r,s,t,X)
 
