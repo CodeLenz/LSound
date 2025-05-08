@@ -11,6 +11,7 @@ module LSound
     using ProgressMeter
     using DelimitedFiles
     using Lgmsh
+    using YAML
 
     include("parse/parsemsh_daniele.jl")
     include("global/auxiliar.jl")
@@ -29,6 +30,7 @@ module LSound
     include("main.jl")
 
     # Otimização
+    include("otim/le_yaml.jl")
     include("otim/parametrizacao.jl")
     include("otim/global_otim.jl")
     include("otim/main_otim.jl")

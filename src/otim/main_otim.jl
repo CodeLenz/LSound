@@ -40,6 +40,10 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
 
+    # Le os dados do arquivo yaml
+    aquivo_yaml = meshfile[1:end-3]*"yaml"
+    raio_filtro, niter, er = Le_YAML(arquivo_yaml)
+
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
     # que vai funcionar como nodes_probe aqui
     isempty(nodes_target) && error("Otim:: nodes_target deve ter ao menos um nó informado")
@@ -62,12 +66,6 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     
     # Calcula a matriz com os centróides de cada elemento da malha
     @time centroides = Centroides(ne,connect,coord)
-
-    # O raio do filtro
-    # Específico para o problema sala_quadrada.msh
-    # que tem 1 × 1 m^2 de dimensão e tamanho de 
-    # elemento de 1E-2 m 
-    raio_filtro = 4E-2
 
     # Obtém os vizinhos de cada elemento da malha
     @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro)
@@ -95,14 +93,6 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     Lgmsh_export_element_scalar(nome,γ,"Iter 0")
 
     # Começo do loop principal de otimização topológica
-
-    # Dados para o BESO
-
-    # Evolution rate
-    er = 0.01
-
-    # Number of iterations
-    niter = 50
 
     # Volume of each element
     V = Volumes(ne,connect,coord)

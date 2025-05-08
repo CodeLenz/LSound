@@ -1,0 +1,19 @@
+#
+# Dados para a otimização no arquivo sala_quadrada.msh
+#
+
+# Versão do arquivo (opcional)
+versao: 1.0
+
+# Fração de volume (obrigatório)
+volfrac: 0.5
+
+# Raio do filtro (obrigatório)
+raio: 3E-2 
+
+# Evolution rate (valor padrão é 0.01)
+er : 0.01
+
+# Número de iterações de otimização (valor padrão é 100)
+niter: 100
+
