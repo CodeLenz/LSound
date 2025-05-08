@@ -22,12 +22,7 @@
 
 """
 function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
-
-    # Um dos dados de entrada para a otimização é a fração de volume
-    # como γ = 1 é material sólido, vf está dizendo quanto do projeto
-    # final terá de material sódido (1-vf será a quantidade de ar)
-    vf = 0.5
-
+    
     # Evita chamar um .geo
     occursin(".geo",meshfile) && error("Chamar com .msh..")
     
@@ -48,7 +43,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
 
     # Le os dados do arquivo yaml
-    raio_filtro, niter, er = Le_YAML(arquivo_yaml)
+    raio_filtro, niter, er, vf = Le_YAML(arquivo_yaml)
 
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
     # que vai funcionar como nodes_probe aqui
@@ -85,7 +80,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # 0*(1+er) = sempre zero.
     # Então, podemos começar com um padrão que seja fisicamente
     # adequado para o problema em questão.
-    γ = rand(ne)
+    γ = vf*ones(ne)
 
     # DOFs livres do problema
     livres = setdiff(collect(1:nn),nodes_open)

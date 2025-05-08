@@ -12,7 +12,7 @@ volfrac: 0.5
 raio: 3E-2 
 
 # Evolution rate (valor padrão é 0.01)
-er : 0.01
+er : 0.001
 
 # Número de iterações de otimização (valor padrão é 100)
 niter: 100

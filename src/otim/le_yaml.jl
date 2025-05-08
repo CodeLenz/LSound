@@ -91,8 +91,28 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         println("Número de iterações não foi informado no .yaml. Utilizando o valor padrão ", niter)
     end
 
+    # Recupera a fração de volume
+    if haskey(dados,"volfrac")
+
+        # recupera como string
+        string_vf = dados["volfrac"]
+
+        # Se foi informado como string, convertemos
+        if isa(string_vf,String)
+            vf =  parse(Float64,string_vf)
+        else
+            vf = string_vf
+        end
+ 
+        # Testa consistência da informação 
+        (vf<=0||vf>=1) && throw("Le_YAML::Volume fraction deve estar em (0,1) ") 
+        
+    else
+        println("Evolution Rate não foi informado no .yaml. Utilizando o valor padrão ", er)
+    end
+
 
    # Retorna os dados 
-   return raio, niter, er 
+   return raio, niter, er, vf
 
 end
