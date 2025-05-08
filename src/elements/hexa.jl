@@ -256,8 +256,8 @@ function Map_face_hex8(face,ζ,η,X)
         # Determinante do Jacobiano para essa face
         dJ = (A1+A2)/4
          
-         # N
-         N = Matriz_N_hex8(ζ,1,η) 
+        # N
+        N = Matriz_N_hex8(ζ,1,η) 
         
     else 
 
@@ -272,8 +272,8 @@ function Map_face_hex8(face,ζ,η,X)
         # Determinante do Jacobiano para essa face
         dJ = (A1+A2)/4
          
-         # N
-         N = Matriz_N_hex8(-1,ζ,η) 
+        # N
+        N = Matriz_N_hex8(-1,ζ,η) 
 
     end
 
@@ -333,22 +333,18 @@ function Volume_hex8(X::Matrix)
 
     # Integração por quadratura de Gauss-Legendre
     pg = (1/sqrt(3))*[-1;1]
-    wg = ones(2)
     
     for i=1:2
         # Ponto e peso nesta dimensão
         r = pg[i]
-        wr = wg[i]
         
         for j=1:2
             # Ponto e peso nesta dimensão
             s = pg[j]
-            ws = wg[j]
             
             for k=1:2
                 #Ponto e peso nesta dimensão
                 t = pg[k]
-                wt = wg[k]
 
                 # Calcula a matriz Jacobiana no ponto r,s
                 J = Jacobiana_hex8(r,s,t,X)
