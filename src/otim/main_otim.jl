@@ -94,7 +94,6 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Sensitivity index in the last iteration
     ESED_F_ANT = zeros(ne)
 
-     
     #############################  Main loop ###########################
     for iter = 1:niter
 
