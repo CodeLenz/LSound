@@ -41,6 +41,8 @@ module LSound
     include("otim/centroides.jl")
     include("otim/vizinhanca.jl")
     include("otim/filtro_espacial.jl")
+    include("otim/sweep.jl")
+    include("otim/verifica_derivada.jl")
     include("otim/BESO.jl")
 
     export Analise

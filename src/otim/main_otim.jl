@@ -160,7 +160,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,dfρ,dfκ,nodes_target,MP) 
   
         # Valores extremos da derivada
-        max_dΦ = maximum(dΦ)
+        # max_dΦ = maximum(dΦ)
 
         # Se o valor máximo for positivo, transladamos todos os valores para 
         # ficarem negativos
@@ -210,10 +210,24 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
      
     end # iterações externas
 
-    return historico_V, historico_SLP
+    # Roda o sweep na topologia otimizada e exporta para visualização 
+    MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
 
-    # Calcula a função objetivo SPL_w
-    # objetivo = Objetivo(MP,nodes_target)
+    # Número de frequências
+    nf = length(freqs)
+    
+    # Exporta por frequência
+    for i=1:nf
+
+        # frequência
+        f = freqs[i]
+
+        # Exporta
+        Lgmsh_export_nodal_scalar(nome,abs.(MP[:,i]),"Pressão em $f Hz [abs]")
+        
+    end
+
+    return historico_V, historico_SLP
 
 end # main_otim
 
