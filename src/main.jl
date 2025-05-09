@@ -55,7 +55,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     metodo in [:Modal, :Bathe, :Newmark, :Harmonic] || error("Métodos disponíveis são :Modal, :Bathe, :Newmark e :Harmonic")
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, pressures, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
 
     # Vamos evitar coordenadas negativas 
     for i=1:3  

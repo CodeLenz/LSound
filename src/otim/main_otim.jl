@@ -44,7 +44,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     isfile(arquivo_yaml) || throw("Otim:: arquivo de entrada $(arquivo_yaml) não existe")
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, pressures, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
 
     # Le os dados do arquivo yaml
     raio_filtro, niter, er, vf = Le_YAML(arquivo_yaml)
@@ -70,9 +70,11 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     isempty(materials) && error("Analise:: at least one material is necessary")
     
     # Calcula a matriz com os centróides de cada elemento da malha
+    println("Determinando os centróides dos elementos")
     @time centroides = Centroides(ne,connect,coord)
 
     # Obtém os vizinhos de cada elemento da malha
+    println("Determinando a vizinhança para um raio de $(raio_filtro)")
     @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro)
 
     # Vamos inicializar o vetor de variáveis de projeto.
@@ -84,6 +86,8 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # 0*(1+er) = sempre zero.
     # Então, podemos começar com um padrão que seja fisicamente
     # adequado para o problema em questão.
+    println("Inicializando o vetor de variáveis de projeto")
+    println("Utilizando a fração de volume como ponto de partida")
     γ = vf*ones(ne)
 
     # DOFs livres do problema

@@ -5,19 +5,42 @@
 #
 
 using Lgmsh
-
+#
+# Physical groups que esta rotina consegue processar
+#
+#
+# Material,nome,id,dens,c,Z [ surfaces (and volumes) ]
+#
+# Open [ lines and/or nodes and/or surfaces]
+# 
+# Vn,value,freq,phase (in degrees) [ lines and/or nodes and/or surfaces]
+#
+# Pressure,value,freq,phase (in degrees) [ lines and/or nodes and/or surfaces]
+#
+# Yn, value [ lines and/or nodes and/or surfaces]
+#
+# Probe [ lines and/or nodes and/or surfaces]
+#
+#
+# For optimization, there are some specific phisical groups
+#
+# Target [ lines and/or nodes and/or surfaces]
+# 
+#
+# Elementos que estão implementados
+#
+#          2D
+# 2 -> triangular (linear)
+# 3 -> quadrangular (linear)
+#
+#          3D
+# 4 -> Tetrahedra (linear)
+# 5 -> hexaedra (linear)
+# 7 -> pyramid (linear)
+#
+#
 function Parsemsh_Daniele(meshfile::String,verbose=false)
-
-    # Element types to  read
-    #          2D
-    # 2 -> triangular (linear)
-    # 3 -> quadrangular (linear)
-    #
-    #          3D
-    # 4 -> Tetrahedra (linear)
-    # 5 -> hexaedra (linear)
-    # 7 -> pyramid (linear)
-
+ 
     # Primeiro precisamos definir se a malha é 2D ou 3D
     elist = Lgmsh_import_etypes(meshfile)
 
@@ -42,23 +65,7 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     # Read mesh
     nn, coord, ne, etypes, connect, etags = Readmesh(meshfile,et)
 
-    #
-    # Expected/known Physical groups
-    #
-    # Material,nome,id,dens,c,Z [ surfaces (and volumes) ]
-    #
-    # Open [ lines and/or nodes and/or surfaces]
-    # 
-    # Vn,value,freq,phase (in degrees) [ lines and/or nodes and/or surfaces]
-    #
-    # Yn, value [ lines and/or nodes and/or surfaces]
-    #
-    # Probe [ lines and/or nodes and/or surfaces]
-    #
-    # For optimization, there are some specific phisical groups
-    #
-    # Target [ lines and/or nodes and/or surfaces]
-    #
+    # Le todos os grupos físicos do arquivo 
     pgroups, pgnames = Lgmsh_import_physical_groups(meshfile)
 
     # Vector with Dicts of materials
@@ -70,8 +77,14 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     # Vector with Dicts of normal velocities on nodes
     velocities = Dict{String,Union{Float64,Matrix{Int64}}}[]
 
+    # Vector with Dicts of pressure on nodes
+    pressures = Dict{String,Union{Float64,Matrix{Int64}}}[]
+
     # Local dict inside the loop
     localD_vn = Dict{String,Union{Float64,Matrix{Int64}}}()
+
+    # Local dict inside the loop
+    localD_pressure = Dict{String,Union{Float64,Matrix{Int64}}}()
 
     # Vector with Dicts of damping in faces
     damping = Dict{String,Union{Float64,Matrix{Int64}}}[]
@@ -81,6 +94,9 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
 
     # Vector of OPEN nodes
     nodes_open = Int64[]
+
+    # Vector of PRESS nodes
+    nodes_pressure = Int64[]
 
     # Vector of Probe nodes
     nodes_probe = Int64[]
@@ -154,7 +170,7 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
             # Clean dictionary to store local data
             empty!(localD_vn)
 
-            # Pressure, frequency and phase 
+            # Normal velocity, frequency and phase 
             localD_vn["value"] = parse(Float64,st[2])
             localD_vn["freq"]  = parse(Float64,st[3])
             localD_vn["phase"] = parse(Float64,st[4])
@@ -184,6 +200,43 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
 
             # Copy the dict to the vector of velocities
             push!(velocities,copy(localD_vn))
+
+        elseif  occursin("Pressure",st[1])
+
+            # Clean dictionary to store local data
+            empty!(localD_pressure)
+
+            # Pressure, frequency and phase 
+            localD_pressure["value"] = parse(Float64,st[2])
+            localD_pressure["freq"]  = parse(Float64,st[3])
+            localD_pressure["phase"] = parse(Float64,st[4])
+
+            # Find nodes 
+            nodes_pressure = Lgmsh.Readnodesgroup(meshfile,name)
+
+            # If 2D  - Find element and edges
+            # else   - Find element faces
+            # Vamos continuar chamando de edges, mesmo em 3D
+            eleedges = Int64[]
+            edges = Int64[]
+            for tt in et
+                if dimensao==2
+                   eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_pressure)
+                else
+                   eleedges_,edges_ = FindElementsFaces(tt,ne,etypes,connect,nodes_pressure)
+                end
+                if !isempty(eleedges_)
+                    push!(eleedges,eleedges_...)
+                    push!(edges,edges_...)
+                end
+            end
+
+            # Append
+            localD_pressure["elements"] = [eleedges edges]
+
+            # Copy the dict to the vector of pressures
+            push!(pressures,copy(localD_pressure))
+
 
       elseif  occursin("Yn",st[1])
 
@@ -251,6 +304,6 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     end
 
     # Return processed data
-    return nn, coord, ne, connect2, materials2, nodes_open, velocities, damping, nodes_probe, nodes_target
+    return nn, coord, ne, connect2, materials2, nodes_open, velocities, pressures, damping, nodes_probe, nodes_target
 
 end
