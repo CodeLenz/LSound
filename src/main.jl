@@ -55,7 +55,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     metodo in [:Modal, :Bathe, :Newmark, :Harmonic] || error("Métodos disponíveis são :Modal, :Bathe, :Newmark e :Harmonic")
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities, pressures, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
 
     # Vamos evitar coordenadas negativas 
     for i=1:3  
@@ -77,6 +77,28 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
 
     # Calcula as matrizes globais
     K,M = Monta_KM(nn,ne,coord,connect,materials)
+
+    #
+    # TODO: quando tivermos pressures (Pressão imposta), vamos ter que 
+    #       alterar o sistema de equações, gerando um novo vetor de 
+    #       forças. Com isso, temos algumas opções para a solução do sistema
+    #         
+    #       1. Solucionar para livres, como já estamos fazendo agora, mas 
+    #          livres vai ser o setdiff de todos os nós com a UNIÃO de 
+    #          nodes_open com nodes_pressure. Outra modificação importante 
+    #          é que teremos que impor a máscara com os valores de pressão 
+    #          imposta depois de solucionar o sistema. 
+    #
+    #       2. Fazer a jogada de colocar 1.0 na diagonal e resolver o sistema 
+    #          modificado. Neste caso, não aplicamos mais a máscara de livres
+    #
+    #
+    #       IMPORTANTE que a opção 2 não vai funcionar diretamente na análise 
+    #       transiente (temos 3 matrizes para modificar), funcionando somente
+    #       no caso Harmônico.
+    #
+    #
+    #
 
     # DOFs livres do problema
     livres = setdiff(collect(1:nn),nodes_open)
@@ -172,6 +194,12 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
 
             # Monta o vetor de forças, que depende da frequência  
             Vetor_P!(0.0,velocities,coord,connect,P,ω=ω)
+
+            # Aqui devemos implementar a rotina para a imposição de pressões 
+            # no código
+            #
+            # TODO IMPLEMENTAR PRESSÃO IMPOSTA (pressures)
+            #
 
             # Soluciona 
             U[livres] .= Kd\P[livres]

@@ -212,7 +212,7 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
             localD_pressure["phase"] = parse(Float64,st[4])
 
             # Find nodes 
-            nodes_pressure = Lgmsh.Readnodesgroup(meshfile,name)
+            nodes_pressure_local = Lgmsh.Readnodesgroup(meshfile,name)
 
             # If 2D  - Find element and edges
             # else   - Find element faces
@@ -221,9 +221,9 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
             edges = Int64[]
             for tt in et
                 if dimensao==2
-                   eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_pressure)
+                   eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_pressure_local)
                 else
-                   eleedges_,edges_ = FindElementsFaces(tt,ne,etypes,connect,nodes_pressure)
+                   eleedges_,edges_ = FindElementsFaces(tt,ne,etypes,connect,nodes_pressure_local)
                 end
                 if !isempty(eleedges_)
                     push!(eleedges,eleedges_...)
@@ -237,6 +237,8 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
             # Copy the dict to the vector of pressures
             push!(pressures,copy(localD_pressure))
 
+            # Append nodes_pressure_local no vetor com TODOS os nodes_pressure
+            nodes_pressure = vcat(nodes_pressure,nodes_pressure_local)
 
       elseif  occursin("Yn",st[1])
 
@@ -304,6 +306,6 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     end
 
     # Return processed data
-    return nn, coord, ne, connect2, materials2, nodes_open, velocities, pressures, damping, nodes_probe, nodes_target
+    return nn, coord, ne, connect2, materials2, unique!(nodes_open), velocities, unique!(nodes_pressure),pressures, damping, nodes_probe, nodes_target
 
 end
