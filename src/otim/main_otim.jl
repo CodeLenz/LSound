@@ -26,6 +26,11 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Evita chamar um .geo
     occursin(".geo",meshfile) && error("Chamar com .msh..")
     
+    # Define os nomes dos arquivos de entrada (yaml) e de saída
+    # (pos) em função do nome de meshfile
+    arquivo_yaml = meshfile[1:end-3]*"yaml"
+    arquivo_pos  = meshfile[1:end-3]*"pos"
+
     # Verificamos se existem frequências sendo informadas
     isempty(freqs) && error("Analise Harmonica:: freqs deve ser um vetor não vazio")
 
@@ -36,7 +41,6 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     isfile(meshfile) || throw("Otim:: arquivo de entrada $meshfile não existe")
 
     # Arquivo .yaml
-    arquivo_yaml = meshfile[1:end-3]*"yaml"
     isfile(arquivo_yaml) || throw("Otim:: arquivo de entrada $(arquivo_yaml) não existe")
 
     # Le dados da malha
@@ -86,12 +90,11 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     livres = setdiff(collect(1:nn),nodes_open)
 
     # Inicializa um arquivo de pós-processamento do gmsh
-    nome = "otim.pos"
     etype = connect[:,1]
-    Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
+    Lgmsh_export_init(arquivo_pos,nn,ne,coord,etype,connect[:,3:end])
     
     # Grava a topologia inicial 
-    Lgmsh_export_element_scalar(nome,γ,"Iter 0")
+    Lgmsh_export_element_scalar(arquivo_pos,γ,"Iter 0")
 
     # Começo do loop principal de otimização topológica
 
@@ -196,14 +199,11 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         # Se niter_beso for nula, então o problema stagnou
         if niter_beso==0
            println("BESO não atualizou as variáveis")
+           break
         end
 
         # Grava a topologia para visualização 
-        Lgmsh_export_element_scalar(nome,γn,"Iter $iter")
-
-        # Compara a variação de variáveis de projeto
-        # entre as duas iterações
-        println("Variação máxima de γ ", norm(γn-γ,Inf))
+        Lgmsh_export_element_scalar(arquivo_pos,γn,"Iter $iter")
 
         # Atualiza o γ para a próxima iteração 
         γ .= γn
@@ -213,7 +213,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     println("Final da otimização, executando a análise SWEEP na topologia otimizada")
 
     # Roda o sweep na topologia otimizada e exporta para visualização 
-    MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
+    @time MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
 
     # Número de frequências
     nf = length(freqs)
@@ -225,10 +225,11 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         f = freqs[i]
 
         # Exporta
-        Lgmsh_export_nodal_scalar(nome,abs.(MP[:,i]),"Pressão em $f Hz [abs]")
+        Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressão em $f Hz [abs]")
 
     end
 
+    # Retorna o histórico de volume e também o da função objetivo 
     return historico_V, historico_SLP
 
 end # main_otim
