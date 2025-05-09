@@ -53,6 +53,9 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # que vai funcionar como nodes_probe aqui
     isempty(nodes_target) && error("Otim:: nodes_target deve ter ao menos um nó informado")
 
+    # Vamos colocar nodes_target em ordem crescente
+    sort!(nodes_target)
+
     # Vamos evitar coordenadas negativas 
     for i=1:3  
         minx = minimum(coord[:,i])
@@ -90,9 +93,18 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     println("Utilizando a fração de volume como ponto de partida")
     γ = vf*ones(ne)
 
-    # DOFs livres do problema
-    livres = setdiff(collect(1:nn),nodes_open)
+    # Vamos avisar que a análise de sensibilidade ainda não está consideranto
+    # pressões impostas diretamente
+    if !isempty(pressures) 
+      error("Aplicação de Pressure é válida para análise, mas não estamos considerando na otimização")
+    end
 
+    # Concatena nodes_open e nodes_pressure
+    nodes_mask = sort(vcat(nodes_open,nodes_pressure))
+
+    # Posições que não precisam ser calculadas no sistema de equações 
+    livres = setdiff(collect(1:nn),nodes_mask)
+   
     # Inicializa um arquivo de pós-processamento do gmsh
     etype = connect[:,1]
     Lgmsh_export_init(arquivo_pos,nn,ne,coord,etype,connect[:,3:end])
@@ -155,7 +167,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
 
         # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
         # cada coluna é o vetor P para uma frequência de excitação
-        MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
+        MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
         # Calcula o SPL para esta iteração 
         objetivo = Objetivo(MP,nodes_target)
@@ -217,7 +229,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     println("Final da otimização, executando a análise SWEEP na topologia otimizada")
 
     # Roda o sweep na topologia otimizada e exporta para visualização 
-    @time MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities)
+    @time MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
     # Número de frequências
     nf = length(freqs)

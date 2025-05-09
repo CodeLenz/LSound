@@ -16,7 +16,6 @@ function P_pressure(nnos::Int64, K::AbstractArray{T}, pressures::Vector, freq=0.
 
     # O caso mais simples é quando pressures for vazio
     if isempty(pressures)
-        println("P_pressure:: saindo com forças nulas")
         return F
     end
 

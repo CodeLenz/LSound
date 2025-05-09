@@ -25,12 +25,12 @@ Plane Surface(1) = {1};
 Physical Surface("Material,Ar,1,1.21,342.57,400.0") = {1};
 
 // Aplica uma excitação de velocidade normal na parede da esquerda
-// Physical Curve("Vn,1E-3,100.0,0.0") = {4};
+Physical Curve("Vn,1E-3,100.0,0.0") = {4};
 
 // Aplica uma excitação de pressão imposta na parede da esquerda
 // Só para testar a leitura de dados, ainda não implementado no 
 // código
-Physical Curve("Pressure,1E-3,100.0,0.0") = {4};
+// Physical Curve("Pressure,1E-3,100.0,0.0") = {4};
 
 // Nós para monitorar as pressões
 // Vamos monitorar em TODOS os nós
