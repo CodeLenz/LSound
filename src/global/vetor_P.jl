@@ -1,4 +1,10 @@
+ #
  # Rotina que monta o vetor de "forças" para um determinando tempo t
+ # 
+ # Aqui, as "forças" são devidas às velocidades normais aplicadas no 
+ # contorno - campo velocities - 
+ #
+ #
  function Vetor_P!(t,velocities,coord,connect,P;ω=-1.0)
 
     # Zera todo o vetor 

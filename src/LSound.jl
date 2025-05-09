@@ -15,6 +15,7 @@ module LSound
 
     include("parse/parsemsh_daniele.jl")
     include("global/auxiliar.jl")
+    include("global/ebc.jl")
     include("elements/quad.jl")
     include("elements/tri.jl")
     include("elements/hexa.jl")

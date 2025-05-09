@@ -57,8 +57,6 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
 
-    return nodes_pressure, pressures
-
     # Vamos evitar coordenadas negativas 
     for i=1:3  
         minx = minimum(coord[:,i])
@@ -78,7 +76,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     end
 
     # Calcula as matrizes globais
-    K,M = Monta_KM(nn,ne,coord,connect,materials)
+    K, M = Monta_KM(nn,ne,coord,connect,materials)
 
     #
     # TODO: quando tivermos pressures (Pressão imposta), vamos ter que 
@@ -102,8 +100,17 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     #
     #
 
-    # DOFs livres do problema
-    livres = setdiff(collect(1:nn),nodes_open)
+    # Vamos evitar que o usuário utilize pressure com outras análises que não a 
+    # Harmônica
+    if !isempty(pressures) && !(metodo===:Harmonic)
+       error("Aplicação de Pressure é válida somente para análises Harmônicas (e otimização)")
+    end
+
+    # Concatena nodes_open e nodes_pressure
+    nodes_mask = sort(vcat(nodes_open,nodes_pressure))
+
+    # Posições que não precisam ser calculadas no sistema de equações 
+    livres = setdiff(collect(1:nn),nodes_mask)
     
     # Inicializa um arquivo de pós-processamento do gmsh
     if output
@@ -111,6 +118,12 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
         etype = connect[:,1]
         Lgmsh_export_init(nome,nn,ne,coord,etype,connect[:,3:end])
     end
+
+    #
+    # TODO 
+    #
+    # Separar cada análise em um arquivo separado
+    #
 
     ###############################################################
     #                           Modal
@@ -149,10 +162,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     #                       Harmônico e Transiente
     ##############################################################
     
-    # Aloca o vetor de forças (para Harmônico e transiente)
-    P = zeros(nn)
-
-    # E a de amortecimento
+    # Aloca a matriz de amortecimento 
     C = Matriz_C(nn,damping,coord,connect)
  
     ##############################################################
@@ -177,12 +187,18 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
             nodes_probe = livres
             np = length(livres)
         end
+
+        # Garante que nodes_probe está ordenado
+        sort!(nodes_probe)
         
         # Aloca matriz com os valores a serem monitorados
         monitor = zeros(ComplexF64,np,nω)
 
         # pre-aloca vetor de resposta
         U = zeros(ComplexF64, nn)
+
+        # Pre-aloca o vetor de forças 
+        Ph = zeros(ComplexF64,nn)
 
         # Loop pelas frequências
         contador = 1
@@ -192,19 +208,28 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
             ω = 2*pi*f
 
             # Monta a matriz de rigidez dinâmica
-            Kd = K[livres,livres] .+ im*ω*C[livres,livres] .- (ω^2)*M[livres,livres]
+            Kd = K .+ im*ω*C .- (ω^2)*M
 
-            # Monta o vetor de forças, que depende da frequência  
-            Vetor_P!(0.0,velocities,coord,connect,P,ω=ω)
+            # Monta o vetor de forças devido as velocidades normais
+            # nas faces, que dependem da frequência de excitação  
+            # AQUI USA EM RAD/S mesmo
+            Vetor_P!(0.0,velocities,coord,connect,Ph,ω=ω)
 
-            # Aqui devemos implementar a rotina para a imposição de pressões 
-            # no código
+            # Monta o vetor de forças devido às pressões impostas 
+            # 
+            # TODO VER A QUESTÃO DA FREQUÊNCIA
             #
-            # TODO IMPLEMENTAR PRESSÃO IMPOSTA (pressures)
-            #
+            F_P =  P_pressure(nn, Kd, pressures)
 
+            # A "força" total será a soma das duas parcelas
+            Ph += F_P
+            
             # Soluciona 
-            U[livres] .= Kd\P[livres]
+            U[livres] .= Kd[livres,livres]\Ph[livres]
+
+            # Precisamos registrar os valores das pressões impostas em U
+            # TODO VER A QUESTÃO DA FREQUÊNCIA
+            Mask_ebc!(U,pressures)
 
             # Adiciona ao arquivo
             if output
@@ -228,10 +253,12 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     #                       Transiente
     ##############################################################
 
-    # Faz a jogadinha para chamar os integradores no tempo
-    F(t) = Vetor_P!(t,velocities,coord,connect,P)
- 
+    # Pre-aloca o vetor de forças para o caso transiente
+    Pt = zeros(nn)
 
+    # Faz a jogadinha para chamar os integradores no tempo
+    F(t) = Vetor_P!(t,velocities,coord,connect,Pt)
+ 
     # Chama o integrador
     if metodo===:Newmark
 

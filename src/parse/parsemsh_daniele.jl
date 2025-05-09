@@ -4,7 +4,6 @@
 # Daniele (Acoustics)
 #
 
-using Lgmsh
 #
 # Physical groups que esta rotina consegue processar
 #
@@ -20,6 +19,7 @@ using Lgmsh
 # Yn, value [ lines and/or nodes and/or surfaces]
 #
 # Probe [ lines and/or nodes and/or surfaces]
+#
 #
 #
 # For optimization, there are some specific phisical groups
@@ -289,6 +289,6 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     end
 
     # Return processed data
-    return nn, coord, ne, connect2, materials2, unique!(nodes_open), velocities, unique!(nodes_pressure),pressures, damping, nodes_probe, nodes_target
+    return nn, coord, ne, connect2, materials2, unique!(nodes_open), velocities, unique!(nodes_pressure), pressures, damping, nodes_probe, nodes_target
 
 end
