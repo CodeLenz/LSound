@@ -78,13 +78,13 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     velocities = Dict{String,Union{Float64,Matrix{Int64}}}[]
 
     # Vector with Dicts of pressure on nodes
-    pressures = Dict{String,Union{Float64,Matrix{Int64}}}[]
+    pressures = Dict{String,Union{Float64,Vector{Int64}}}[]
 
     # Local dict inside the loop
     localD_vn = Dict{String,Union{Float64,Matrix{Int64}}}()
 
     # Local dict inside the loop
-    localD_pressure = Dict{String,Union{Float64,Matrix{Int64}}}()
+    localD_pressure = Dict{String,Union{Float64,Vector{Int64}}}()
 
     # Vector with Dicts of damping in faces
     damping = Dict{String,Union{Float64,Matrix{Int64}}}[]
@@ -214,25 +214,8 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
             # Find nodes 
             nodes_pressure_local = Lgmsh.Readnodesgroup(meshfile,name)
 
-            # If 2D  - Find element and edges
-            # else   - Find element faces
-            # Vamos continuar chamando de edges, mesmo em 3D
-            eleedges = Int64[]
-            edges = Int64[]
-            for tt in et
-                if dimensao==2
-                   eleedges_,edges_ = FindElementsEdges(tt,ne,etypes,connect,nodes_pressure_local)
-                else
-                   eleedges_,edges_ = FindElementsFaces(tt,ne,etypes,connect,nodes_pressure_local)
-                end
-                if !isempty(eleedges_)
-                    push!(eleedges,eleedges_...)
-                    push!(edges,edges_...)
-                end
-            end
-
             # Append
-            localD_pressure["elements"] = [eleedges edges]
+            localD_pressure["nodes"] = nodes_pressure_local
 
             # Copy the dict to the vector of pressures
             push!(pressures,copy(localD_pressure))

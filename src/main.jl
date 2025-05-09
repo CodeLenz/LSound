@@ -57,6 +57,8 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
 
+    return nodes_pressure, pressures
+
     # Vamos evitar coordenadas negativas 
     for i=1:3  
         minx = minimum(coord[:,i])
