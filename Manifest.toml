@@ -2,7 +2,7 @@
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "80f787e9e17b060ba3f7a34eed57359232e318f1"
+project_hash = "842da875434c6c053a7981b5652d1f17150c926c"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e2478490447631aedba0823d4d7a80b2cc8cdb32"
@@ -66,9 +66,9 @@ version = "0.4.0"
 
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra"]
-git-tree-sha1 = "bebb10cd3f0796dd1429ba61e43990ba391186e9"
+git-tree-sha1 = "9606d7832795cbef89e06a550475be300364a8aa"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "7.18.1"
+version = "7.19.0"
 
     [deps.ArrayInterface.extensions]
     ArrayInterfaceBandedMatricesExt = "BandedMatrices"
@@ -933,9 +933,9 @@ version = "2.87.0"
 
 [[deps.SciMLOperators]]
 deps = ["Accessors", "ArrayInterface", "DocStringExtensions", "LinearAlgebra", "MacroTools"]
-git-tree-sha1 = "05bab217b1f4b504f5a605fe02bc0e9fb92ccf02"
+git-tree-sha1 = "1c4b7f6c3e14e6de0af66e66b86d525cae10ecb4"
 uuid = "c0aeaf25-5076-4817-a8d5-81caf7dfa961"
-version = "0.3.14"
+version = "0.3.13"
 weakdeps = ["SparseArrays", "StaticArraysCore"]
 
     [deps.SciMLOperators.extensions]
@@ -1200,9 +1200,9 @@ version = "5.11.0+0"
 
 [[deps.libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "068dfe202b0a05b8332f1e8e6b4080684b9c7700"
+git-tree-sha1 = "002748401f7b520273e2b506f61cab95d4701ccf"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
-version = "1.6.47+0"
+version = "1.6.48+0"
 
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
