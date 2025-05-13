@@ -3,7 +3,7 @@
 //
 
 // Element size
-lc = 1e-2;
+lc = 1e-1;
 
 // Corners
 Point(1) = { 0, 0,   0, lc};
@@ -30,7 +30,7 @@ Physical Surface("Material,Ar,1,1.21,342.57,400.0") = {1};
 // Aplica uma excitação de pressão imposta na parede da esquerda
 // Só para testar a leitura de dados, ainda não implementado no 
 // código
-Physical Curve("Pressure,1E-3,100.0,0.0") = {4};
+Physical Curve("Pressure,-1E-3,100.0,0.0") = {4};
 
 // Nós para monitorar as pressões
 // Vamos monitorar em TODOS os nós

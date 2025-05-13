@@ -26,6 +26,8 @@
 #
 # Target [ lines and/or nodes and/or surfaces]
 # 
+# Fixed, value [surfaces or volumes]
+#
 #
 # Elementos que estão implementados
 #
@@ -104,6 +106,13 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     # Vector of Target nodes
     nodes_target = Int64[]
 
+    # Vector with fixed elements
+    elements_fixed = Int64[]
+
+    # Vector with the values for the 
+    # fixed elements
+    values_fixed = Float64[]
+
     # Loop over groups
     for g in LinearIndices(pgnames)
 
@@ -140,6 +149,24 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
 
             # Copy the dict to the vector of materials
             push!(materials,copy(localD_m))
+
+      # Check if Fixed
+      elseif occursin("Fixed",st[1])
+
+            # Valor a ser fixado
+            value   = parse(Float64,st[2])
+                
+            # Now we must find wich elements are associated to this group
+            elems_domain = Lgmsh.Readelementsgroup(meshfile,name,etags)
+
+            # Adiciona os elementos ao vetor de elementos fixos
+            elements_fixed = vcat(elements_fixed,sort(elems_domain))
+
+            # E grava os valores fixos na sequência
+            fixos = value*ones(length(elems_domain))
+
+            # E concatena com o vetor de valores dos elementos fixos
+            values_fixed = vcat(values_fixed,fixos)
 
       elseif  occursin("Open",st[1])
 
@@ -289,6 +316,7 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     end
 
     # Return processed data
-    return nn, coord, ne, connect2, materials2, unique!(nodes_open), velocities, unique!(nodes_pressure), pressures, damping, nodes_probe, nodes_target
+    return nn, coord, ne, connect2, materials2, unique!(nodes_open), velocities, unique!(nodes_pressure), 
+           pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed
 
 end

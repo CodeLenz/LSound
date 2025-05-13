@@ -1,6 +1,16 @@
 #
 # Rotina principal
 #
+
+# TODO Revisar Modal e Transiente com a aplicação de pressão imposta 
+#
+# Atualmente, :Modal está utilizando tanto OPEN quanto Pressure como livres,
+#             ou seja, estes nós estão fora da análise modal (e são tratados)
+#             como OPEN...
+#
+# Transiente não está sequer considerando Pressure <= pensar bem e arrumar
+#
+
 """
  Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,
          γ = 1/2, β = 1/4, δ  = 1/4, β1 = 1/3,  β2 = 2/3,
@@ -55,7 +65,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     metodo in [:Modal, :Bathe, :Newmark, :Harmonic] || error("Métodos disponíveis são :Modal, :Bathe, :Newmark e :Harmonic")
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed = Parsemsh_Daniele(meshfile)
 
     # Vamos evitar coordenadas negativas 
     for i=1:3  
@@ -81,7 +91,9 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     # Vamos evitar que o usuário utilize pressure com outras análises que não a 
     # Harmônica
     if !isempty(pressures) && !(metodo===:Harmonic)
-       error("Aplicação de Pressure é válida somente para análises Harmônicas (e otimização)")
+       println("******************************************************************************")
+       println("Aplicação de Pressure é válida somente para análises Harmônicas (e otimização)")
+       println("******************************************************************************")
     end
 
     # Concatena nodes_open e nodes_pressure

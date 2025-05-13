@@ -44,7 +44,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     isfile(arquivo_yaml) || throw("Otim:: arquivo de entrada $(arquivo_yaml) não existe")
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target = Parsemsh_Daniele(meshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed = Parsemsh_Daniele(meshfile)
 
     # Le os dados do arquivo yaml
     raio_filtro, niter, er, vf = Le_YAML(arquivo_yaml)
@@ -92,6 +92,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     println("Inicializando o vetor de variáveis de projeto")
     println("Utilizando a fração de volume como ponto de partida")
     γ = vf*ones(ne)
+    γ = rand(ne)
 
     # Vamos avisar que a análise de sensibilidade ainda não está consideranto
     # pressões impostas diretamente
@@ -181,7 +182,14 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         # Verifica por DF
         dnum = Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
 
-        return dΦ, dnum
+        # Relativo
+        rel = (dΦ.-dnum)./dnum
+      
+        Lgmsh_export_element_scalar(arquivo_pos,dΦ,"Analitica")
+        Lgmsh_export_element_scalar(arquivo_pos,dnum,"Numerica")
+        Lgmsh_export_element_scalar(arquivo_pos,rel,"relativa")
+
+        return dΦ, dnum, rel 
 
         # Valores extremos da derivada
         # max_dΦ = maximum(dΦ)

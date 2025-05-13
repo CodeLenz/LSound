@@ -19,7 +19,7 @@ function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocitie
 
     # Calcula a derivada por DFC
     println("Entrando em numérica")
-    d_numerica = df(γ,f,1E-8)
+    d_numerica = df(γ,f,1E-6)
 
 end
 
