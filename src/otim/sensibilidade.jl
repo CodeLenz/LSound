@@ -83,6 +83,9 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
     # Calcula a constante 10/(ln(10)*nt)
     cte = 10/(log(10)*nt)
 
+    # Calcula as matrizes globais < -- precisa ou já temos essa informação?
+    K,M = Monta_KM2(ne,coord,connect,γ,fρ,fκ)
+
     # Define λ fora do loop, para reaproveitar
     λn = zeros(T2,nn)
 
@@ -123,6 +126,12 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
         # Soluciona o problema adjunto, obtendo λ^n
         λn[livres] .= Kd[livres,livres]\Fn[livres]
 
+        # Monta a matriz de rigidez dinâmica sem a aplicação da máscara livres 
+        Kdn = K  .- (ω^2)*M
+
+        # Forças devido as pressoes impostas 
+        fp =  P_pressure(nn, Kdn, pressures)
+
         # Loop pelos elementos
         for ele = 1:ne
 
@@ -141,14 +150,20 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
             # Variável de projeto do elemento
             γe = γ[ele]
 
+            # Pressão aplicada nos nós do elemento 
+            fpe = fp[nos]
+
             # Calcula a derivada da rigidez dinâmica do elemento
             dKe, dMe = Derivada_KM(etype,γe,dfρ,dfκ,X)
 
             # Derivada da matriz dinâmica do elemento
             dKde = dKe - dMe*ωn^2  
 
+            # Derivada de Fn [dFn/dγm]
+            dfn = fpe * (dKe - dMe*ωn^2)
+
             # Calcula a derivada e sobrepõe na posição do elemento
-            d[ele] += 2*real(transpose(λe)*dKde*pe)
+            d[ele] += 2*real(transpose(λe)*dKde*pe) -  2*real(transpose(λe)*dfn)
 
         end # Elemento
 

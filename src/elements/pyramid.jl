@@ -1,6 +1,4 @@
 #
-# Ainda falta testar!
-
 # Devolve a matriz [N] para um  ponto r,s,t
 #
 function Matriz_N_pyr5(r,s,t)
@@ -105,7 +103,6 @@ function Matriz_N_pyr5(r,s,t)
   
   end
   
- 
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
@@ -119,15 +116,15 @@ function Matriz_N_pyr5(r,s,t)
       pg = (1/sqrt(3))*[-1;1]
       
       @inbounds for i=1:2
-          # Ponto e peso nesta dimensão
+          # Ponto nesta dimensão
           r = pg[i]
       
           @inbounds for j=1:2
-              # Ponto e peso nesta dimensão
+              # Ponto nesta dimensão
               s = pg[j]
       
               @inbounds for k=1:2
-                # Ponto e peso nesta dimensão
+                # Ponto nesta dimensão
                 t = pg[k]
       
                 # Calcula DJ e B 
@@ -149,17 +146,13 @@ function Matriz_N_pyr5(r,s,t)
   end
   
 
-#
+# ######################################################
 # Faces
-# 1) 1 2 3 4 ; <-- Esta face permanece
+# 1) 1 2 3 4 ; <-- Esta face permanece do hex8
 # 2) 2 3 5 ;   
 # 3) 3 4 5 ;
 # 4) 4 1 5 ;
 # 5) 1 2 5 ;
-# 
-#
-# ######################################################
-#
 # ######################################################
 function Map_face_pyr5(face,ζ,η,X)
 
@@ -189,7 +182,7 @@ function Map_face_pyr5(face,ζ,η,X)
         v15 = @SVector [X[5,1] - X[1,1] ;  X[5,2] - X[1,2]; X[5,3] - X[1,3]]
         A1 = 0.5*norm(cross(v12,v15))
 
-        # Determinante do Jacobiano para essa face <-- Conferir 
+        # Determinante do Jacobiano para essa face
         dJ = A1/2
         
         # N
@@ -237,7 +230,6 @@ function Map_face_pyr5(face,ζ,η,X)
     return N, dJ
 
 end
-
 
 #
 # Force vector for a pyramid element 
@@ -291,15 +283,15 @@ function Volume_pyr5(X::Matrix)
     pg = (1/sqrt(3))*[-1;1]
     
     for i=1:2
-        # Ponto e peso nesta dimensão
+        # Ponto nesta dimensão
         r = pg[i]
         
         for j=1:2
-            # Ponto e peso nesta dimensão
+            # Ponto nesta dimensão
             s = pg[j]
             
             for k=1:2
-                #Ponto e peso nesta dimensão
+                #Ponto nesta dimensão
                 t = pg[k]
     
                 # Calcula a matriz Jacobiana no ponto r,s

@@ -72,7 +72,7 @@ function Matriz_N_hex8(r,s,t)
   end
   
   #
-  # Monta a matriz B de um elemento na posiçao r,s
+  # Monta a matriz B de um elemento na posição r,s
   #
   function Matriz_B_hex8(r,s,t,X::Array)
   
@@ -154,8 +154,7 @@ function Matriz_N_hex8(r,s,t)
   
   end
   
-
-#
+# ######################################################
 # Faces
 # 1) 1 2 3 4 ;
 # 2) 5 6 7 8 ;
@@ -163,14 +162,6 @@ function Matriz_N_hex8(r,s,t)
 # 4) 2 3 7 6 ;
 # 5) 4 3 7 8 ;
 # 6) 1 4 8 5 
-#
-# ######################################################
-#
-# Determinante do Jacobiano estava completamente errado 
-# 
-# Revisar para termos um cálculo mais geral por corrdenada
-# normalizada
-#
 # ######################################################
 function Map_face_hex8(face,ζ,η,X)
 
@@ -335,15 +326,15 @@ function Volume_hex8(X::Matrix)
     pg = (1/sqrt(3))*[-1;1]
     
     for i=1:2
-        # Ponto e peso nesta dimensão
+        # Ponto nesta dimensão
         r = pg[i]
         
         for j=1:2
-            # Ponto e peso nesta dimensão
+            # Ponto nesta dimensão
             s = pg[j]
             
             for k=1:2
-                #Ponto e peso nesta dimensão
+                #Ponto nesta dimensão
                 t = pg[k]
 
                 # Calcula a matriz Jacobiana no ponto r,s

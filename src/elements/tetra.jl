@@ -95,7 +95,6 @@
 
   end
   
- 
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #

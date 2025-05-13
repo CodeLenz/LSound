@@ -87,7 +87,6 @@ function Matriz_N_bi4(r,s)
   
   end
   
- 
   #
   # Calcula as matrizes Ke e Me para um elemento 
   #
@@ -128,9 +127,8 @@ function Matriz_N_bi4(r,s)
   
   end
   
-  
 
-  #
+# ######################################################
 #    Edges, normals and tangents
 #
 #               n
@@ -144,7 +142,7 @@ function Matriz_N_bi4(r,s)
 #           n
 #
 #
-#
+# ######################################################
 function Map_edge_bi4(edge,ζ,X)
 
     # Basic test

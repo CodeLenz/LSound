@@ -53,7 +53,7 @@
         nos,X = Nos_Coordenadas(ele,et,coord,connect)
 
         # value
-        val =  -qn
+        val = -qn
 
         # Local vector 
         if et==3
@@ -71,7 +71,7 @@
         end
 
         # Add to the global vector
-        P[nos] .+=  Pn
+        P[nos] .+= Pn
 
       end #i
  

@@ -1,14 +1,18 @@
-#
-#
+# 
+# Exemplo do wolframalpha ("aplicamos no meio de uma sala")
+# 
 function Gauss(x,y,cx=0.5,cy=0.5,b=0.2)
     exp(-(x-cx)^2/b^2)*exp(-(y-cy)^2/b^2)
 end
 
+#
+# Nula
+#
 function Zero(x,y)
     0.0
 end
 
-
+#
 # Degrau com centro em (xc,yx)
 # base b e altura h
 function Degrau(x,y,xc,yc,b,h)

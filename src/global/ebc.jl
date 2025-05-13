@@ -1,6 +1,6 @@
-
 #
-# Calcula o vetor de "forças" devio à aplicação das condições de contorno 
+#
+# Calcula o vetor de "forças" devido à aplicação das condições de contorno 
 # de pressão 
 # 
 # A matriz K deve ser a matriz sem a aplicação da máscara livres 
