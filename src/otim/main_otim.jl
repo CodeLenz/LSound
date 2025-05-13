@@ -95,9 +95,9 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
 
     # Vamos avisar que a análise de sensibilidade ainda não está consideranto
     # pressões impostas diretamente
-    if !isempty(pressures) 
-      error("Aplicação de Pressure é válida para análise, mas não estamos considerando na otimização")
-    end
+    #if !isempty(pressures) 
+    #  error("Aplicação de Pressure é válida para análise, mas não estamos considerando na otimização")
+    #end
 
     # Concatena nodes_open e nodes_pressure
     nodes_mask = sort(vcat(nodes_open,nodes_pressure))
@@ -176,8 +176,13 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         historico_SLP[iter] = objetivo
 
         # Calcula a derivada da função objetivo em relação ao vetor γ
-        dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,dfρ,dfκ,nodes_target,MP) 
+        dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP) 
   
+        # Verifica por DF
+        dnum = Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
+
+        return dΦ, dnum
+
         # Valores extremos da derivada
         # max_dΦ = maximum(dΦ)
 

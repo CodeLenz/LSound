@@ -2,12 +2,12 @@
 #
 # Programar depois para fazer a validação das derivadas por DFC
 #
-function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities)
+function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
     
     # Vamos validar a derivada usando diferenças finitas
-    function f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities)
+    function f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
 
-        MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities) 
+        MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures) 
 
         # Calcula a função objetivo SPL_w
         objetivo = Objetivo(MP,nodes_target)
@@ -15,7 +15,7 @@ function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocitie
         return objetivo
 
     end
-    f(γ) = f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities)
+    f(γ) = f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
 
     # Calcula a derivada por DFC
     println("Entrando em numérica")

@@ -78,28 +78,6 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     # Calcula as matrizes globais
     K, M = Monta_KM(nn,ne,coord,connect,materials)
 
-    #
-    # TODO: quando tivermos pressures (Pressão imposta), vamos ter que 
-    #       alterar o sistema de equações, gerando um novo vetor de 
-    #       forças. Com isso, temos algumas opções para a solução do sistema
-    #         
-    #       1. Solucionar para livres, como já estamos fazendo agora, mas 
-    #          livres vai ser o setdiff de todos os nós com a UNIÃO de 
-    #          nodes_open com nodes_pressure. Outra modificação importante 
-    #          é que teremos que impor a máscara com os valores de pressão 
-    #          imposta depois de solucionar o sistema. 
-    #
-    #       2. Fazer a jogada de colocar 1.0 na diagonal e resolver o sistema 
-    #          modificado. Neste caso, não aplicamos mais a máscara de livres
-    #
-    #
-    #       IMPORTANTE que a opção 2 não vai funcionar diretamente na análise 
-    #       transiente (temos 3 matrizes para modificar), funcionando somente
-    #       no caso Harmônico.
-    #
-    #
-    #
-
     # Vamos evitar que o usuário utilize pressure com outras análises que não a 
     # Harmônica
     if !isempty(pressures) && !(metodo===:Harmonic)

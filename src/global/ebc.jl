@@ -111,8 +111,6 @@ function Mask_ebc!(P::Vector{T},pressures,freq=0.0) where T
            # Aplica o valor 
            P[nodes] .= press
 
-           println("Aplicando $press nos nós ",nodes)
-
         end #if 
 
     end # p 
