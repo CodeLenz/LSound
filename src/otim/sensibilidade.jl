@@ -149,10 +149,10 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
             dKde = dKe - dMe*ωn^2  
 
             # Derivada de Fn [dFn/dγm]
-            dfn =  Derivada_forca_pressao(nos,pressures,dKde)
+            dFp =  Derivada_forca_pressao(nos,pressures,dKde)
 
             # Calcula a derivada e sobrepõe na posição do elemento
-            d[ele] += 2*real(transpose(λe)*dKde*pe) -  2*real(transpose(λe)*dfn)
+            d[ele] += 2*real(transpose(λe)*dKde*pe) #-  2*real(transpose(λe)*dFp)
 
         end # Elemento
 
@@ -176,6 +176,7 @@ end
 function Derivada_forca_pressao(nos::Vector,pressures::Vector,dKde::AbstractMatrix)
 
      # Aloca o vetor de saída
+     # com a dimensão do número de nós do elemento
      dF = zeros(ComplexF64,length(nos))
 
      # Loop pelas entradas de pressures
