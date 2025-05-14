@@ -13,13 +13,13 @@ struct Mesh
     connect::Matrix{Int64}
 
     # Vector of Dictionaries with material data
-    materials::Vector{Dict{String,Union{Float64,Int64,Vector{Int64}}}}
+    materials::Matrix{Float64}
 
     # Vector with open nodes (zero pressure)
     nodes_open::Vector{Int64}
 
     # Vector with Dicts of normal velocities on nodes
-    velocities = Vector{Dict{String,Union{Float64,Matrix{Int64}}}}
+    velocities::Vector{Dict{String,Union{Float64,Matrix{Int64}}}}
 
     # Vector of nodes with prescribed pressures 
     nodes_pressure::Vector{Int64}
