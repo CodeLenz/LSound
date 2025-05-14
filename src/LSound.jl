@@ -13,6 +13,9 @@ module LSound
     using Lgmsh
     using YAML
 
+    # Main structure for mesh 
+    include("mesh.jl")
+
     include("parse/parsemsh_daniele.jl")
     include("global/auxiliar.jl")
     include("global/ebc.jl")
