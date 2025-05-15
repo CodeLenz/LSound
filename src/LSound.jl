@@ -36,6 +36,7 @@ module LSound
     # Otimização
     include("otim/le_yaml.jl")
     include("otim/parametrizacao.jl")
+    include("otim/fixos.jl")
     include("otim/global_otim.jl")
     include("otim/main_otim.jl")
     include("otim/objetivo.jl")

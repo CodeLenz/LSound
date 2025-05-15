@@ -46,6 +46,10 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed = Parsemsh_Daniele(meshfile)
 
+    # Sala quadrada com discretização 10 × 10
+    #elements_fixed = [ 34; 36; 84; 85; 78; 66; 27; 58; 62; 97] 
+    #values_fixed   = 1E-3*ones(10)
+
     # Le os dados do arquivo yaml
     raio_filtro, niter, er, vf = Le_YAML(arquivo_yaml)
 
@@ -91,9 +95,11 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # adequado para o problema em questão.
     println("Inicializando o vetor de variáveis de projeto")
     println("Utilizando a fração de volume como ponto de partida")
-    γ = vf*ones(ne)
-    γ = rand(ne)
-
+    γ = vf*ones(ne) + 1E-2*randn(ne)
+    
+    # Fixa os valores prescritos de densidade relativa
+    Fix_γ!(γ,elements_fixed,values_fixed)
+    
     # Vamos avisar que a análise de sensibilidade ainda não está consideranto
     # pressões impostas diretamente
     #if !isempty(pressures) 
@@ -179,17 +185,20 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         # Calcula a derivada da função objetivo em relação ao vetor γ
         dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP) 
   
+        # Zera a derivada dos elementos fixos
+        Fix_D!(dΦ,elements_fixed)
+
         # Verifica por DF
-        dnum = Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
+        # dnum = Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
 
         # Relativo
-        rel = (dΦ.-dnum)./dnum
+        # rel = (dΦ.-dnum)./dnum
       
-        Lgmsh_export_element_scalar(arquivo_pos,dΦ,"Analitica")
-        Lgmsh_export_element_scalar(arquivo_pos,dnum,"Numerica")
-        Lgmsh_export_element_scalar(arquivo_pos,rel,"relativa")
+        # Lgmsh_export_element_scalar(arquivo_pos,dΦ,"Analitica")
+        # Lgmsh_export_element_scalar(arquivo_pos,dnum,"Numerica")
+        # Lgmsh_export_element_scalar(arquivo_pos,rel,"relativa")
 
-        return dΦ, dnum, rel 
+        # return dΦ, dnum, rel 
 
         # Valores extremos da derivada
         # max_dΦ = maximum(dΦ)
@@ -212,6 +221,9 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         # Filtro de vizinhança espacial
         ESED_F =  Filtro(ne,vizinhos,pesos,SN)
 
+        # Zera os valores fixos
+        Fix_D!(ESED_F,elements_fixed)
+
         # Mean value using the last iteration
         if iter > 1
            ESED_F_media .= (ESED_F .+ ESED_F_ANT)./2
@@ -224,6 +236,9 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
 
         # Update the relative densities
         γn, niter_beso = BESO(γ, ESED_F_media, V, vol)
+
+        # Garante que os elementos fixos não tenham sido alterados
+        Fix_γ!(γn,elements_fixed,values_fixed)
 
         # Se niter_beso for nula, então o problema stagnou
         if niter_beso==0

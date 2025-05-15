@@ -11,10 +11,17 @@ function df(γ0::Vector,f::Function, δ=1E-6)
         
         # Perturba para frente
         γ0[i] = γe + δ
+        if γ0[i]>=1.0  
+           error("variável não pode passar de 1.") 
+        end
         ff    = f(γ0)
 
         # Perturba para trás
         γ0[i] = γe - δ
+        if γ0[i]<=0  
+            error("variável não pode ser menor do que zero") 
+         end
+         
         ft    = f(γ0)
 
         # Aproxima a derivada

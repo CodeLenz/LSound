@@ -43,7 +43,7 @@ function P_pressure(nnos::Int64, K::AbstractArray{T}, pressures::Vector, freq=0.
            # Loop pelos nós, calculando a contribuição 
            # da pressão no vetor de forças 
            for node in nodes
-              
+ 
               F .-= K[:,node]*press
 
            end # node
