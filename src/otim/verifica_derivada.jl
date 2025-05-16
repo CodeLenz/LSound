@@ -18,7 +18,6 @@ function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocitie
     f(γ) = f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
 
     # Calcula a derivada por DFC
-    println("Entrando em numérica")
     d_numerica = df(γ,f,1E-6)
 
 end

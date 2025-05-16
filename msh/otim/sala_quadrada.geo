@@ -3,7 +3,9 @@
 //
 
 // Element size
-lc = 1e-2;
+// lc = 1e-2;
+// Para validar as derivadas
+lc = 5E-2;
 
 // Corners
 Point(1) = { 0, 0,   0, lc};
@@ -34,7 +36,7 @@ Physical Curve("Vn,1E-3,100.0,0.0") = {4};
 
 // Nós para monitorar as pressões
 // Vamos monitorar em TODOS os nós
-Physical Surface("Probe") = {1};
+// Physical Surface("Probe") = {1};
 
 // Nós para monitorar a SPL
 Physical Curve("Target") = {2};

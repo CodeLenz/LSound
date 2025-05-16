@@ -14,6 +14,8 @@
 
  meshfile -> arquivo de entrada (.msh)
 
+ verifica_derivada -> bool 
+
  scale -> [1.0 ; 1.0 ; 1.0] scale to apply to the geometry (1.0 meter)
 
 
@@ -21,7 +23,7 @@
 
 
 """
-function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
+function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;1.0;1.0])
     
     # Evita chamar um .geo
     occursin(".geo",meshfile) && error("Chamar com .msh..")
@@ -38,10 +40,10 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     isa(freqs,Vector{Float64}) || error("freqs deve ser um vetor de floats")
     
     # Verifica se os arquivos de entrada existem
-    isfile(meshfile) || throw("Otim:: arquivo de entrada $meshfile não existe")
+    isfile(meshfile) || error("Otim:: arquivo de entrada $meshfile não existe")
 
     # Arquivo .yaml
-    isfile(arquivo_yaml) || throw("Otim:: arquivo de entrada $(arquivo_yaml) não existe")
+    isfile(arquivo_yaml) || error("Otim:: arquivo de entrada $(arquivo_yaml) não existe")
 
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed = Parsemsh_Daniele(meshfile)
@@ -76,13 +78,19 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Precisamos de um material
     isempty(materials) && error("Analise:: at least one material is necessary")
     
-    # Calcula a matriz com os centróides de cada elemento da malha
-    println("Determinando os centróides dos elementos")
-    @time centroides = Centroides(ne,connect,coord)
 
-    # Obtém os vizinhos de cada elemento da malha
-    println("Determinando a vizinhança para um raio de $(raio_filtro)")
-    @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro)
+    # Não precisamos do centróide e de vizinhança se for para verificar a derivada
+    if !verifica_derivada
+    
+         # Calcula a matriz com os centróides de cada elemento da malha
+         println("Determinando os centróides dos elementos")
+         @time centroides = Centroides(ne,connect,coord)
+
+         # Obtém os vizinhos de cada elemento da malha
+         println("Determinando a vizinhança para um raio de $(raio_filtro)")
+         @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro)
+
+    end
 
     # Vamos inicializar o vetor de variáveis de projeto.
     # γ = 0 --> ar
@@ -108,7 +116,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
 
     # Concatena nodes_open e nodes_pressure
     nodes_mask = sort(vcat(nodes_open,nodes_pressure))
-
+    
     # Posições que não precisam ser calculadas no sistema de equações 
     livres = setdiff(collect(1:nn),nodes_mask)
    
@@ -119,7 +127,37 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
     # Grava a topologia inicial 
     Lgmsh_export_element_scalar(arquivo_pos,γ,"Iter 0")
 
-    # Começo do loop principal de otimização topológica
+   
+    # Verifica derivadas
+    if verifica_derivada
+
+      # Derivada utilizando o procedimento analítico
+      MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
+
+      # Calcula a derivada da função objetivo em relação ao vetor γ
+      dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP) 
+
+      println("Verificando as derivadas utilizando diferenças finitas centrais...")
+
+      # Derivada numérica
+      dnum = Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
+
+      # Relativo
+      rel = (dΦ.-dnum)./dnum
+      
+      # Exporta para a visualização no Gmsh
+      Lgmsh_export_element_scalar(arquivo_pos,dΦ,"Analitica")
+      Lgmsh_export_element_scalar(arquivo_pos,dnum,"Numerica")
+      Lgmsh_export_element_scalar(arquivo_pos,rel,"relativa")
+
+      # Retorna as derivadas
+      return dΦ, dnum 
+
+    end
+
+    ########################################################################################################
+    ################################ Começo do loop principal de otimização topológica #####################
+    ########################################################################################################
 
     # Volume of each element
     V = Volumes(ne,connect,coord)
@@ -164,20 +202,19 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
            vol = Vast
         end 
 
-        println("Iteração       ", iter)
-        println("Volume atual   ", volume_atual)
-        println("Volume próxima ", vol)
-        println("Volume target  ", Vast)
-        println()
-
-        # Agora podemos calcular a resposta do problema - Equilíbrio
-
         # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
         # cada coluna é o vetor P para uma frequência de excitação
         MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
         # Calcula o SPL para esta iteração 
         objetivo = Objetivo(MP,nodes_target)
+
+        println("Iteração       ", iter)
+        println("Objetivo       ",objetivo)
+        println("Volume atual   ", volume_atual)
+        println("Volume próxima ", vol)
+        println("Volume target  ", Vast)
+        println()
 
         # Armazena no historico de SPL
         historico_SLP[iter] = objetivo
@@ -187,28 +224,6 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
   
         # Zera a derivada dos elementos fixos
         Fix_D!(dΦ,elements_fixed)
-
-        # Verifica por DF
-        # dnum = Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
-
-        # Relativo
-        # rel = (dΦ.-dnum)./dnum
-      
-        # Lgmsh_export_element_scalar(arquivo_pos,dΦ,"Analitica")
-        # Lgmsh_export_element_scalar(arquivo_pos,dnum,"Numerica")
-        # Lgmsh_export_element_scalar(arquivo_pos,rel,"relativa")
-
-        # return dΦ, dnum, rel 
-
-        # Valores extremos da derivada
-        # max_dΦ = maximum(dΦ)
-
-        # Se o valor máximo for positivo, transladamos todos os valores para 
-        # ficarem negativos
-        #if max_dΦ > 0 
-        #    dΦ = dΦ .- 1.1*max_dΦ
-        #end
-    
 
         # Como podemos ter variação de sinal na derivada, devemos tomar cuidado 
         # com a lógica dos esquemas que funcionam para compliance (derivadas sempre
@@ -232,7 +247,7 @@ function Otim(meshfile::String,freqs::Vector,scale=[1.0;1.0;1.0])
         end
 
         # Store the value for the next iteration
-        ESED_F_ANT .= ESED_F_media 
+        ESED_F_ANT .= ESED_F #_media  <-- aqui é a média da anterior ou a da anterior ?
 
         # Update the relative densities
         γn, niter_beso = BESO(γ, ESED_F_media, V, vol)

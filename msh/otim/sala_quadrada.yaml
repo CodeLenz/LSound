@@ -9,7 +9,7 @@ versao: 1.0
 volfrac: 0.1
 
 # Raio do filtro (obrigatório)
-raio: 3E-2 
+raio: 5E-2 
 
 # Evolution rate (valor padrão é 0.01)
 er : 0.001
