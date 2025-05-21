@@ -113,6 +113,9 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     # fixed elements
     values_fixed = Float64[]
 
+    # Maximum id in materials
+    max_id = 0
+
     # Loop over groups
     for g in LinearIndices(pgnames)
 
@@ -141,6 +144,9 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
             localD_m["c"]    = c
             localD_m["Z"]    = Z
           
+            # Store maximum id
+            max_id = max(max_id,id)
+
             # Now we must find wich elements are associated to this group
             elems_domain = Lgmsh.Readelementsgroup(meshfile,name,etags)
 
@@ -294,7 +300,7 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     connect2[:,3:end] .= connect
 
     # Materials as a matrix
-    materials2 = zeros(length(materials),3)
+    materials2 = zeros(max_id,3)
    
     # loop over vector of material dicts
     for mat in materials
@@ -316,8 +322,10 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     end
 
     # Testing...
+    #=
     Mesh(nn, coord, ne, connect2, materials2, unique!(nodes_open), velocities, unique!(nodes_pressure), 
     pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed)
+    =#
 
     # Return processed data
     return nn, coord, ne, connect2, materials2, unique!(nodes_open), velocities, unique!(nodes_pressure), 
