@@ -103,7 +103,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
     # adequado para o problema em questão.
     println("Inicializando o vetor de variáveis de projeto")
     println("Utilizando a fração de volume como ponto de partida")
-    γ = vf*ones(ne) + 1E-2*randn(ne)
+    γ = vf*ones(ne) #+ 1E-2*randn(ne)
     
     # Fixa os valores prescritos de densidade relativa
     Fix_γ!(γ,elements_fixed,values_fixed)
@@ -247,7 +247,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
         end
 
         # Store the value for the next iteration
-        ESED_F_ANT .= ESED_F #_media  <-- aqui é a média da anterior ou a da anterior ?
+        ESED_F_ANT .= ESED_F
 
         # Update the relative densities
         γn, niter_beso = BESO(γ, ESED_F_media, V, vol)

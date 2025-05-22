@@ -12,7 +12,7 @@
 # xmax -> valor máximo ("cheio")
 #
 #
-function BESO(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64,  tol=1E-6, xmin=1E-3, xmax=1.0) where T1
+function BESO(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64,  tol=1E-6, xmin=1E-3, xmax=0.99) where T1
 
     # Valores limites para a iteração 
     D_min = minimum(D)
