@@ -254,7 +254,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
         ESED_F_ANT .= ESED_F
 
         # Update the relative densities
-        γn, niter_beso = BESO(γ, ESED_F_media, V, vol)
+        γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design)
 
         # Garante que os elementos fixos não tenham sido alterados
         Fix_γ!(γn,elements_fixed,values_fixed)

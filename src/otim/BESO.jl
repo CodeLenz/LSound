@@ -12,11 +12,11 @@
 # xmax -> valor máximo ("cheio")
 #
 #
-function BESO(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64,  tol=1E-6, xmin=1E-3, xmax=0.99) where T1
+function BESO(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, elements_design::Vector, tol=1E-6, xmin=1E-3, xmax=0.99) where T1
 
     # Valores limites para a iteração 
-    D_min = minimum(D)
-    D_max = maximum(D)
+    D_min = minimum(D[elements_design])
+    D_max = maximum(D[elements_design])
  
     # Copia o vetor atual para um novo vetor
     xn = copy(x)
@@ -45,7 +45,7 @@ function BESO(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64,  tol=1
         volume = 0.0
 
         # Para cada variável de projeto
-        for i in LinearIndices(x)
+        for i in elements_design #LinearIndices(x)
 
             # Se o indicador for abaixo do valor de 
             # referência, tira material do elemento i
