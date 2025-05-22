@@ -1,7 +1,7 @@
 #
 # Retorna um vetor de vetores, com os vizinhos de cada elemento 
 #
-function Vizinhanca(ne,centroides,raio_filtro)
+function Vizinhanca(ne,centroides,raio_filtro,elements_design::Vector)
 
     # Aloca a lista de saída para os vizinhos
     vizinhos = Vector{Vector{Int64}}(undef,ne)
@@ -10,7 +10,7 @@ function Vizinhanca(ne,centroides,raio_filtro)
     pesos = Vector{Vector{Float64}}(undef,ne)
 
     # Loop pelos elementos da malha
-    for ele = 1:ne
+    for ele in elements_design 
 
         # Centroide deste elemento
         cele = centroides[ele,:]
