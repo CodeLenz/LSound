@@ -96,4 +96,4 @@ Mesh.Algorithm = 8;
 
 // Build mesh
 Mesh 2;
-Save "bla.msh";
+Save "sala_duhring.msh";

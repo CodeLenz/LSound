@@ -155,6 +155,9 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
 
     end
 
+    # Lista com os elementos que são de projeto
+    elements_design = setdiff(1:ne,sort!(elements_fixed))
+
     ########################################################################################################
     ################################ Começo do loop principal de otimização topológica #####################
     ########################################################################################################
@@ -163,10 +166,11 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
     V = Volumes(ne,connect,coord)
 
     # Total volume sem a parametrização 
-    volume_full = sum(V)
+    # mas só dos elementos de projeto
+    volume_full_projeto = sum(V[elements_design])
 
     # Target volume
-    Vast = vf*volume_full
+    Vast = vf*volume_full_projeto
 
     # Sensitivity index in the last iteration
     ESED_F_ANT = zeros(ne)
@@ -186,7 +190,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
     for iter = 1:niter
 
         # Volume atual da estrutura
-        volume_atual = sum(γ.*V)
+        volume_atual = sum(γ[elements_design].*V[elements_design])
 
         # Armazena o volume no histório de volumes
         historico_V[iter] = volume_atual
