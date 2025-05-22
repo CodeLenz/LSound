@@ -1,10 +1,11 @@
-function df(γ0::Vector,f::Function, δ=1E-6)
+function df(γ0::Vector,f::Function, elements_design::Vector, δ=1E-6)
 
     # Iniciliza o vetor gradiente
     d = similar(γ0)
+    fill!(d,0.0)
 
     # Para cada componente do vetor, perturba e calcula a diferença
-    for i in eachindex(γ0)
+    for i in elements_design
 
         # Valor atual nesta posição
         γe = γ0[i]

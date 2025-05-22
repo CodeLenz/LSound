@@ -125,7 +125,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
       println("Verificando as derivadas utilizando diferenças finitas centrais...")
 
       # Derivada numérica
-      dnum = Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
+      dnum = Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target,elements_design)
 
       # Relativo
       rel = (dΦ.-dnum)./dnum
@@ -223,7 +223,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         ESED_F =  Filtro(ne,vizinhos,pesos,SN,elements_design)
 
         # Zera os valores fixos
-        Fix_D!(ESED_F,elements_fixed)
+        # Fix_D!(ESED_F,elements_fixed)
 
         # Mean value using the last iteration
         if iter > 1
@@ -239,7 +239,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design)
 
         # Garante que os elementos fixos não tenham sido alterados
-        Fix_γ!(γn,elements_fixed,values_fixed)
+        # Fix_γ!(γn,elements_fixed,values_fixed)
 
         # Se niter_beso for nula, então o problema stagnou
         if niter_beso==0

@@ -2,7 +2,7 @@
 #
 # Programar depois para fazer a validação das derivadas por DFC
 #
-function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
+function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target,elements_design)
     
     # Vamos validar a derivada usando diferenças finitas
     function f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
@@ -18,7 +18,7 @@ function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocitie
     f(γ) = f_(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target)
 
     # Calcula a derivada por DFC
-    d_numerica = df(γ,f,1E-6)
+    d_numerica = df(γ,f,elements_design,1E-6)
 
 end
 
