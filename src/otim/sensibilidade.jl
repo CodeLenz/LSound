@@ -67,7 +67,8 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
                   K::AbstractMatrix{T0},M::AbstractMatrix{T0},
                   livres::Vector{T1},freqs::Vector{T0},
                   pressures::Vector, dfρ::Function, dfκ::Function,
-                  nodes_target::Vector{T1},MP::Matrix{T2},p0=20E-6) where {T0,T1,T2}
+                  nodes_target::Vector{T1},MP::Matrix{T2},
+                  elements_design::Vector,p0=20E-6) where {T0,T1,T2}
 
     # Define o vetor de derivadas
     d = zeros(ne)
@@ -125,7 +126,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
         λn[livres] .= Kd\Fn[livres]
 
         # Loop pelos elementos
-        for ele = 1:ne
+        for ele in elements_design
 
             # Tipo de elemento
             etype = connect[ele,1]

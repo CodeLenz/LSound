@@ -224,10 +224,10 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
         historico_SLP[iter] = objetivo
 
         # Calcula a derivada da função objetivo em relação ao vetor γ
-        dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP) 
+        dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP,elements_design) 
   
         # Zera a derivada dos elementos fixos
-        Fix_D!(dΦ,elements_fixed)
+        # Fix_D!(dΦ,elements_fixed)
 
         # Como podemos ter variação de sinal na derivada, devemos tomar cuidado 
         # com a lógica dos esquemas que funcionam para compliance (derivadas sempre
