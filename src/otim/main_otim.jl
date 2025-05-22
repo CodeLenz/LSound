@@ -238,7 +238,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
         SN = -dΦ ./ V
         
         # Filtro de vizinhança espacial
-        ESED_F =  Filtro(ne,vizinhos,pesos,SN)
+        ESED_F =  Filtro(ne,vizinhos,pesos,SN,elements_design)
 
         # Zera os valores fixos
         Fix_D!(ESED_F,elements_fixed)

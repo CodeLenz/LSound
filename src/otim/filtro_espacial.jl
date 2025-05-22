@@ -1,13 +1,13 @@
 #
 # Filtro de vizinhança espacial
 #
-function Filtro(ne,vizinhos::Vector{Vector{T1}},pesos::Vector{Vector{T2}},vetor::Vector{T2}) where {T1,T2}
+function Filtro(ne,vizinhos::Vector{Vector{T1}},pesos::Vector{Vector{T2}},vetor::Vector{T2},elements_design::Vector) where {T1,T2}
 
     # Aloca o vetor saída filtrada
     filtrado = zeros(T2,ne)
 
     # Loop em cada elemento
-    for ele = 1:ne
+    for ele in elements_design
 
         # Recupera os vizinhos e os pesos do elemento
         viz  = vizinhos[ele]

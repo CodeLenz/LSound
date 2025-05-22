@@ -498,7 +498,7 @@ version = "1.11.0"
 
 [[deps.Lgmsh]]
 deps = ["Gmsh"]
-git-tree-sha1 = "c2b2371136b2f9bdb29bbb80075483fd1ad74e11"
+git-tree-sha1 = "79419c2cad294c79c758d85c7a652584ed9f0379"
 repo-rev = "main"
 repo-url = "https://github.com/CodeLenz/Lgmsh"
 uuid = "901517f6-ef86-4a80-bf35-2c5b8e720204"
