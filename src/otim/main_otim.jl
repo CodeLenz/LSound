@@ -52,6 +52,9 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
     #elements_fixed = [ 34; 36; 84; 85; 78; 66; 27; 58; 62; 97] 
     #values_fixed   = 1E-3*ones(10)
 
+    # Lista com os elementos que são de projeto
+    elements_design = setdiff(1:ne,sort!(elements_fixed))
+
     # Le os dados do arquivo yaml
     raio_filtro, niter, er, vf = Le_YAML(arquivo_yaml)
 
@@ -88,7 +91,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
 
          # Obtém os vizinhos de cada elemento da malha
          println("Determinando a vizinhança para um raio de $(raio_filtro)")
-         @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro)
+         @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro,elements_design)
 
     end
 
@@ -135,7 +138,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
       MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
       # Calcula a derivada da função objetivo em relação ao vetor γ
-      dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP) 
+      dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP,elements_design) 
 
       println("Verificando as derivadas utilizando diferenças finitas centrais...")
 
@@ -154,9 +157,6 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
       return dΦ, dnum 
 
     end
-
-    # Lista com os elementos que são de projeto
-    elements_design = setdiff(1:ne,sort!(elements_fixed))
 
     ########################################################################################################
     ################################ Começo do loop principal de otimização topológica #####################
