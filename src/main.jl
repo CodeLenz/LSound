@@ -22,8 +22,6 @@
 
  metodo   -> :Modal, :Harmonic, :Bathe, :Newmark, 
 
- scale -> [1.0 ; 1.0 ; 1.0] scale to apply to the geometry (1.0 meter)
-
  :Modal
 
  only additional input is the number of eigenvalues to compute - nev
@@ -51,7 +49,7 @@
 """
 function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, β = 1/4,
                  δ  = 1/4, β1 = 1/3,  β2 = 2/3,
-                 freqs=[],U0=[],V0=[],output=true,scale=[1.0;1.0;1.0])
+                 freqs=[],U0=[],V0=[],output=true)
 
     # Evita chamar um .geo
     if occursin(".geo",meshfile)
@@ -66,19 +64,6 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
 
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed = Parsemsh_Daniele(meshfile)
-
-    # Vamos evitar coordenadas negativas 
-    for i=1:3  
-        minx = minimum(coord[:,i])
-        if minx<0
-           coord[:,i] .= coord[:,i] .- minx 
-        end
-    end
-
-    # Apply scale to the coordinates
-    coord[:,1] ./= scale[1]
-    coord[:,2] ./= scale[2]
-    coord[:,3] ./= scale[3]
 
     # Precisamos de um material
     if isempty(materials)

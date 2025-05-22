@@ -23,7 +23,7 @@
 
 
 """
-function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;1.0;1.0])
+function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     
     # Evita chamar um .geo
     occursin(".geo",meshfile) && error("Chamar com .msh..")
@@ -48,10 +48,6 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
     # Le dados da malha
     nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed = Parsemsh_Daniele(meshfile)
 
-    # Sala quadrada com discretização 10 × 10
-    #elements_fixed = [ 34; 36; 84; 85; 78; 66; 27; 58; 62; 97] 
-    #values_fixed   = 1E-3*ones(10)
-
     # Lista com os elementos que são de projeto
     elements_design = setdiff(1:ne,sort!(elements_fixed))
 
@@ -65,22 +61,8 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false,scale=[1.0;
     # Vamos colocar nodes_target em ordem crescente
     sort!(nodes_target)
 
-    # Vamos evitar coordenadas negativas 
-    for i=1:3  
-        minx = minimum(coord[:,i])
-        if minx<0
-           coord[:,i] .= coord[:,i] .- minx 
-        end
-    end
-
-    # Apply scale to the coordinates
-    coord[:,1] ./= scale[1]
-    coord[:,2] ./= scale[2]
-    coord[:,3] ./= scale[3]
-
     # Precisamos de um material
     isempty(materials) && error("Analise:: at least one material is necessary")
-    
 
     # Não precisamos do centróide e de vizinhança se for para verificar a derivada
     if !verifica_derivada
