@@ -11,13 +11,16 @@ https://doi.org/10.1016/j.finel.2021.103701.
 =#
 
 # Parametrização do inverso de ρ
-function fρ_pereira(γe,ψ=2.0;ρ_ar=1.204,ρ2=1.204*1E7)
+function fρ_pereira(γe,ψ=2.0;ρ_ar=1.21,ρ2=1.21*1E7)
 
     # Teste de consistência
     0<γe<=1 || error("fρ:: γe inválido")
 
     # ρ do ar
     ρa = ρ_ar
+
+    # Fase sólida
+    ρr = ρ2
     
     # Calcula a parametrização
     return (1/ρa) + (γe^ψ)*(1/ρr - 1/ρa)
@@ -25,13 +28,16 @@ function fρ_pereira(γe,ψ=2.0;ρ_ar=1.204,ρ2=1.204*1E7)
 end 
 
 # Derivada da parametrização do inverso de ρ
-function dfρ_pereira(γe,ψ=2.0;ρ_ar=1.204,ρ2=1.204*1E7)
+function dfρ_pereira(γe,ψ=2.0;ρ_ar=1.21,ρ2=1.21*1E7)
 
     # Teste de consistência
     0<γe<=1 || error("dfρ:: γe inválido")
 
     # ρ do ar
     ρa = ρ_ar
+
+    # Fase sólida
+    ρr = ρ2
     
     # Calcula a parametrização
     return ψ*(γe^(ψ-1))*(1/ρr - 1/ρa)
@@ -48,6 +54,9 @@ function fκ_pereira(γe,ψ=2.0;κ_ar=1.42E5,κ2=1.42E5*1E9)
     # κ do ar
     κa = κ_ar
 
+    # fase sólida 
+    κr = κ2
+
     # Calcula a parametrização
     return (1/κa) + (γe^ψ)*(1/κr - 1/κa)
 
@@ -61,6 +70,9 @@ function dfκ_pereira(γe,ψ=2.0;κ_ar=1.42E5,κ2=1.42E5*1E9)
 
     # κ do ar
     κa = κ_ar
+
+    # fase sólida 
+    κr = κ2
 
     # Calcula a parametrização
     return ψ*(γe^(ψ-1))*(1/κr - 1/κa)

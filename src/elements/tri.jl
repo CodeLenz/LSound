@@ -129,6 +129,6 @@ function Area_tri3(X::Matrix)
                       1 X[3,1] X[3,2] ]
 
     # Retorna o determinante
-    det(0.5*MA)
+    0.5*det(MA)
 
 end

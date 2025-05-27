@@ -57,15 +57,17 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Seleciona as rotinas de parametrização de material de acordo com 
     # a opção 
     if parametrizacao=="PEREIRA"
+         println("Utilizando a parametrização de PEREIRA")
          fρ(γ)  = fρ_pereira(γ) #,ψ, ρ_ar = ρ_ar, ρ2 = ρ_solido)
          dfρ(γ) = dfρ_pereira(γ)
          fκ(γ)  = fκ_pereira(γ)
          dfκ(γ) = dfκ_pereira(γ)
-    elseif parametrizacao=="DUHRING"
-         fρ(γ)  = fρ_duhring(γ)
-         dfρ(γ) = dfρ_duhring(γ)
-         fκ(γ)  = fκ_duhring(γ)
-         dfκ(γ) = dfκ_duhring(γ)
+    #elseif parametrizacao=="DUHRING"
+    #     println("Utilizando a parametrização de DUHRING")
+    #     fρ(γ)  = fρ_duhring(γ)
+    #     dfρ(γ) = dfρ_duhring(γ)
+    #     fκ(γ)  = fκ_duhring(γ)
+    #     dfκ(γ) = dfκ_duhring(γ)
     end
      
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
