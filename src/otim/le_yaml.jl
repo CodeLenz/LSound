@@ -22,6 +22,8 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     # Primeiro lemos o arquivo de dados
     dados = YAML.load_file(arquivo)
  
+    
+
     # Verifica se temos informação sobre a versão do arquivo de dados
     versao = 0.0
     if haskey(dados,"versao")

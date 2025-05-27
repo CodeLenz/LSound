@@ -52,8 +52,22 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     elements_design = setdiff(1:ne,sort!(elements_fixed))
 
     # Le os dados do arquivo yaml
-    raio_filtro, niter, er, vf = Le_YAML(arquivo_yaml)
+    raio_filtro, niter, er, vf, parametrizacao = Le_YAML(arquivo_yaml)
 
+    # Seleciona as rotinas de parametrização de material de acordo com 
+    # a opção 
+    if parametrizacao=="PEREIRA"
+         fρ(γ)  = fρ_pereira(γ) #,ψ, ρ_ar = ρ_ar, ρ2 = ρ_solido)
+         dfρ(γ) = dfρ_pereira(γ)
+         fκ(γ)  = fκ_pereira(γ)
+         dfκ(γ) = dfκ_pereira(γ)
+    elseif parametrizacao=="DUHRING"
+         fρ(γ)  = fρ_duhring(γ)
+         dfρ(γ) = dfρ_duhring(γ)
+         fκ(γ)  = fκ_duhring(γ)
+         dfκ(γ) = dfκ_duhring(γ)
+    end
+     
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
     # que vai funcionar como nodes_probe aqui
     isempty(nodes_target) && error("Otim:: nodes_target deve ter ao menos um nó informado")

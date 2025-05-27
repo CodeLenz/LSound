@@ -50,7 +50,6 @@ Curve Loop(40) = {9};
 Plane Surface(100) = {10};
 Curve{8, 9} In Surface{100};
 
-
 // Superfície de projeto
 Plane Surface(200) = {20};
 

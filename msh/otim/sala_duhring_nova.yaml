@@ -17,3 +17,5 @@ er : 0.001
 # Número de iterações de otimização (valor padrão é 100)
 niter: 5
 
+# Parametrização do material 
+parametrizacao: PEREIRA
