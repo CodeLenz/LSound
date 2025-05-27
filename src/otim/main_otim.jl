@@ -127,8 +127,24 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     
     # Grava a topologia inicial 
     Lgmsh_export_element_scalar(arquivo_pos,γ,"Iter 0")
-
    
+    # Sweep na topologia inicial, para comparação com a otimizada
+    @time MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
+
+    # Número de frequências
+    nf = length(freqs)
+   
+    # Exporta por frequência
+    for i=1:nf
+
+      # frequência
+      f = freqs[i]
+
+      # Exporta
+      Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressão em $f Hz [abs] - topolgia inicial")
+
+    end
+
     # Verifica derivadas
     if verifica_derivada
 
