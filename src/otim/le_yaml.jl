@@ -15,6 +15,10 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     # Número de iterações 
     niter = 100
 
+    # Valor padrão de parametrização 
+    # PEREIRA ou DUHRING
+    param = "PEREIRA"
+
     # Primeiro lemos o arquivo de dados
     dados = YAML.load_file(arquivo)
  
@@ -111,8 +115,21 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         println("Evolution Rate não foi informado no .yaml. Utilizando o valor padrão ", er)
     end
 
+    # Recupera a fração de volume
+    if haskey(dados,"parametrizacao")
+
+        # recupera como string
+        parametrizacao = dados["parametrizacao"]
+
+        # verifica se é uma das parametrizações válidas
+        parametrizacao in ["PEREIRA"; "DUHRING"]  || error("Parametrização $parametrizacao é inválida") 
+
+    else
+        println("parametrização não foi informada no .yaml. Utilizando o valor padrão ", parametrizacao)
+    end
+
 
    # Retorna os dados 
-   return raio, niter, er, vf
+   return raio, niter, er, vf, parametrizacao
 
 end
