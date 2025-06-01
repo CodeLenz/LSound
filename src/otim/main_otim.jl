@@ -133,6 +133,8 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
 
     # Número de frequências
     nf = length(freqs)
+
+    historico_SLPn_inicial = zeros(length(freqs))
    
     # Exporta por frequência
     for i=1:nf
@@ -141,7 +143,9 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
       f = freqs[i]
 
       # Exporta
-      Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressão em $f Hz [abs] - topolgia inicial")
+      Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressure in $f Hz [abs] - initial topology")
+
+      historico_SLPn_inicial[i] = SPLn(MP[:,i],20E-6)
 
     end
 
@@ -200,7 +204,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # iterações 
     historico_V   = zeros(niter)
     historico_SLP = zeros(niter)
-    historico_SLP_final = zeros(length(freqs))
+    historico_SLPn_final = zeros(length(freqs))
 
     #############################  Main loop ###########################
     for iter = 1:niter
@@ -308,13 +312,13 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         f = freqs[i]
 
         # Exporta
-        Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressão em $f Hz [abs]")
+        Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressure in $f Hz [abs]")
 
-        historico_SLP_final[i] = SPLn(MP[:,i],20E-6)
+        historico_SLPn_final[i] = SPLn(MP[:,i],20E-6)
 
     end
 
     # Retorna o histórico de volume e também o da função objetivo 
-    return historico_V, historico_SLP, historico_SLP_final
+    return historico_V, historico_SLP, historico_SLPn_inicial, historico_SLPn_final
 
 end # main_otim
