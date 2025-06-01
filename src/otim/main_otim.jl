@@ -200,6 +200,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # iterações 
     historico_V   = zeros(niter)
     historico_SLP = zeros(niter)
+    historico_SLP_final = zeros(length(freqs))
 
     #############################  Main loop ###########################
     for iter = 1:niter
@@ -293,8 +294,9 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
 
     println("Final da otimização, executando a análise SWEEP na topologia otimizada")
 
-    # Roda o sweep na topologia otimizada e exporta para visualização 
-    @time MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
+   # Roda o sweep na topologia otimizada e exporta para visualização 
+   @time MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
+
 
     # Número de frequências
     nf = length(freqs)
@@ -308,9 +310,11 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # Exporta
         Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressão em $f Hz [abs]")
 
+        historico_SLP_final[i] = SPLn(MP[:,i],20E-6)
+
     end
 
     # Retorna o histórico de volume e também o da função objetivo 
-    return historico_V, historico_SLP
+    return historico_V, historico_SLP, historico_SLP_final
 
 end # main_otim
