@@ -52,7 +52,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     elements_design = setdiff(1:ne,sort!(elements_fixed))
 
     # Le os dados do arquivo yaml
-    raio_filtro, niter, er, vf, parametrizacao = Le_YAML(arquivo_yaml)
+    raio_filtro, niter, nhisto, er, vf, parametrizacao = Le_YAML(arquivo_yaml)
 
     # Seleciona as rotinas de parametrização de material de acordo com 
     # a opção 

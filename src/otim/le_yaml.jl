@@ -15,6 +15,9 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     # Número de iterações 
     niter = 100
 
+    # Número de iterações para o histórico de sensibilidade
+    nhisto = 1
+
     # Valor padrão de parametrização 
     # PEREIRA ou DUHRING
     param = "PEREIRA"
@@ -22,8 +25,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     # Primeiro lemos o arquivo de dados
     dados = YAML.load_file(arquivo)
  
-    
-
     # Verifica se temos informação sobre a versão do arquivo de dados
     versao = 0.0
     if haskey(dados,"versao")
@@ -131,7 +132,28 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     end
 
 
+    # Recupera o número de iterações para o histórico de sensibilidades
+     if haskey(dados,"nhisto")
+
+        # recupera como string
+        string_nhisto = dados["nhisto"]
+
+        # Se foi informado como string, convertemos
+        if isa(string_nhisto,String)
+            nhisto =  parse(Int64,string_nhisto)
+        else
+            nhisto = string_nhisto
+        end
+ 
+        # Testa consistência da informação 
+        nhisto>=1 || throw("Le_YAML::Número de iterações para o histórico de sensibilidades deve ser >=1") 
+        
+    else
+        println("Número de iterações para o histórico de sensibilidade não foi informado no .yaml. Utilizando o valor padrão ", nhisto)
+    end
+
+
    # Retorna os dados 
-   return raio, niter, er, vf, parametrizacao
+   return raio, niter, nhisto, er, vf, parametrizacao
 
 end
