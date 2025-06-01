@@ -186,8 +186,9 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Target volume
     Vast = vf*volume_full_projeto
 
-    # Sensitivity index in the last iteration
-    ESED_F_ANT = zeros(ne)
+    # Sensitivity index in the last iterations
+    # Aqui vamos  simplificar um pouco a lógica, sacrificando memória
+    ESED_F_ANT = zeros(ne,niter)
 
     # Valor médio da sensibilidade (entre duas iterações)
     ESED_F_media = zeros(ne)
@@ -257,16 +258,19 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # Zera os valores fixos
         # Fix_D!(ESED_F,elements_fixed)
 
-        # Mean value using the last iteration
-        if iter > 1
-           ESED_F_media .= (ESED_F .+ ESED_F_ANT)./2
-        else
-           ESED_F_media .= ESED_F
-        end
+        # Guarda na coluna de ESED_F_media
+        ESED_F_ANT[:,iter] .= ESED_F
 
-        # Store the value for the next iteration
-        ESED_F_ANT .= ESED_F
+        # Mean value using the last iterations
+        # Aqui temos que ter um cuidado muito importante. O número de colunas 
+        # para calcularmos a média deve ser o menor entre iter e nhisto
+        pini = max(1,iter-nhisto)
+        pfin = max(iter,iter-nhisto) 
+        @show pini,pfin
 
+        # Valor médio 
+        ESED_F_media .= mean(ESED_F_ANT[:,pini:pfin],dims=2)
+        
         # Update the relative densities
         γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design)
 
