@@ -82,7 +82,10 @@ function BESO(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, elemen
 end
 
 
-
+#
+# Essa rotina está acessando elementos que não são de projeto 
+# e também está deixando elementos com densidades intermediárias <- problemão
+#
 function BESO2(ne::Int64, x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, elements_design::Vector, ar=0.05; tol=1E-6, xmin=1E-3, xmax=0.99) where T1
 
     # Devolve uma lista com os elementos 
@@ -91,8 +94,11 @@ function BESO2(ne::Int64, x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Flo
 
     # Precisamos pegar somente os que são de projeto 
     # mas mantendo a sequência numérica dos elementos
-    eles_D_sort_projeto = 
+    eles_D_sortp = indexin(elements_design,eles_D_sort)
  
+    # Número de elementos em eles_D_sortp
+    nep = length(eles_D_sortp)
+
     # Copia o vetor atual para um novo vetor
     xn = copy(x)
 
@@ -107,10 +113,10 @@ function BESO2(ne::Int64, x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Flo
 
     # O número de elementos adicionados/removidos deve ser igual 
     # ou próximo a
-    ne_mod = ceil(Int64,length(elements_design)*ar)
+    ne_mod = ceil(Int64,nep*ar)
 
     # Meio da lista
-    meio = floor(Int64,length(elements_design)/2)
+    meio = floor(Int64,nep/2)
 
     @show ne_mod, meio
 
@@ -122,17 +128,17 @@ function BESO2(ne::Int64, x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Flo
 
         # Para os elementos que estão do meio para o 
         # começo da lista modificamos para vazio
-        if xn[eles_D_sort[meio+i]]!=xmin
+        if xn[eles_D_sortp[meio+i]]!=xmin
            AR += 1
         end 
-        xn[eles_D_sort[meio+i]] = xmin
+        xn[eles_D_sortp[meio+i]] = xmin
 
         # Os que estão no do meio para o final da lista
         # passam para cheio
-        if xn[eles_D_sort[meio-i]]!=xmax
+        if xn[eles_D_sortp[meio-i]]!=xmax
             AR += 1
         end  
-        xn[eles_D_sort[meio-i]] = xmax
+        xn[eles_D_sortp[meio-i]] = xmax
 
     end
 
