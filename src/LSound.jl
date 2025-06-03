@@ -51,6 +51,8 @@ module LSound
     include("otim/verifica_derivada.jl")
     include("otim/BESO.jl")
 
+    include("otim/processa_FRF.jl")
+
     export Analise
 
 end

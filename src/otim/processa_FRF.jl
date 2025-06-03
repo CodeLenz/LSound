@@ -1,14 +1,19 @@
 """
- Otim(meshfile::String,freqs=[])
+ Processa_FRF(meshfile::String,freqs=[],γ_opt)
+
+ Calcula o SPLn para as frequências em freqs, tanto para a topologia 
+ inicial quanto para a otimizada (γ_opt) 
 
  Basic input:
 
  meshfile -> arquivo de entrada (.msh)
 
- Inputs -> freqs, a vector with the frequencies to sweep
+ freqs ->  vector with the frequencies to sweep 
+ 
+ γ_opt -> optimal distribution of γ
 
 """
-function Processa_FRF(meshfile::String,freqs::Vector, γ_opt::Vector)
+function Processa_FRF(meshfile::String,freqs::Vector)
     
     # Evita chamar um .geo
     occursin(".geo",meshfile) && error("Chamar com .msh..")
@@ -16,6 +21,10 @@ function Processa_FRF(meshfile::String,freqs::Vector, γ_opt::Vector)
     # Define os nomes dos arquivos de entrada (yaml) e de saída
     # (pos) em função do nome de meshfile
     arquivo_yaml = meshfile[1:end-3]*"yaml"
+
+    # Arquivos que contém as distribuições inicial/otimizada de γ
+    arquivo_γ_ini = meshfile[1:end-3]*"_γ_ini.dat"
+    arquivo_γ_fin = meshfile[1:end-3]*"_γ_opt.dat"
 
     # Verificamos se existem frequências sendo informadas
     isempty(freqs) && error("Analise Harmonica:: freqs deve ser um vetor não vazio")
@@ -64,22 +73,9 @@ function Processa_FRF(meshfile::String,freqs::Vector, γ_opt::Vector)
     # Precisamos de um material
     isempty(materials) && error("Processa_FRF:: at least one material is necessary")
     
-    # Vamos inicializar o vetor de variáveis de projeto.
-    # γ = 0 --> ar
-    # γ = 1 --> sólido
-    #
-    # Não podemos começar com todas as posições nulas, pois 
-    # isso vai fazer com que a atualização de volume seja 
-    # 0*(1+er) = sempre zero.
-    # Então, podemos começar com um padrão que seja fisicamente
-    # adequado para o problema em questão.
-    println("Inicializando o vetor de variáveis de projeto")
-    println("Utilizando a fração de volume como ponto de partida")
-    γ = vf*ones(ne) #+ 1E-2*randn(ne)
-    
-    # Fixa os valores prescritos de densidade relativa
-    Fix_γ!(γ,elements_fixed,values_fixed)
-
+    # Le as variáveis de projeto iniciais
+    γ = vec(readdlm(arquivo_γ_ini))  
+   
     # Concatena nodes_open e nodes_pressure
     nodes_mask = sort(vcat(nodes_open,nodes_pressure))
     
@@ -93,31 +89,31 @@ function Processa_FRF(meshfile::String,freqs::Vector, γ_opt::Vector)
     nf = length(freqs)
 
     # Cria um vetor para armazenar o SPLn em cada frequência considerada na otimização
-    historico_SLPn_inicial = zeros(length(freqs))
+    FRF_SLPn_inicial = zeros(length(freqs))
    
     # Processa o SPLn por frequência
     for i=1:nf
 
       # Calcula o valor e armazena
-      historico_SLPn_inicial[i] = SPLn(MP[:,i],20E-6)
+      FRF_SLPn_inicial[i] = SPLn(MP[:,i],20E-6)
 
     end
 
     # Aloca o vetor de saída - SPLn para cada frequência
-    historico_SLPn_final = zeros(nf)
+    FRF_SLPn_final = zeros(nf)
 
+    # Le as variáveis de projeto finais (otimizadas)
+    γ_opt = vec(readdlm(arquivo_γ_fin))  
     
     # Roda o sweep na topologia otimizada e exporta para visualização 
     MP,_ =  Sweep(nn,ne,coord,connect,γ_opt,fρ,fκ,freqs,livres,velocities,pressures)
     
     # Calcula o SLPn em cada uma das frequências 
     for i=1:nf
+        FRF_SLPn_final[i] = SPLn(MP[:,i],20E-6)
+    end
 
-      historico_SLPn_final[i] = SPLn(MP[:,i],20E-6)
-
-   end
-
-   # Retorna os históricos
-   return  freqs, historico_SLPn_inicial, historico_SLPn_final
+   # Retorna o vetor com as frequências, a varredura inicial e a final
+   return  freqs, FRF_SLPn_inicial, FRF_SLPn_final
 
 end 

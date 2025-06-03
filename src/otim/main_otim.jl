@@ -29,6 +29,12 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     arquivo_yaml = meshfile[1:end-3]*"yaml"
     arquivo_pos  = meshfile[1:end-3]*"pos"
 
+    # Define o nome dos arquivos contendo a distribuição inicial e final (otimizada)
+    # das variáveis de projeto. Esses arquivos serão utilizados posteriormente em 
+    # Processa_FRF
+    arquivo_γ_ini = meshfile[1:end-3]*"_γ_ini.dat"
+    arquivo_γ_fin = meshfile[1:end-3]*"_γ_opt.dat"
+
     # Verificamos se existem frequências sendo informadas
     isempty(freqs) && error("Analise Harmonica:: freqs deve ser um vetor não vazio")
 
@@ -105,6 +111,9 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Fixa os valores prescritos de densidade relativa
     Fix_γ!(γ,elements_fixed,values_fixed)
     
+    # Grava o arquivo com a distribuição inicial de densidades
+    writedlm(arquivo_γ_ini,γ)
+
     # Vamos avisar que a análise de sensibilidade ainda não está consideranto
     # pressões impostas diretamente
     #if !isempty(pressures) 
@@ -306,7 +315,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
    end
 
    # Grava um arquivo com os γ finais
-   writedlm("γ_opt.dat",γ)
+   writedlm(arquivo_γ_fin,γ)
 
    # Retorna o histórico de volume e também o da função objetivo 
    return historico_V, historico_SLP
