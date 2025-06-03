@@ -16,11 +16,7 @@
 
  verifica_derivada -> bool 
 
- scale -> [1.0 ; 1.0 ; 1.0] scale to apply to the geometry (1.0 meter)
-
-
  Inputs -> freqs, a vector with the frequencies to sweep
-
 
 """
 function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
@@ -129,12 +125,10 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     Lgmsh_export_element_scalar(arquivo_pos,γ,"Iter 0")
    
     # Sweep na topologia inicial, para comparação com a otimizada
-    @time MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
+    MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
     # Número de frequências
     nf = length(freqs)
-
-    historico_SLPn_inicial = zeros(length(freqs))
    
     # Exporta por frequência
     for i=1:nf
@@ -144,8 +138,6 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
 
       # Exporta
       Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressure in $f Hz [abs] - initial topology")
-
-      historico_SLPn_inicial[i] = SPLn(MP[:,i],20E-6)
 
     end
 
@@ -204,7 +196,6 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # iterações 
     historico_V   = zeros(niter)
     historico_SLP = zeros(niter)
-    historico_SLPn_final = zeros(length(freqs))
 
     #############################  Main loop ###########################
     for iter = 1:niter
@@ -271,8 +262,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # para calcularmos a média deve ser o menor entre iter e nhisto
         pini = max(1,iter-nhisto)
         pfin = max(iter,iter-nhisto) 
-        @show pini,pfin
-
+        
         # Valor médio 
         ESED_F_media .= mean(ESED_F_ANT[:,pini:pfin],dims=2)
         
@@ -299,26 +289,26 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     println("Final da otimização, executando a análise SWEEP na topologia otimizada")
 
    # Roda o sweep na topologia otimizada e exporta para visualização 
-   @time MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
+   MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
-
-    # Número de frequências
-    nf = length(freqs)
+   # Número de frequências
+   nf = length(freqs)
     
-    # Exporta por frequência
-    for i=1:nf
+   # Exporta por frequência
+   for i=1:nf
 
-        # frequência
-        f = freqs[i]
+      # frequência
+      f = freqs[i]
 
-        # Exporta
-        Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressure in $f Hz [abs]")
+      # Exporta
+      Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressure in $f Hz [abs]")
 
-        historico_SLPn_final[i] = SPLn(MP[:,i],20E-6)
+   end
 
-    end
+   # Grava um arquivo com os γ finais
+   writedlm("γ_opt.dat",γ)
 
-    # Retorna o histórico de volume e também o da função objetivo 
-    return historico_V, historico_SLP, historico_SLPn_inicial, historico_SLPn_final
+   # Retorna o histórico de volume e também o da função objetivo 
+   return historico_V, historico_SLP
 
 end # main_otim

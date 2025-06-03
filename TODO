@@ -1,0 +1,7 @@
+1) Ver como aplicar diferentes parametrizações materiais: Duhring e Pereira
+   Atualmente temos a opção de escolher no .yaml, mas está dando problema (carrega sempre o último do ifelse)
+   Estamos usando só a parametrização do Pereira, embora a Duhring esteja programada
+
+2) Melhorar a alocação e a lógica do ESED_F_ANT
+
+3) 
