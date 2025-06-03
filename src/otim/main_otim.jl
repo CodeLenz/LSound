@@ -226,6 +226,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
            vol = Vast
         end 
 
+
         # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
         # cada coluna é o vetor P para uma frequência de excitação
         MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
@@ -234,7 +235,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         objetivo = Objetivo(MP,nodes_target)
 
         println("Iteração       ", iter)
-        println("Objetivo       ",objetivo)
+        println("Objetivo       ", objetivo)
         println("Volume atual   ", volume_atual)
         println("Volume próxima ", vol)
         println("Volume target  ", Vast)
@@ -277,6 +278,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         
         # Update the relative densities
         γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design)
+        #γn, niter_beso = BESO2(ne,γ, ESED_F_media, V, vol, elements_design)
 
         # Garante que os elementos fixos não tenham sido alterados
         # Fix_γ!(γn,elements_fixed,values_fixed)
