@@ -18,6 +18,12 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     # Número de iterações para o histórico de sensibilidade
     nhisto = 1
 
+    # Valor mínimo da variável de projeto 
+    γmin = 1E-3
+
+    # Valor máximo da variável de projeto 
+    γmax = 0.99
+
     # Valor padrão de parametrização 
     # PEREIRA ou DUHRING
     param = "PEREIRA"
@@ -118,7 +124,51 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         println("Evolution Rate não foi informado no .yaml. Utilizando o valor padrão ", er)
     end
 
-    # Recupera a fração de volume
+    # Recupera o valor mínimo da variável de projeto
+    if haskey(dados,"γmin")
+
+        # recupera como string
+        string_γmin = dados["γmin"]
+
+        # Se foi informado como string, convertemos
+        if isa(string_γmin,String)
+            γmin =  parse(Float64,string_γmin)
+        else
+            γmin = string_γmin
+        end
+ 
+        # Testa consistência da informação 
+        (γmin<=0||γmin>=1) && throw("Le_YAML::γmin deve estar em (0,1) ") 
+        
+    else
+        println("γmin não foi informado no .yaml. Utilizando o valor padrão ", γmin)
+    end
+
+
+    # Recupera o valor máximo da variável de projeto
+    if haskey(dados,"γmax")
+
+        # recupera como string
+        string_γmax = dados["γmax"]
+
+        # Se foi informado como string, convertemos
+        if isa(string_γmax,String)
+            γmax =  parse(Float64,string_γmax)
+        else
+            γmax = string_γmax
+        end
+ 
+        # Testa consistência da informação 
+        (γmax<=0||γmax>1) && throw("Le_YAML::γmax deve estar em (0,1) ") 
+        
+    else
+        println("γmax não foi informado no .yaml. Utilizando o valor padrão ", γmax)
+    end
+
+    # Teste para ver se γmin < γmax
+    (γmin<γmax) && throw("Le_YAML::γmin deve ser menor do que γmax") 
+
+    # Recupera o tipo de parametrização do material
     if haskey(dados,"parametrizacao")
 
         # recupera como string
@@ -154,6 +204,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
 
 
    # Retorna os dados 
-   return raio, niter, nhisto, er, vf, parametrizacao
+   return raio, niter, nhisto, er, vf, parametrizacao, γmin, γmax
 
 end

@@ -31,7 +31,7 @@ Line(6) = {5, 6};
 Line(7) = {6, 4};
 
 // Região de excitação 
-Circle(8) = {2, 2, 0, 0.1, 0, 2*Pi};
+Circle(8) = {2, 2, 0, 0.5, 0, 2*Pi};
 
 // Região target
 Circle(9) = {16, 2, 0, 1, 0, 2*Pi};

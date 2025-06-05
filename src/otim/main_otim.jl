@@ -54,7 +54,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     elements_design = setdiff(1:ne,sort!(elements_fixed))
 
     # Le os dados do arquivo yaml
-    raio_filtro, niter, nhisto, er, vf, parametrizacao = Le_YAML(arquivo_yaml)
+    raio_filtro, niter, nhisto, er, vf, parametrizacao, γ_min, γ_max = Le_YAML(arquivo_yaml)
 
     # Seleciona as rotinas de parametrização de material de acordo com 
     # a opção 
@@ -106,7 +106,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # adequado para o problema em questão.
     println("Inicializando o vetor de variáveis de projeto")
     #println("Utilizando a fração de volume como ponto de partida")
-    γ = zeros(ne) #+ 1E-2*randn(ne)
+    γ = γ_max*ones(ne) #+ 1E-2*randn(ne)
     
     # Fixa os valores prescritos de densidade relativa
     Fix_γ!(γ,elements_fixed,values_fixed)
@@ -277,7 +277,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         ESED_F_media .= mean(ESED_F_ANT[:,pini:pfin],dims=2)
         
         # Update the relative densities
-        γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design)
+        γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design,γ_min=γ_min,γ_max=γ_max)
         #γn, niter_beso = BESO2(ne,γ, ESED_F_media, V, vol, elements_design)
 
         # Garante que os elementos fixos não tenham sido alterados
