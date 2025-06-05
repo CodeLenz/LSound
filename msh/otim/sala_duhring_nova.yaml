@@ -15,7 +15,7 @@ raio: 0.3
 er : 0.01
 
 # Número de iterações de otimização (valor padrão é 100)
-niter: 1
+niter: 100
 
 # Parametrização do material 
 parametrizacao: PEREIRA
