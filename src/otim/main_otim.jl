@@ -106,7 +106,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # adequado para o problema em questão.
     println("Inicializando o vetor de variáveis de projeto")
     #println("Utilizando a fração de volume como ponto de partida")
-    γ = ones(ne) #+ 1E-2*randn(ne)
+    γ = zeros(ne) #+ 1E-2*randn(ne)
     
     # Fixa os valores prescritos de densidade relativa
     Fix_γ!(γ,elements_fixed,values_fixed)
