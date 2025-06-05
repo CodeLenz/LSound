@@ -166,7 +166,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     end
 
     # Teste para ver se γmin < γmax
-    (γmin<γmax) && throw("Le_YAML::γmin deve ser menor do que γmax") 
+    (γmin<γmax) || throw("Le_YAML::γmin deve ser menor do que γmax") 
 
     # Recupera o tipo de parametrização do material
     if haskey(dados,"parametrizacao")

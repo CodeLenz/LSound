@@ -20,6 +20,9 @@ niter: 200
 # Parametrização do material 
 parametrizacao: PEREIRA
 
+# Número de iterações para a média histórica
+nhisto: 5
+
 # Valor mínimo da variável de projeto
 γmin: 1E-3
 
