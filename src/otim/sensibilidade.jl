@@ -1,6 +1,9 @@
 #
 # Monta o vetor adjunto para uma frequência específica
 #
+# nodes_target -> vector of Target nodes   (vetor com os 'nós monitorados' )
+# O vetor P foi obtido via Sweep.
+#
 function F_adj(nodes_target::Vector{T1},P::Vector{T2}) where {T1,T2}
 
     # Inicializa o vetor de carregamento adjunto
@@ -21,14 +24,14 @@ function F_adj(nodes_target::Vector{T1},P::Vector{T2}) where {T1,T2}
 
 end
 
-#
+# ===================================================================================
 # Calcula a derivada da matriz de rigidez dinâmica
 #
-# et -> tipo de elemento
-# γe -> variável de projeto do elemento
-# dfρ -> função que parametriza a derivada da densidade 
-# dfκ -> função que parametriza a derivada do módulo de compressibilidade
-# X   -> matriz com as coordenadas do elemento 
+# et  ->  tipo de elemento
+# γe  ->  variável de projeto do elemento
+# dfρ ->  função que parametriza a derivada da densidade 
+# dfκ ->  função que parametriza a derivada do módulo de compressibilidade
+# X   ->  matriz com as coordenadas do elemento 
 #
 function Derivada_KM(et,γe,dfρ::Function,dfκ::Function,X::Array)
 
@@ -38,29 +41,30 @@ function Derivada_KM(et,γe,dfρ::Function,dfκ::Function,X::Array)
     diκ = dfκ(γe)
 
     # Monta as matrizes dos elementos
-    # usando as derivadas das propriedades em 
-    # relação à γe
-     if et==3
+    # usando as derivadas das propriedades 
+    # em relação à γe
+    if et==3
         Ke, Me = KMe_bi4(diρ,diκ,X)
-     elseif et==2
+    elseif et==2
         Ke, Me = KMe_tri3(diρ,diκ,X)
-     elseif et==4
-         Ke, Me = KMe_tet4(diρ,diκ,X)   
-     elseif et==5
+    elseif et==4
+        Ke, Me = KMe_tet4(diρ,diκ,X)   
+    elseif et==5
         Ke, Me = KMe_hex8(diρ,diκ,X)
-     elseif et==7
-         Ke, Me = KMe_pyr5(diρ,diκ,X) 
-      else
-         error("Derivada_KM::Elemento não definido")
-     end
+    elseif et==7
+        Ke, Me = KMe_pyr5(diρ,diκ,X) 
+    else
+        error("Derivada_KM::Elemento não definido")
+    end
 
-     # Devolve as derivadas
-     return Ke, Me
+    # Devolve as derivadas
+    return Ke, Me
 
 end
 
-#
+# ===================================================================================
 # Calcula a derivada da função objetivo
+#
 # Média simples do SPL em cada frequência
 #
 function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
@@ -72,9 +76,6 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
 
     # Define o vetor de derivadas
     d = zeros(ne)
-
-    # Como estamos assumindo que todos os nós target tem o mesmo p0
-    P02 = p0^2 
 
     # Número de frequências
     Nf = length(freqs)
@@ -169,7 +170,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
          
 end
 
-#
+# ===================================================================================
 # Derivada de Fn [dFn/dγm]
 #
 # "Forças" devido a pressões impostas para um elemento com 

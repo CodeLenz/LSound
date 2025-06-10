@@ -50,17 +50,17 @@ function Processa_FRF(meshfile::String,freqs::Vector)
     # Seleciona as rotinas de parametrização de material de acordo com 
     # a opção 
     if parametrizacao=="PEREIRA"
-         println("Utilizando a parametrização de PEREIRA")
-         fρ(γ)  = fρ_pereira(γ) #,ψ, ρ_ar = ρ_ar, ρ2 = ρ_solido)
-         dfρ(γ) = dfρ_pereira(γ)
-         fκ(γ)  = fκ_pereira(γ)
-         dfκ(γ) = dfκ_pereira(γ)
+      println("Utilizando a parametrização de PEREIRA")
+      fρ(γ)  = fρ_pereira(γ) #,ψ, ρ_ar = ρ_ar, ρ2 = ρ_solido)
+      dfρ(γ) = dfρ_pereira(γ)
+      fκ(γ)  = fκ_pereira(γ)
+      dfκ(γ) = dfκ_pereira(γ)
     #elseif parametrizacao=="DUHRING"
-    #     println("Utilizando a parametrização de DUHRING")
-    #     fρ(γ)  = fρ_duhring(γ)
-    #     dfρ(γ) = dfρ_duhring(γ)
-    #     fκ(γ)  = fκ_duhring(γ)
-    #     dfκ(γ) = dfκ_duhring(γ)
+    #  println("Utilizando a parametrização de DUHRING")
+    #  fρ(γ)  = fρ_duhring(γ)
+    #  dfρ(γ) = dfρ_duhring(γ)
+    #  fκ(γ)  = fκ_duhring(γ)
+    #  dfκ(γ) = dfκ_duhring(γ)
     end
      
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
@@ -73,7 +73,7 @@ function Processa_FRF(meshfile::String,freqs::Vector)
     # Precisamos de um material
     isempty(materials) && error("Processa_FRF:: at least one material is necessary")
     
-    # Le as variáveis de projeto iniciais
+    # Lê as variáveis de projeto iniciais
     γ = vec(readdlm(arquivo_γ_ini))  
    
     # Concatena nodes_open e nodes_pressure
@@ -110,7 +110,9 @@ function Processa_FRF(meshfile::String,freqs::Vector)
     
     # Calcula o SLPn em cada uma das frequências 
     for i=1:nf
-        FRF_SLPn_final[i] = SPLn(MP[:,i],20E-6)
+
+      FRF_SLPn_final[i] = SPLn(MP[:,i],20E-6)
+
     end
 
    # Retorna o vetor com as frequências, a varredura inicial e a final

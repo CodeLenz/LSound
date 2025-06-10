@@ -18,7 +18,6 @@ function Volumes(ne,connect,coord)
 
     # Loop em cada elemento, identificado o tipo e chamando a função 
     # correta
-
     for ele = 1:ne 
 
         # Tipo de elemento

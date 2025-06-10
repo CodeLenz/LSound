@@ -1,3 +1,6 @@
+# 
+# Função que Calcula a derivada por DFC
+#
 function df(γ0::Vector,f::Function, elements_design::Vector, δ=1E-6)
 
     # Iniciliza o vetor gradiente

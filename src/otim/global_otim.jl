@@ -1,9 +1,11 @@
-#
+# ===================================================================================
 # Monta_KM, versão para otimização
 #
-# γ é um vetor de variáveis de projeto [0,1]
-# fρ é uma função que parametriza ρ
-# fκ é uma função que parametriza κ
+# γ   ->  vetor de variáveis de projeto [0,1] 
+# fρ  ->  função que parametriza ρ
+# fκ  ->  função que parametriza κ
+# ===================================================================================
+
 function Monta_KM2(ne,coord,connect,γ::Vector,fρ::Function,fκ::Function)  
     
     # Aloca vetores para a montagem eficiente 
@@ -61,4 +63,3 @@ function Monta_KM2(ne,coord,connect,γ::Vector,fρ::Function,fκ::Function)
     return sparse(I,J,VK), sparse(I,J,VM)
 
 end
-

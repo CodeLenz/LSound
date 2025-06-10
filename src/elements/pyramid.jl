@@ -1,6 +1,6 @@
 #
 # Devolve a matriz [N] para um  ponto r,s,t
-#
+# (matriz com as funções de interpolação para este elemento)
 function Matriz_N_pyr5(r,s,t)
 
     N1 = - (1/8)*(((r-1)*s-r+1)*t+(1-r)*s+r-1)
@@ -11,119 +11,119 @@ function Matriz_N_pyr5(r,s,t)
 
     return @SMatrix [N1 N2 N3 N4 N5]
   
-  end
-  
-  #
-  # Devolve as derivadas das funções de interpolação
-  # em um ponto r,s,t
-  #
-  function dNrs_pyr5(r,s,t)
-      # Derivada das funções de interpolação em relação
-      # a r, s e t
-      #                    
-      dNr = SMatrix{5,1}([ -(((s-1)*t-s+1)/8) ; ((s-1)*t-s+1)/8 ; -(((s+1)*t-s-1)/8) ;
-                            ((s+1)*t-s-1)/8   ;  0 ])
+end
 
-      dNs = SMatrix{5,1}([ -(((r-1)*t-r+1)/8) ; ((r+1)*t-r-1)/8 ; -(((r+1)*t-r-1)/8) ; 
-                            ((r-1)*t-r+1)/8  ;  0 ])
+# ===================================================================================
+# Devolve as derivadas das funções de interpolação
+# em um ponto r,s,t
+#
+function dNrs_pyr5(r,s,t)
+    # Derivada das funções de interpolação em relação
+    # a r, s e t
+    #                    
+    dNr = SMatrix{5,1}([ -(((s-1)*t-s+1)/8) ; ((s-1)*t-s+1)/8 ; -(((s+1)*t-s-1)/8) ;
+                          ((s+1)*t-s-1)/8   ;  0 ])
 
-      dNt = SMatrix{5,1}([ -(((r-1)*s-r+1)/8) ; ((r+1)*s-r-1)/8 ; -(((r+1)*s+r+1)/8) ; 
-                            ((r-1)*s+r-1)/8  ; 1/2 ])
+    dNs = SMatrix{5,1}([ -(((r-1)*t-r+1)/8) ; ((r+1)*t-r-1)/8 ; -(((r+1)*t-r-1)/8) ; 
+                          ((r-1)*t-r+1)/8  ;  0 ])
+
+    dNt = SMatrix{5,1}([ -(((r-1)*s-r+1)/8) ; ((r+1)*s-r-1)/8 ; -(((r+1)*s+r+1)/8) ; 
+                          ((r-1)*s+r-1)/8  ; 1/2 ])
       
-      return dNr,  dNs, dNt
-  end
-   
-  #
-  # Calcula a matriz Jacobiana do elemento
-  #
-  function Jacobiana_pyr5(r,s,t,X::Array)
-  
-      # Derivadas das funções de interpolação
-      # em relação a    r e s
-      dNr, dNs, dNt = dNrs_pyr5(r,s,t)
-  
-      # Inicializa a matriz J
-      J = @MMatrix zeros(3,3)
-  
-      # Loop pelos somatórios
-      for i=1:5
-          J[1,1] += dNr[i]*X[i,1]
-          J[1,2] += dNr[i]*X[i,2]
-          J[1,3] += dNr[i]*X[i,3]
+    return dNr,  dNs, dNt
+end
 
-          J[2,1] += dNs[i]*X[i,1]
-          J[2,2] += dNs[i]*X[i,2]
-          J[2,3] += dNs[i]*X[i,3]
+# ===================================================================================
+# Calcula a matriz Jacobiana do elemento
+#
+function Jacobiana_pyr5(r,s,t,X::Array)
+  
+    # Derivadas das funções de interpolação
+    # em relação a    r e s
+    dNr, dNs, dNt = dNrs_pyr5(r,s,t)
+  
+    # Inicializa a matriz J
+    J = @MMatrix zeros(3,3)
+  
+    # Loop pelos somatórios
+    for i=1:5
+        J[1,1] += dNr[i]*X[i,1]
+        J[1,2] += dNr[i]*X[i,2]
+        J[1,3] += dNr[i]*X[i,3]
+
+        J[2,1] += dNs[i]*X[i,1]
+        J[2,2] += dNs[i]*X[i,2]
+        J[2,3] += dNs[i]*X[i,3]
           
-          J[3,1] += dNt[i]*X[i,1]
-          J[3,2] += dNt[i]*X[i,2]
-          J[3,3] += dNt[i]*X[i,3]
+        J[3,1] += dNt[i]*X[i,1]
+        J[3,2] += dNt[i]*X[i,2]
+        J[3,3] += dNt[i]*X[i,3]
           
-      end
+    end
    
-      # Devolve a matriz Jacobiana para o elemento
-      # no ponto r,s,t
-      return J
+    # Devolve a matriz Jacobiana para o elemento
+    # no ponto r,s,t
+    return J
   
-  end
-  
-  #
-  # Monta a matriz B de um elemento na posiçao r,s
-  #
-  function Matriz_B_pyr5(r,s,t,X::Array)
-  
-      # Derivadas das funções de interpolação
-      # em relação a r,s,t
-      dNr, dNs, dNt = dNrs_pyr5(r,s,t)
-  
-      # Calcula a matriz Jacobiana no ponto r,s,t
-      J = Jacobiana_pyr5(r,s,t,X)
-  
-      # Inicializa a matriz B
-      B = @MMatrix zeros(3,5)
-  
-      # Inverte a J
-      iJ = inv(J)
-  
-      # Loop pelas colunas de B
-      for i=1:5
-  
-          # Corrige as derivadas de rs para xy
-          dNxy = iJ*[dNr[i];dNs[i];dNt[i]]
-   
-          # Posiciona na coluna
-          B[1,i] = dNxy[1]
-          B[2,i] = dNxy[2]
-          B[3,i] = dNxy[3]
-  
-      end
-  
-      # Devolve B e o dJ
-      return B, det(J)
-  
-  end
-  
-  #
-  # Calcula as matrizes Ke e Me para um elemento 
-  #
-  function KMe_pyr5(iρ,iκ,X)
+end
 
-      # Aloca as matrizes
-      Ke = @MMatrix zeros(5,5)
-      Me = @MMatrix zeros(5,5)
+# ===================================================================================
+# Monta a matriz B de um elemento na posiçao r,s
+#
+function Matriz_B_pyr5(r,s,t,X::Array)
   
-      # Integração por quadratura de Gauss-Legendre
-      pg = (1/sqrt(3))*[-1;1]
+    # Derivadas das funções de interpolação
+    # em relação a r,s,t
+    dNr, dNs, dNt = dNrs_pyr5(r,s,t)
+  
+    # Calcula a matriz Jacobiana no ponto r,s,t
+    J = Jacobiana_pyr5(r,s,t,X)
+  
+    # Inicializa a matriz B
+    B = @MMatrix zeros(3,5)
+  
+    # Inverte a J
+    iJ = inv(J)
+  
+    # Loop pelas colunas de B
+    for i=1:5
+  
+        # Corrige as derivadas de rs para xy
+        dNxy = iJ*[dNr[i];dNs[i];dNt[i]]
+   
+        # Posiciona na coluna
+        B[1,i] = dNxy[1]
+        B[2,i] = dNxy[2]
+        B[3,i] = dNxy[3]
+  
+    end
+  
+    # Devolve B e o dJ
+    return B, det(J)
+  
+ end
+
+ # ===================================================================================
+# Calcula as matrizes Ke e Me para um elemento 
+#
+function KMe_pyr5(iρ,iκ,X)
+
+    # Aloca as matrizes
+    Ke = @MMatrix zeros(5,5)
+    Me = @MMatrix zeros(5,5)
+  
+    # Integração por quadratura de Gauss-Legendre
+    pg = (1/sqrt(3))*[-1;1]
       
-      @inbounds for i=1:2
-          # Ponto nesta dimensão
-          r = pg[i]
+    @inbounds for i=1:2
+        # Ponto nesta dimensão
+        r = pg[i]
       
-          @inbounds for j=1:2
-              # Ponto nesta dimensão
-              s = pg[j]
+        @inbounds for j=1:2
+            # Ponto nesta dimensão
+            s = pg[j]
       
-              @inbounds for k=1:2
+            @inbounds for k=1:2
                 # Ponto nesta dimensão
                 t = pg[k]
       
@@ -137,23 +137,22 @@ function Matriz_N_pyr5(r,s,t)
                 Me = Me + N'*N*dJ
                 Ke = Ke + B'*B*dJ
 
-              end  #k 
-          end #j
-      end #i
+            end  #k 
+        end #j
+    end #i
   
-      return iρ*Ke, iκ*Me
+    return iρ*Ke, iκ*Me
   
-  end
-  
+end
 
-# ######################################################
+# ===================================================================================
 # Faces
-# 1) 1 2 3 4 ; <-- Esta face permanece do hex8
+# 1) 1 2 3 4 ; <-- Esta face permanece do hex8 (visto que ocorreu o colapso de nós)
 # 2) 2 3 5 ;   
 # 3) 3 4 5 ;
 # 4) 4 1 5 ;
 # 5) 1 2 5 ;
-# ######################################################
+# ===================================================================================
 function Map_face_pyr5(face,ζ,η,X)
 
     # Basic test
@@ -231,7 +230,7 @@ function Map_face_pyr5(face,ζ,η,X)
 
 end
 
-#
+# ===================================================================================
 # Force vector for a pyramid element 
 #
 function Face_load_local_pyr5(face,qn,X)
@@ -251,7 +250,7 @@ function Face_load_local_pyr5(face,qn,X)
 
 end
 
-#
+# ===================================================================================
 # Damping matrix Ce
 #
 function Damping_local_pyr5(face,damp,X)
@@ -271,7 +270,7 @@ function Damping_local_pyr5(face,damp,X)
 
 end
 
-#
+# ===================================================================================
 # Calcula a volume do elemento
 #
 function Volume_pyr5(X::Matrix)

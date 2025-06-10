@@ -1,5 +1,6 @@
 #
 # Devolve a matriz [N] para um  ponto r,s
+# (matriz com as funções de interpolação para este elemento)
 #
 function Matriz_N_bi4(r,s)
 
@@ -10,125 +11,125 @@ function Matriz_N_bi4(r,s)
   
     return @SMatrix [N1 N2 N3 N4]
   
-  end
+end
   
-  #
-  # Devolve as derivadas das funções de interpolação
-  # em um ponto r,s
-  #
-  function dNrs_bi4(r,s)
-      # Deriva das funções de interpolação em relação
-      # a r e s
-      #               N1     N2     N3       N4
-      dNr = SMatrix{4,1}((1/4)*[-(1-s);  (1-s); (1+s); -(1+s)])
-      dNs = SMatrix{4,1}((1/4)*[-(1-r); -(1+r); (1+r);  (1-r)])
+# ===================================================================================
+# Devolve as derivadas das funções de interpolação
+# em um ponto r,s
+#
+function dNrs_bi4(r,s)
+    # Deriva das funções de interpolação em relação
+    # a 'r' e 's'
+    #                           N1     N2     N3       N4
+    dNr = SMatrix{4,1}((1/4)*[-(1-s);  (1-s); (1+s); -(1+s)])
+    dNs = SMatrix{4,1}((1/4)*[-(1-r); -(1+r); (1+r);  (1-r)])
       
-      return dNr,  dNs
-  end
-   
-  #
-  # Calcula a matriz Jacobiana do elemento
-  #
-  function Jacobiana_bi4(r,s,X::Array)
-  
-      # Derivadas das funções de interpolação
-      # em relação a    r e s
-      dNr, dNs = dNrs_bi4(r,s)
-  
-      # Inicializa a matriz J
-      J = @MMatrix zeros(2,2)
-  
-      # Loop pelos somatórios
-      for i=1:4
-          J[1,1] += dNr[i]*X[i,1]
-          J[1,2] += dNr[i]*X[i,2]
-          J[2,1] += dNs[i]*X[i,1]
-          J[2,2] += dNs[i]*X[i,2]
-      end
-   
-      # Devolve a matriz Jacobiana para o elemento
-      # no ponto r,s
-      return J
-  
-  end
-  
-  #
-  # Monta a matriz B de um elemento na posiçao r,s
-  #
-  function Matriz_B_bi4(r,s,X::Array)
-  
-      # Derivadas das funções de interpolação
-      # em relação a    r e s
-      dNr, dNs = dNrs_bi4(r,s)
-  
-      # Calcula a matriz Jacobiana no ponto r,s
-      J = Jacobiana_bi4(r,s,X)
-  
-      # Inicializa a matriz B
-      B = @MMatrix zeros(2,4)
-  
-      # Inverte a J
-      iJ = inv(J)
-  
-      # Loop pelas colunas de B
-      for i=1:4
-  
-          # Corrige as derivadas de rs para xy
-          dNxy = iJ*[dNr[i];dNs[i]]
-   
-          # Posiciona na coluna
-          B[1,i] = dNxy[1]
-          B[2,i] = dNxy[2]
-  
-      end
-  
-      # Devolve B e o dJ
-      return B, det(J)
-  
-  end
-  
-  #
-  # Calcula as matrizes Ke e Me para um elemento 
-  #
-  function KMe_bi4(iρ,iκ,X)
+    return dNr,  dNs
+end
 
-      # Aloca as matrizes
-      Ke = @MMatrix zeros(4,4)
-      Me = @MMatrix zeros(4,4)
+# ===================================================================================
+# Calcula a matriz Jacobiana do elemento
+#
+function Jacobiana_bi4(r,s,X::Array)
   
-      # Integração por quadratura de Gauss-Legendre
-      pg = (1/sqrt(3))*[-1;1]
-      wg = ones(2)
+    # Derivadas das funções de interpolação
+    # em relação a    r e s
+    dNr, dNs = dNrs_bi4(r,s)
   
-      @inbounds for i=1:2
-          # Ponto e peso nesta dimensão
-          r = pg[i]
-          wr = wg[i]
+    # Inicializa a matriz J
+    J = @MMatrix zeros(2,2)
   
-          @inbounds for j=1:2
-              # Ponto e peso nesta dimensão
-              s = pg[j]
-              ws = wg[j]
-  
-              # Calcula DJ e B 
-              B, dJ = Matriz_B_bi4(r,s,X)
-  
-              # Calcula N(r,s)
-              N = Matriz_N_bi4(r,s) 
-  
-              # Somatórios
-              Me = Me + N'*N*dJ
-              Ke = Ke + B'*B*dJ
-  
-          end
-      end
-  
-      return iρ*Ke, iκ*Me
-  
-  end
-  
+    # Loop pelos somatórios
+    for i=1:4
+        J[1,1] += dNr[i]*X[i,1]
+        J[1,2] += dNr[i]*X[i,2]
 
-# ######################################################
+        J[2,1] += dNs[i]*X[i,1]
+        J[2,2] += dNs[i]*X[i,2]
+    end
+   
+    # Devolve a matriz Jacobiana para o elemento
+    # no ponto r,s
+    return J
+  
+end
+
+# ===================================================================================
+# Monta a matriz B de um elemento na posiçao r,s
+#
+function Matriz_B_bi4(r,s,X::Array)
+  
+    # Derivadas das funções de interpolação
+    # em relação a    'r' e 's'
+    dNr, dNs = dNrs_bi4(r,s)
+  
+    # Calcula a matriz Jacobiana no ponto r,s
+    J = Jacobiana_bi4(r,s,X)
+  
+    # Inicializa a matriz B
+    B = @MMatrix zeros(2,4)
+  
+    # Inverte a J
+    iJ = inv(J)
+  
+    # Loop pelas colunas de B
+    for i=1:4
+  
+        # Corrige as derivadas de rs para xy
+        dNxy = iJ*[dNr[i];dNs[i]]
+   
+        # Posiciona na coluna
+        B[1,i] = dNxy[1]
+        B[2,i] = dNxy[2]
+  
+    end
+  
+    # Devolve B e o dJ
+    return B, det(J)
+  
+end
+  
+# ===================================================================================
+# Calcula as matrizes Ke e Me para um elemento 
+#
+function KMe_bi4(iρ,iκ,X)
+
+    # Aloca as matrizes
+    Ke = @MMatrix zeros(4,4)
+    Me = @MMatrix zeros(4,4)
+  
+    # Integração por quadratura de Gauss-Legendre
+    pg = (1/sqrt(3))*[-1;1]
+    wg = ones(2)
+  
+    @inbounds for i=1:2
+        # Ponto e peso nesta dimensão
+        r = pg[i]
+        wr = wg[i]
+  
+        @inbounds for j=1:2
+            # Ponto e peso nesta dimensão
+            s = pg[j]
+            ws = wg[j]
+  
+            # Calcula DJ e B 
+            B, dJ = Matriz_B_bi4(r,s,X)
+  
+            # Calcula N(r,s)
+            N = Matriz_N_bi4(r,s) 
+  
+            # Somatórios
+            Me = Me + N'*N*dJ
+            Ke = Ke + B'*B*dJ
+  
+        end
+    end
+  
+    return iρ*Ke, iκ*Me
+  
+end
+
+# ===================================================================================
 #    Edges, normals and tangents
 #
 #               n
@@ -142,7 +143,7 @@ function Matriz_N_bi4(r,s)
 #           n
 #
 #
-# ######################################################
+# ===================================================================================
 function Map_edge_bi4(edge,ζ,X)
 
     # Basic test
@@ -236,7 +237,7 @@ function Map_edge_bi4(edge,ζ,X)
 
 end
 
-#
+# ===================================================================================
 # Force vector for a bi4 element 
 # local (normal) surface load.
 #
@@ -257,7 +258,7 @@ function Edge_load_local_bi4(edge,qn,X)
 
 end
 
-#
+# ===================================================================================
 # Damping matrix Ce
 #
 function Damping_local_bi4(edge,damp,X)
@@ -277,8 +278,7 @@ function Damping_local_bi4(edge,damp,X)
 
 end
 
-
-#
+# ===================================================================================
 # Calcula a área do elemento
 #
 function Area_bi4(X::Matrix)

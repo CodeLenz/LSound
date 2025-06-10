@@ -1,6 +1,5 @@
-
 #
-# Programar depois para fazer a validação das derivadas por DFC
+# Validação das derivadas por DFC
 #
 function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target,elements_design)
     
@@ -21,4 +20,3 @@ function Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocitie
     d_numerica = df(γ,f,elements_design,1E-6)
 
 end
-

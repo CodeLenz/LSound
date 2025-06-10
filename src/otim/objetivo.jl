@@ -1,7 +1,9 @@
 #
 # Calcula o SPL (Sound Pressure Level) para uma dada distribuição de pressao p
-# equivalente a uma frequência ω_n. O vetor P foi obtido via Sweep
-
+# equivalente a uma frequência ω_n. O vetor P foi obtido via Sweep.
+# 
+# p0 -> pressão de referência
+# nt -> numero de pontos em 'nodes_target'
 #
 function SPLn(P::Vector,p0)
 
@@ -23,6 +25,8 @@ function SPLn(P::Vector,p0)
 
 end
 
+# ===================================================================================
+#
 # Média dos SPL em cada uma das frequências consideradas
 #
 # MP é uma matriz nn × nf com pressões em diferentes frequências
@@ -46,6 +50,4 @@ function Objetivo(MP::Matrix, nodes_target::Vector, p0=20E-6)
     # Retorna o valor médio (média pelo número de frequências)
     return soma / Nf
 
-
 end
-

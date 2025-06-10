@@ -12,12 +12,11 @@ function Centroides(ne,connect,coord)
     # 3 -> quadrangular (linear)
     #
     #          3D
-    # 4 -> Tetrahedra (linear)
+    # 4 -> tetrahedra (linear)
     # 5 -> hexaedra (linear)
     # 7 -> pyramid (linear)
 
     # Loop em cada elemento, identificado o tipo 
-
     for ele = 1:ne 
 
         # Tipo de elemento
