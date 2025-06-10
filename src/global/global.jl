@@ -47,8 +47,8 @@ function Monta_KM(nn,ne,coord,connect,materials)
         elseif et==5
            Ke, Me = KMe_hex8(iρ,iκ,X)
         elseif et==7
-            Ke, Me = KMe_pyr5(iρ,iκ,X)    # 7  5-node pyramid.
-         else
+            Ke, Me = KMe_pyr5(iρ,iκ,X)    
+        else
             error("Elemento não definido")
         end
  
@@ -70,7 +70,9 @@ function Monta_KM(nn,ne,coord,connect,materials)
 
 end
 
-
+# ===================================================================================
+# Monta a matriz de amortecimento global C 
+#
 function Matriz_C(nn,damping,coord,connect)
 
     # Aloca os vetores para a matriz de amortecimento
@@ -112,7 +114,7 @@ function Matriz_C(nn,damping,coord,connect)
             elseif et==5
                 Ce = Damping_local_hex8(edge,damp,X)
             elseif et==7
-                Ce = Damping_local_pyr5(edge,damp,X)   # 7  5-node pyramid.
+                Ce = Damping_local_pyr5(edge,damp,X)  
             else
                 error("Tipo de elemento não definido")
             end
