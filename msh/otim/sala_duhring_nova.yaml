@@ -6,22 +6,22 @@
 versao: 1.0
 
 # Fração de volume (obrigatório)
-volfrac: 0.3
+volfrac: 0.7
 
 # Raio do filtro (obrigatório)
-raio: 0.6 
+raio: 0.6
 
 # Evolution rate (valor padrão é 0.01)
 er : 0.01
 
 # Número de iterações de otimização (valor padrão é 100)
-niter: 200
+niter: 50
 
 # Parametrização do material 
 parametrizacao: PEREIRA
 
 # Número de iterações para a média histórica
-nhisto: 5
+nhisto: 2
 
 # Valor mínimo da variável de projeto
 γmin: 1E-3

@@ -50,6 +50,7 @@ module LSound
     include("otim/sweep.jl")
     include("otim/verifica_derivada.jl")
     include("otim/BESO.jl")
+    include("otim/BESO_classico.jl")
 
     include("otim/processa_FRF.jl")
 

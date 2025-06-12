@@ -85,10 +85,18 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Não precisamos do centróide e de vizinhança se for para verificar a derivada
     if !verifica_derivada
     
+         # TODO 
+         # Calcular centróides e vizinhos somente de elementos de projeto
+         # 
+
          # Calcula a matriz com os centróides de cada elemento da malha
          println("Determinando os centróides dos elementos")
          @time centroides = Centroides(ne,connect,coord)
 
+         # TODO 
+         # Ver cálculo automático de raio se raio_filtro for nulo
+         #
+         
          # Obtém os vizinhos de cada elemento da malha
          println("Determinando a vizinhança para um raio de $(raio_filtro)")
          @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro,elements_design)
@@ -210,7 +218,12 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     for iter = 1:niter
 
         # Volume atual da estrutura
-        volume_atual = sum(γ[elements_design].*V[elements_design])
+        volume_atual = 0.0
+        for ele in elements_design
+            if γ[ele]≈γ_max
+               volume_atual += V[ele]
+            end
+         end
 
         # Armazena o volume no histório de volumes
         historico_V[iter] = volume_atual
@@ -265,7 +278,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # Fix_D!(ESED_F,elements_fixed)
 
         # Guarda na coluna de ESED_F_media
-        ESED_F_ANT[:,iter] .= ESED_F
+        ESED_F_ANT[elements_design,iter] .= ESED_F[elements_design]
 
         # Mean value using the last iterations
         # Aqui temos que ter um cuidado muito importante. O número de colunas 
@@ -274,17 +287,27 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         pfin = max(iter,iter-nhisto) 
         
         # Valor médio 
-        ESED_F_media .= mean(ESED_F_ANT[:,pini:pfin],dims=2)
-        
+        ESED_F_media[elements_design] .= mean(ESED_F_ANT[elements_design,pini:pfin],dims=2)
+     
+        # Visualiza as ESEDS...
+        Lgmsh_export_element_scalar(arquivo_pos,SN,"SN")  
+        Lgmsh_export_element_scalar(arquivo_pos,ESED_F,"ESED_F")  
+        Lgmsh_export_element_scalar(arquivo_pos,ESED_F_media,"ESED_media")  
+
         # Update the relative densities
-        γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design,γ_min=γ_min,γ_max=γ_max)
-        #γn, niter_beso = BESO2(ne,γ, ESED_F_media, V, vol, elements_design)
+        # Método baseado na biseção
+        # γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design,γ_min=γ_min,γ_max=γ_max)
+
+        # Clássico
+        niter_beso = 1
+        γn = BESO3(γ, ESED_F_media,V,vol,elements_design,xmin=γ_min,xmax=γ_max)
+        
 
         # Garante que os elementos fixos não tenham sido alterados
         # Fix_γ!(γn,elements_fixed,values_fixed)
 
         # Se niter_beso for nula, então o problema stagnou
-        if niter_beso==0
+        if norm(γn-γ,Inf) ≈ 0 # niter_beso==0
            println("BESO não atualizou as variáveis")
            break
         end
