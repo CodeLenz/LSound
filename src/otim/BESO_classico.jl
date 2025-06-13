@@ -1,4 +1,3 @@
-
 #
 # Devolve o volume associado aos elementos cheios e o volume associado aos 
 # elementos vazios
@@ -37,8 +36,10 @@ end
 # que podemos acessar nos vetores decrecente e crescente, até 
 # bater o volume em questão (adicionar/remover)
 #
+# Fazer o somatorio de volume no caso em cada situação para comparação
 #
-function Valores_corte(D::Vector,elementos_projeto::Vector,V::Vector,cheio::Float64,Vlim::Float64)
+#
+function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,cheio::Float64,Vlim::Float64,xmin::Float64,xmax::Float64)
 
     # Uma roubadinha marota aqui...volume médio dos elementos
     Vmedio = mean(V[elementos_projeto])
@@ -53,19 +54,23 @@ function Valores_corte(D::Vector,elementos_projeto::Vector,V::Vector,cheio::Floa
     flag_remocao = false
     remocao = 0.0
 
+    # Listas de modificação  --> lista booleana ?  
+    # lista_adicao = 
+    # lista_remocao = 
+
     #             Adição
 
     # Organiza do maior para o menor
     #
-    # ordem_decrecente = sortperm(Dprojeto,rev=true)
+    ordem_decrescente = sortperm(Dprojeto,rev=true)
     #
     # toda a vez que quiser acessar Dprojeto, pode usar
-    # a lista ordem_decrecente direto. Mas para acessar, 
-    # por exemplo, V tem que usar elementos_projeto[alguma posição em ordem crescente]
+    # a lista ordem_decrescente direto. Mas para acessar, 
+    # por exemplo, V tem que usar elementos_projeto[alguma posição em ordem decrescente]
     #
-    # decrecente = Dprojeto[ordem_decrecente]
+    decrescente = Dprojeto[ordem_decrescente]
     #
-    decrecente = sort(Dprojeto, rev=true)
+    #decrescente = sort(Dprojeto, rev=true)
 
     # O volume a adicionar é 
     adicionar = Vlim-cheio
@@ -77,9 +82,23 @@ function Valores_corte(D::Vector,elementos_projeto::Vector,V::Vector,cheio::Floa
         # Indica que precisamos adicionar material 
         flag_adicao = true
 
-        # loop por todos os elementos de projeto, na ordem_decrecente
+        # loop por todos os elementos de projeto, na ordem_decrescente
         # vendo se a variável de projeto do elemento é xmin, soma o volume  
         # e marca esse elemento para adição
+        for ele in elementos_projeto   # <-- AQUI PODERIA UTILIZAR DIRETO O 'decrescente'?
+
+            # Se o valor de D está acima do valor de corte para adição, adicionamos material 
+            if x[ele] ≈ xmin
+
+                x[ele] = xmax
+
+                adicao += V[ele]
+                
+                lista_adicao[ele] = true 
+
+            end    
+
+        end #ele
 
         # O número de elementos associado a essa diferença será 
         # arredonda para cima para evitarmos que não seja removido
@@ -96,17 +115,17 @@ function Valores_corte(D::Vector,elementos_projeto::Vector,V::Vector,cheio::Floa
 
     # Organiza do  menor para o maior
     #
-    # ordem_crescente = sortperm(Dprojeto)
+    ordem_crescente = sortperm(Dprojeto)
     #
     # toda a vez que quiser acessar Dprojeto, pode usar
     # a lista ordem_crescente direto. Mas para acessar, 
     # por exemplo, V tem que usar elementos_projeto[alguma posição em ordem crescente]
     #
-    # crescente = Dprojeto[ordem_crescente]
+    crescente = Dprojeto[ordem_crescente]
     #
 
     # Organiza do menor para o maior
-    crescente = sort(Dprojeto)
+    #crescente = sort(Dprojeto)
 
     # O volume a remover é o complementar ao da adição
     remover = cheio - Vlim
@@ -121,7 +140,19 @@ function Valores_corte(D::Vector,elementos_projeto::Vector,V::Vector,cheio::Floa
         # loop por todos os elementos de projeto, na ordem_crescente
         # vendo se a variável de projeto do elemento é xmax, soma o volume  
         # e marca esse elemento para remocao
+        for ele in elementos_projeto  # <-- AQUI PODERIA UTILIZAR DIRETO O 'crescente'?
 
+            # Se o valor de D está abaixo do valor de corte para remoção, removemos
+            if x[ele] ≈ xmax
+
+                x[ele] = xmin
+                remocao += V[ele]
+
+                lista_remocao[ele] = true 
+
+            end    
+            
+        end #ele
 
         # O número de elementos associado a essa diferença será 
         # arredonda para cima para evitarmos que não seja adicionaro
@@ -134,7 +165,7 @@ function Valores_corte(D::Vector,elementos_projeto::Vector,V::Vector,cheio::Floa
     end
 
     # Retorna o valor de corte para adição/remoção
-    return flag_adicao, adicao, flag_remocao, remocao
+    return flag_adicao, adicao, lista_adicao, flag_remocao, remocao, lista_remocao
 
 end
 
@@ -147,16 +178,16 @@ function BESO3(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, eleme
     xn = copy(x)
 
     # Primeiro calculamos os volumes de cheio de de vazio
-    cheio, _  = Volume_cheios_vazios(x,V,elements_design,xmin,xmax)
+    cheio, _  = Volume_cheios_vazios(xn,V,elements_design,xmin,xmax)
 
     # Agora verificamos quais são os valores de corte para adição e remoção de material 
-    flag_adicao, adicao, flag_remocao, remocao = Valores_corte(D,elements_design,V,cheio,Vlim)
+    flag_adicao, adicao, lista_adicao, flag_remocao, remocao, lista_remocao = Valores_corte(x,D,elements_design,V,cheio,Vlim, xmin, xmax)
 
-    # Acima, já recebemos as listas de modificação
-    # xn[lista_adicao]  .= xmax
-    # xn[lista_remocao] .= xmin 
+    # Acima, já recebemos as listas de modificação --> ainda falta aqui...
+    xn[lista_adicao]  .= xmax
+    xn[lista_remocao] .= xmin 
       
-    # E, com isso, podemos iterar nos elementos de projeto, modificando a variável de projeto
+    #= E, com isso, podemos iterar nos elementos de projeto, modificando a variável de projeto
     for ele in elements_design
 
         # Se o valor de D está abaixo do valor de corte para remoção, removemos
@@ -169,7 +200,7 @@ function BESO3(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, eleme
             xn[ele] = xmax
         end    
 
-    end #ele
+    end #ele =#
 
     # retorna o novo vetor 
     return xn
