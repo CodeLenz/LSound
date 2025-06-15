@@ -55,8 +55,8 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
     remocao = 0.0
 
     # Listas de modificação  --> lista booleana ?  
-    # lista_adicao = 
-    # lista_remocao = 
+    lista_adicao  = falses(length(x))
+    lista_remocao = falses(length(x))
 
     #             Adição
 
@@ -85,7 +85,7 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
         # loop por todos os elementos de projeto, na ordem_decrescente
         # vendo se a variável de projeto do elemento é xmin, soma o volume  
         # e marca esse elemento para adição
-        for ele in elementos_projeto   # <-- AQUI PODERIA UTILIZAR DIRETO O 'decrescente'?
+        for ele in elementos_projeto   #<-- AQUI PODERIA UTILIZAR DIRETO O 'decrescente'?
 
             # Se o valor de D está acima do valor de corte para adição, adicionamos material 
             if x[ele] ≈ xmin
@@ -106,7 +106,7 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
         ne_adicionar = ceil(Int64,adicionar/Vmedio)
 
         # Valor de corte para adição seria 
-        adicao = decrecente[ne_adicionar]
+        adicao = decrescente[ne_adicionar]
 
     end
 
@@ -178,14 +178,14 @@ function BESO3(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, eleme
     xn = copy(x)
 
     # Primeiro calculamos os volumes de cheio de de vazio
-    cheio, _  = Volume_cheios_vazios(xn,V,elements_design,xmin,xmax)
+    cheio,_  = Volume_cheios_vazios(xn,V,elements_design,xmin,xmax)
 
     # Agora verificamos quais são os valores de corte para adição e remoção de material 
     flag_adicao, adicao, lista_adicao, flag_remocao, remocao, lista_remocao = Valores_corte(x,D,elements_design,V,cheio,Vlim, xmin, xmax)
 
     # Acima, já recebemos as listas de modificação --> ainda falta aqui...
-    xn[lista_adicao]  .= xmax
-    xn[lista_remocao] .= xmin 
+    xn[lista_adicao  .== true]  .= xmax
+    xn[lista_remocao .== true]  .= xmin 
       
     #= E, com isso, podemos iterar nos elementos de projeto, modificando a variável de projeto
     for ele in elements_design
