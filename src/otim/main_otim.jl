@@ -306,6 +306,10 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # Garante que os elementos fixos não tenham sido alterados
         # Fix_γ!(γn,elements_fixed,values_fixed)
 
+       # @show γn
+       # @show γ
+        @show norm(γn-γ,Inf)
+
         # Se niter_beso for nula, então o problema stagnou
         if norm(γn-γ,Inf) ≈ 0 # niter_beso==0
            println("BESO não atualizou as variáveis")

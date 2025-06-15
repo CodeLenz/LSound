@@ -75,6 +75,8 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
     # O volume a adicionar é 
     adicionar = Vlim-cheio
 
+    println("Vlim-cheio = ", adicionar)
+
     # Se temos algo a adicionar (adicionar>0) então temos que ver quantos elementos 
     # podemos modificar para preencher essa diferenca (adicionar)
     if adicionar>0
@@ -85,7 +87,7 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
         # loop por todos os elementos de projeto, na ordem_decrescente
         # vendo se a variável de projeto do elemento é xmin, soma o volume  
         # e marca esse elemento para adição
-        for ele in elementos_projeto   #<-- AQUI PODERIA UTILIZAR DIRETO O 'decrescente'?
+        for ele in elementos_projeto[ordem_decrescente]   #<-- AQUI PODERIA UTILIZAR DIRETO O 'decrescente'?
 
             # Se o valor de D está acima do valor de corte para adição, adicionamos material 
             if x[ele] ≈ xmin
@@ -130,6 +132,8 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
     # O volume a remover é o complementar ao da adição
     remover = cheio - Vlim
 
+    println("cheio - Vlim = ", remover)
+
     # Se temos algo a remover (remover>0) então temos que ver quantos elementos 
     # podemos modificar para preencher essa diferenca (remover)
     if remover>0
@@ -140,7 +144,7 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
         # loop por todos os elementos de projeto, na ordem_crescente
         # vendo se a variável de projeto do elemento é xmax, soma o volume  
         # e marca esse elemento para remocao
-        for ele in elementos_projeto  # <-- AQUI PODERIA UTILIZAR DIRETO O 'crescente'?
+        for ele in elementos_projeto[ordem_crescente]  # <-- AQUI PODERIA UTILIZAR DIRETO O 'crescente'?
 
             # Se o valor de D está abaixo do valor de corte para remoção, removemos
             if x[ele] ≈ xmax
@@ -179,13 +183,30 @@ function BESO3(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, eleme
 
     # Primeiro calculamos os volumes de cheio de de vazio
     cheio,_  = Volume_cheios_vazios(xn,V,elements_design,xmin,xmax)
+    println("Volume cheio inicial: ", cheio)
 
     # Agora verificamos quais são os valores de corte para adição e remoção de material 
     flag_adicao, adicao, lista_adicao, flag_remocao, remocao, lista_remocao = Valores_corte(x,D,elements_design,V,cheio,Vlim, xmin, xmax)
 
+    # println("Flag de adição: ", flag_adicao, " Adição: ", adicao)
+    # println("Flag de remoção: ", flag_remocao, " Remoção: ", remocao)
+    # println("Lista de adição: ", lista_adicao)
+    # println("Lista de remoção: ", lista_remocao)
+
     # Acima, já recebemos as listas de modificação --> ainda falta aqui...
-    xn[lista_adicao  .== true]  .= xmax
-    xn[lista_remocao .== true]  .= xmin 
+    if flag_adicao
+        println("Iniciando adição... :)")
+        xn[lista_adicao  .== true]  .= xmax
+    else
+        println("Nada de adicionar :(")
+    end
+
+    if flag_remocao 
+        println("Iniciando remoção... :)")
+        xn[lista_remocao .== true]  .= xmin 
+    else
+         println("Nada de remover :(")
+    end
       
     #= E, com isso, podemos iterar nos elementos de projeto, modificando a variável de projeto
     for ele in elements_design
