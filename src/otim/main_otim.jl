@@ -279,7 +279,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
 
         # ESED - Normaliza a derivada do objetivo
         #        e corrige o sinal para a definição do Índice de Sensibilidade
-        SN[elements_design] = -dΦ[elements_design] ./ V[elements_design]
+        SN[elements_design] .= -dΦ[elements_design] ./ V[elements_design]
         
         # Filtro de vizinhança espacial
         ESED_F =  Filtro(vizinhos,pesos,SN,elements_design)
