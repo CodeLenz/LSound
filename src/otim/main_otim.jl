@@ -299,19 +299,10 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design,γ_min=γ_min,γ_max=γ_max)
 
         # Clássico
-        niter_beso = 1
         γn = BESO3(γ, ESED_F_media,V,vol,elements_design,xmin=γ_min,xmax=γ_max)
-        
-
-        # Garante que os elementos fixos não tenham sido alterados
-        # Fix_γ!(γn,elements_fixed,values_fixed)
-
-       # @show γn
-       # @show γ
-        @show norm(γn-γ,Inf)
 
         # Se niter_beso for nula, então o problema stagnou
-        if norm(γn-γ,Inf) ≈ 0 # niter_beso==0
+        if norm(γn-γ,Inf) ≈ 0 
            println("BESO não atualizou as variáveis")
            break
         end

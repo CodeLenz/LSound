@@ -39,38 +39,31 @@ end
 # Fazer o somatorio de volume no caso em cada situação para comparação
 #
 #
-function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,cheio::Float64,Vlim::Float64,xmin::Float64,xmax::Float64)
-
-    # Uma roubadinha marota aqui...volume médio dos elementos
-    Vmedio = mean(V[elementos_projeto])
+function Elementos_a_modificar(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,cheio::Float64,Vlim::Float64,xmin::Float64,xmax::Float64)
 
     # Números de sensibilidade somente dos elementos de projeto
     Dprojeto = D[elementos_projeto]
 
     # Valores de corte
     flag_adicao = false
+    ne_adicionar = 0
     adicao  = 0.0
 
     flag_remocao = false
+    ne_remover = 0
     remocao = 0.0
 
     # Listas de modificação  --> lista booleana ?  
     lista_adicao  = falses(length(x))
     lista_remocao = falses(length(x))
 
-    #             Adição
+    #
+    #                                           Adição
+    #
 
     # Organiza do maior para o menor
     #
     ordem_decrescente = sortperm(Dprojeto,rev=true)
-    #
-    # toda a vez que quiser acessar Dprojeto, pode usar
-    # a lista ordem_decrescente direto. Mas para acessar, 
-    # por exemplo, V tem que usar elementos_projeto[alguma posição em ordem decrescente]
-    #
-    decrescente = Dprojeto[ordem_decrescente]
-    #
-    #decrescente = sort(Dprojeto, rev=true)
 
     # O volume a adicionar é 
     adicionar = Vlim-cheio
@@ -87,30 +80,31 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
         # loop por todos os elementos de projeto, na ordem_decrescente
         # vendo se a variável de projeto do elemento é xmin, soma o volume  
         # e marca esse elemento para adição
-        for ele in elementos_projeto[ordem_decrescente]   #<-- AQUI PODERIA UTILIZAR DIRETO O 'decrescente'?
+        for ele in elementos_projeto[ordem_decrescente]   
 
             # Se o valor de D está acima do valor de corte para adição, adicionamos material 
             if x[ele] ≈ xmin
 
-                x[ele] = xmax
-
+                # Adiciona o volume do elemento no total 
                 adicao += V[ele]
                 
+                # Número de elementos a adicionar
+                ne_adicionar += 1
+
+                # Marca o elemento para adição
                 lista_adicao[ele] = true 
 
-            end    
+                # Se passarmos do valor de volume a adicionar,
+                # temos que sair do loop
+                if adicao>=adicionar
+                    break
+                end
 
-        end #ele
+            end # if xmin   
 
-        # O número de elementos associado a essa diferença será 
-        # arredonda para cima para evitarmos que não seja removido
-        # nenhum elemento (por questão de tamanho da malha)
-        ne_adicionar = ceil(Int64,adicionar/Vmedio)
+        end # ele
 
-        # Valor de corte para adição seria 
-        adicao = decrescente[ne_adicionar]
-
-    end
+    end # if adicionar > 0 
 
     
     #             Remoção
@@ -118,16 +112,6 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
     # Organiza do  menor para o maior
     #
     ordem_crescente = sortperm(Dprojeto)
-    #
-    # toda a vez que quiser acessar Dprojeto, pode usar
-    # a lista ordem_crescente direto. Mas para acessar, 
-    # por exemplo, V tem que usar elementos_projeto[alguma posição em ordem crescente]
-    #
-    crescente = Dprojeto[ordem_crescente]
-    #
-
-    # Organiza do menor para o maior
-    #crescente = sort(Dprojeto)
 
     # O volume a remover é o complementar ao da adição
     remover = cheio - Vlim
@@ -144,32 +128,36 @@ function Valores_corte(x::Vector, D::Vector,elementos_projeto::Vector,V::Vector,
         # loop por todos os elementos de projeto, na ordem_crescente
         # vendo se a variável de projeto do elemento é xmax, soma o volume  
         # e marca esse elemento para remocao
-        for ele in elementos_projeto[ordem_crescente]  # <-- AQUI PODERIA UTILIZAR DIRETO O 'crescente'?
+        for ele in elementos_projeto[ordem_crescente]  
 
-            # Se o valor de D está abaixo do valor de corte para remoção, removemos
+            # Se o elemento tem xmax, podemos marcar para passar para xmin
             if x[ele] ≈ xmax
 
-                x[ele] = xmin
+                # Acrescenta o volume do elemento no total para remoção
                 remocao += V[ele]
 
+                # Marca o elemento para remoação
                 lista_remocao[ele] = true 
 
-            end    
+                # Número de elementos a remover
+                ne_remover += 1
+
+                # Se passarmos do valor de volume a remover,
+                # temos que sair do loop
+                if remocao>=remover
+                    break
+                end
+
+            end #if xmax   
             
         end #ele
 
-        # O número de elementos associado a essa diferença será 
-        # arredonda para cima para evitarmos que não seja adicionaro
-        # nenhum elemento (por questão de tamanho da malha)
-        ne_remover = ceil(Int64,remover/Vmedio)
+    end # if remover
 
-        # Valor de corte para remocao seria 
-        remocao = crescente[ne_remover]
-
-    end
+    @show ne_adicionar, ne_remover
 
     # Retorna o valor de corte para adição/remoção
-    return flag_adicao, adicao, lista_adicao, flag_remocao, remocao, lista_remocao
+    return lista_adicao, lista_remocao
 
 end
 
@@ -186,42 +174,16 @@ function BESO3(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, eleme
     println("Volume cheio inicial: ", cheio)
 
     # Agora verificamos quais são os valores de corte para adição e remoção de material 
-    flag_adicao, adicao, lista_adicao, flag_remocao, remocao, lista_remocao = Valores_corte(x,D,elements_design,V,cheio,Vlim, xmin, xmax)
+    lista_adicao, lista_remocao = Elementos_a_modificar(x,D,elements_design,V,cheio,Vlim, xmin, xmax)
 
     # println("Flag de adição: ", flag_adicao, " Adição: ", adicao)
     # println("Flag de remoção: ", flag_remocao, " Remoção: ", remocao)
     # println("Lista de adição: ", lista_adicao)
     # println("Lista de remoção: ", lista_remocao)
 
-    # Acima, já recebemos as listas de modificação --> ainda falta aqui...
-    if flag_adicao
-        println("Iniciando adição... :)")
-        xn[lista_adicao  .== true]  .= xmax
-    else
-        println("Nada de adicionar :(")
-    end
-
-    if flag_remocao 
-        println("Iniciando remoção... :)")
-        xn[lista_remocao .== true]  .= xmin 
-    else
-         println("Nada de remover :(")
-    end
-      
-    #= E, com isso, podemos iterar nos elementos de projeto, modificando a variável de projeto
-    for ele in elements_design
-
-        # Se o valor de D está abaixo do valor de corte para remoção, removemos
-        if flag_remocao && D[ele]<remocao && x[ele] ≈ xmax
-            xn[ele] = xmin
-        end    
-
-        # Se o valor de D está acima do valor de corte para adição, socamos material 
-        if flag_adicao && D[ele]>adicao && x[ele] ≈ xmin
-            xn[ele] = xmax
-        end    
-
-    end #ele =#
+    # Muda as densidades relativas dos elemento 
+    xn[lista_adicao]   .= xmax
+    xn[lista_remocao]  .= xmin
 
     # retorna o novo vetor 
     return xn
