@@ -200,6 +200,9 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Target volume
     Vast = vf*volume_full_projeto
 
+    # Sensitivity index in the current iteration
+    SN = zeros(ne)    
+
     # Sensitivity index in the last iterations
     # Aqui vamos  simplificar um pouco a lógica, sacrificando memória
     ESED_F_ANT = zeros(ne,niter)
@@ -268,7 +271,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP,elements_design) 
   
         # Zera a derivada dos elementos fixos
-        # Fix_D!(dΦ,elements_fixed)
+        Fix_D!(dΦ,elements_fixed)
 
         # Como podemos ter variação de sinal na derivada, devemos tomar cuidado 
         # com a lógica dos esquemas que funcionam para compliance (derivadas sempre
@@ -276,7 +279,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
 
         # ESED - Normaliza a derivada do objetivo
         #        e corrige o sinal para a definição do Índice de Sensibilidade
-        SN = -dΦ ./ V
+        SN[elements_design] = -dΦ[elements_design] ./ V[elements_design]
         
         # Filtro de vizinhança espacial
         ESED_F =  Filtro(vizinhos,pesos,SN,elements_design)
@@ -305,7 +308,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # Método baseado na biseção
         # γn, niter_beso = BESO(γ, ESED_F_media, V, vol, elements_design,γ_min=γ_min,γ_max=γ_max)
 
-        # Clássico
+        # BESO Clássico
         γn = BESO3(γ, ESED_F_media,V,vol,elements_design,xmin=γ_min,xmax=γ_max)
 
         # Se niter_beso for nula, então o problema stagnou

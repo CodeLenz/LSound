@@ -148,7 +148,7 @@ function Elementos_a_modificar(x::Vector, D::Vector,elementos_projeto::Vector,V:
 
                 # Número de elementos a remover
                 ne_remover += 1
-               
+                
             end #if xmax   
             
         end #ele
