@@ -1,15 +1,25 @@
 #
 # Retorna um vetor de vetores, com os vizinhos de cada elemento 
+# considerando SOMENTE os elementos de projeto
 #
 function Vizinhanca(ne,centroides,raio_filtro,elements_design::Vector)
 
+    # Número de variáveis de projeto
+    np = length(elements_design)
+
     # Aloca a lista de saída para os vizinhos
-    vizinhos = Vector{Vector{Int64}}(undef,ne)
+    vizinhos = Vector{Vector{Int64}}(undef,np)
 
     # Aloca a lista de pesos
-    pesos = Vector{Vector{Float64}}(undef,ne)
+    pesos = Vector{Vector{Float64}}(undef,np)
+
+    # Número mínimo e máximo de vizinhos de 
+    # um elemento da malha
+    n_min_viz = np
+    n_max_viz = 0
 
     # Loop pelos elementos da malha
+    contador = 1
     for ele in elements_design 
 
         # Centroide deste elemento
@@ -22,7 +32,7 @@ function Vizinhanca(ne,centroides,raio_filtro,elements_design::Vector)
         pele = Float64[]
 
         # Loop por todos os elementos da malha
-        for viz = 1:ne
+        for viz in elements_design
 
             # Centroide do vizinho
             cviz = centroides[viz,:]
@@ -39,16 +49,31 @@ function Vizinhanca(ne,centroides,raio_filtro,elements_design::Vector)
 
         end # viz
 
+        # Número de vizinhos deste elemento 
+        nviz = length(vele)
+
+        # Verifica número de vizinhos
+        n_min_viz = min(n_min_viz,nviz) 
+        n_max_viz = max(n_max_viz,nviz)
+
         # Armazena vele na linha ele de vizinhos
-        vizinhos[ele] = copy(vele)
+        vizinhos[contador] = copy(vele)
 
         # Armazena pele na linha ele de pesos
-        pesos[ele] = copy(pele)
+        pesos[contador] = copy(pele)
+
+        # Acumula o contador
+        contador += 1
 
     end # ele
 
+    # Mostra o número mínimo e máximo de vizinhos
+    println("Número mínimo de vizinhos na malha: ", n_min_viz)
+    println("Número máximo de vizinhos na malha: ", n_max_viz)
+
     # Retorna o vetor de vetores com os vizinhos do elemento
-    # e também os pesos
+    # e também os pesos. Esses vetores de vetores 
+    # contém somente os elementos de projeto
     return vizinhos, pesos
 
 end

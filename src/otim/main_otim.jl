@@ -101,6 +101,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
          println("Determinando a vizinhança para um raio de $(raio_filtro)")
          @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro,elements_design)
 
+
     end
 
     # Vamos inicializar o vetor de variáveis de projeto.
@@ -114,8 +115,8 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # adequado para o problema em questão.
     println("Inicializando o vetor de variáveis de projeto")
     #println("Utilizando a fração de volume como ponto de partida")
-    γ = γ_max*ones(ne) #+ 1E-2*randn(ne)
-    
+    γ = γ_min*ones(ne) #+ 1E-2*randn(ne)
+
     # Fixa os valores prescritos de densidade relativa
     Fix_γ!(γ,elements_fixed,values_fixed)
     
@@ -223,7 +224,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
             if γ[ele]≈γ_max
                volume_atual += V[ele]
             end
-         end
+        end
 
         # Armazena o volume no histório de volumes
         historico_V[iter] = volume_atual
@@ -239,6 +240,12 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
            vol = Vast
         end 
 
+        # Caso tenhamos um volume nulo, decorrente de uma 
+        # inicialização com todos os γ=γ_min, devemos utilizar
+        # vol como sendo 
+        if vol==0
+           vol = er*Vast
+        end
 
         # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
         # cada coluna é o vetor P para uma frequência de excitação
@@ -272,7 +279,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         SN = -dΦ ./ V
         
         # Filtro de vizinhança espacial
-        ESED_F =  Filtro(ne,vizinhos,pesos,SN,elements_design)
+        ESED_F =  Filtro(vizinhos,pesos,SN,elements_design)
 
         # Zera os valores fixos
         # Fix_D!(ESED_F,elements_fixed)

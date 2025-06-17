@@ -88,18 +88,19 @@ function Elementos_a_modificar(x::Vector, D::Vector,elementos_projeto::Vector,V:
                 # Adiciona o volume do elemento no total 
                 adicao += V[ele]
                 
-                # Número de elementos a adicionar
-                ne_adicionar += 1
-
-                # Marca o elemento para adição
-                lista_adicao[ele] = true 
-
                 # Se passarmos do valor de volume a adicionar,
                 # temos que sair do loop
                 if adicao>=adicionar
                     break
                 end
 
+                # Número de elementos a adicionar
+                ne_adicionar += 1
+
+                # Marca o elemento para adição
+                lista_adicao[ele] = true 
+
+              
             end # if xmin   
 
         end # ele
@@ -136,18 +137,18 @@ function Elementos_a_modificar(x::Vector, D::Vector,elementos_projeto::Vector,V:
                 # Acrescenta o volume do elemento no total para remoção
                 remocao += V[ele]
 
-                # Marca o elemento para remoação
-                lista_remocao[ele] = true 
-
-                # Número de elementos a remover
-                ne_remover += 1
-
                 # Se passarmos do valor de volume a remover,
                 # temos que sair do loop
                 if remocao>=remover
                     break
                 end
 
+                # Marca o elemento para remoação
+                lista_remocao[ele] = true 
+
+                # Número de elementos a remover
+                ne_remover += 1
+               
             end #if xmax   
             
         end #ele
