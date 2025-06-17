@@ -2,7 +2,7 @@
 # Retorna uma matriz com as posições dos centróides de
 # cada elemento da malha
 #
-function Centroides(ne,connect,coord)
+function Centroides(ne,connect,coord,elements_design)
 
     # Inicializa a matriz de saída
     C = zeros(ne,3)
@@ -17,7 +17,7 @@ function Centroides(ne,connect,coord)
     # 7 -> pyramid (linear)
 
     # Loop em cada elemento, identificado o tipo 
-    for ele = 1:ne 
+    for ele in elements_design
 
         # Tipo de elemento
         et = connect[ele,1]

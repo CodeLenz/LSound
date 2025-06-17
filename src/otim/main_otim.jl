@@ -91,7 +91,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
 
          # Calcula a matriz com os centróides de cada elemento da malha
          println("Determinando os centróides dos elementos")
-         @time centroides = Centroides(ne,connect,coord)
+         @time centroides = Centroides(ne,connect,coord,elements_design)
 
          # TODO 
          # Ver cálculo automático de raio se raio_filtro for nulo
