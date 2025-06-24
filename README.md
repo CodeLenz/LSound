@@ -11,15 +11,18 @@ Antes, instale Lgmsh:
 ```julia
 ] add https://github.com/CodeLenz/Lgmsh.git
 ```
-para mais detalhes, consulte https://github.com/CodeLenz/Lgmsh.git.
+para mais detalhes, consulte https://github.com/CodeLenz/Lgmsh.git. [Interface para pré e pós-processamento usando o Gmsh.]
 
 ```julia
 ] add https://github.com/CodeLenz/LSound.git
 ```
 
-O pré e o pós processamento são realizados utilizando o gmsh (https://gmsh.info/).
+O pré e o pós processamento são realizados utilizando o Gmsh (https://gmsh.info/).
 
 ## Elementos Finitos 
+<details>
+
+<summary> Elementos Finitos </summary>
 
 Os seguintes elementos são disponíveis: 
 
@@ -33,7 +36,9 @@ Os seguintes elementos são disponíveis:
 
 + piramide linear de 5 nós
 
-e a teoria de cada elemento pode ser encontrada em [teoria](https://github.com/CodeLenz/LSound/blob/main/doc/theory.pdf)
+e a teoria de cada elemento pode ser encontrada em [teoria](https://github.com/CodeLenz/LSound/blob/main/doc/theory.pdf) .
+
+</details>
 
 ## Entrada de dados
 
