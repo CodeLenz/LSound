@@ -11,7 +11,7 @@ Antes, instale Lgmsh:
 ```julia
 ] add https://github.com/CodeLenz/Lgmsh.git
 ```
-para mais detalhes, consulte https://github.com/CodeLenz/Lgmsh.git. [Interface para pré e pós-processamento usando o Gmsh.]
+para mais detalhes, consulte https://github.com/CodeLenz/Lgmsh.git. 
 
 ```julia
 ] add https://github.com/CodeLenz/LSound.git
