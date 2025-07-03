@@ -18,6 +18,7 @@ er : 0.1
 niter: 100
 
 # Parametrização do material 
+# PEREIRA OU DUHRING
 parametrizacao: PEREIRA
 
 # Número de iterações para a média histórica

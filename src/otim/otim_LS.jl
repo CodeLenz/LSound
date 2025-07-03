@@ -206,6 +206,9 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     ################################ Começo do loop principal de otimização topológica #####################
     ########################################################################################################
 
+    # Define o γn para as atualizações das variáveis de projeto
+    γn = zeros(ne)
+
     # Volume of each element
     V = Volumes(ne,connect,coord)
 
@@ -248,41 +251,17 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # Armazena o volume no histório de volumes
         historico_V[iter] = volume_atual
 
-        # Volume a ser utilizado como limite para esta iteração
-        # Este é o principal parâmetro de controle para a estabilidade
-        # do processo de otimização
-        if volume_atual > Vast
-           vol = max(Vast, volume_atual*(1.0 - er))
-        elseif volume_atual < Vast
-           vol = min(Vast,volume_atual*(1 + er))
-        else
-           vol = Vast
-        end 
-
-        # Caso tenhamos um volume nulo, decorrente de uma 
-        # inicialização com todos os γ=γ_min, devemos utilizar
-        # vol como sendo algum valor pré-determinado, pois o 
-        # if das linhas anteriores vai retornar zero
-        if vol==0
-           vol = er*Vast
-        end
-
         # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
         # cada coluna é o vetor P para uma frequência de excitação
         MP,K,M =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
-        # Calcula o SPL para esta iteração 
-        objetivo = Objetivo(MP,nodes_target)
-
+        
         println("Iteração       ", iter)
-        println("Objetivo       ", objetivo)
+        #println("Objetivo       ", objetivo)
         println("Volume atual   ", volume_atual)
-        println("Volume próxima ", vol)
+        #println("Volume próxima ", vol)
         println("Volume target  ", Vast)
         println()
-
-        # Armazena no historico de SPL
-        historico_SLP[iter] = objetivo
 
         # Calcula a derivada da função objetivo em relação ao vetor γ
         dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design) 
@@ -330,12 +309,40 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         #
         # Mudando o er, mudamos o vol e, com isso, mudamos o número de elementos que 
         # podem ser colocados ou retirados. 
+        println("Entrando no LS com objetivo ", objetivo)
+        objetivo_slp = 0.0
+        for ls=1:10
+ 
+            # Lógica de atualização do er
+            # ARMIJO BACKTRACKING LINE SEARCH
 
-        # BESO Clássico
-        γn = BESO3(γ, ESED_F_media,V,vol,elements_design,xmin=γ_min,xmax=γ_max)
+            # Volume a ser utilizado como limite para esta iteração
+            # Este é o principal parâmetro de controle para a estabilidade
+            # do processo de otimização
+            vol = Calcula_volume_er(er,volume_atual,Vast)
 
+            # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
+            # cada coluna é o vetor P para uma frequência de excitação
+            MP,K,M =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
-        # Quando sairmos do loop, podemos aceitar o γn e continuar...
+            # BESO Clássico
+            γn .= BESO3(γ, ESED_F_media,V,vol,elements_design,xmin=γ_min,xmax=γ_max)
+            
+            # Calcula o SPL para esta iteração 
+            objetivo_slp = Objetivo(MP,nodes_target)
+
+            println("Objetivo  LS     ", objetivo_slp)
+
+            # comparação do objetivo_ls com o objetivo atual
+    
+        end #ls
+
+        # Atualiza o objetivo
+        objetivo = objetivo_slp 
+
+        # Armazena no historico de SPL
+        historico_SLP[iter] = objetivo
+
 
         # Grava a topologia para visualização 
         Lgmsh_export_element_scalar(arquivo_pos,γn,"Iter $iter")
@@ -379,3 +386,33 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
    return historico_V, historico_SLP
 
 end # main_otim
+
+#
+# Rotina que calcula o volume da próxima iteração, baseado no conceito de 
+# er (evolutionary rate, ou taxa de evolução)
+#
+function Calcula_volume_er(er,volume_atual,Vast)
+
+    # Volume a ser utilizado como limite para esta iteração
+    # Este é o principal parâmetro de controle para a estabilidade
+    # do processo de otimização
+    if volume_atual > Vast
+        vol = max(Vast, volume_atual*(1.0 - er))
+    elseif volume_atual < Vast
+        vol = min(Vast,volume_atual*(1 + er))
+    else
+        vol = Vast
+    end 
+ 
+    # Caso tenhamos um volume nulo, decorrente de uma 
+    # inicialização com todos os γ=γ_min, devemos utilizar
+    # vol como sendo algum valor pré-determinado, pois o 
+    # if das linhas anteriores vai retornar zero
+    if vol==0
+       vol = er*Vast
+    end
+
+    # Retorna o volume a ser atendido pelo BESO
+    return vol
+
+end
