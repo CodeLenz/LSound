@@ -310,7 +310,18 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # Mudando o er, mudamos o vol e, com isso, mudamos o número de elementos que 
         # podem ser colocados ou retirados. 
         println("Entrando no LS com objetivo ", objetivo)
+
         objetivo_slp = 0.0
+
+        # Fator de redução do passo 
+        τ = 0.005 # --> QUAL SERIA O VALOR CORRETO DE UTILIZAR AQUI?
+        
+        # Constante 'c'
+        c = 1E-4
+
+        # Passo inicial
+        α_0 = er
+
         for ls=1:10
  
             # Lógica de atualização do er
@@ -334,7 +345,44 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
             println("Objetivo  LS     ", objetivo_slp)
 
             # comparação do objetivo_ls com o objetivo atual
-    
+
+            # "Gradiente" para a condição de ARMIJO
+            # Será SN[elements_design] ou dΦ[elements_design] ?
+            # gradiente = -dΦ[elements_design]  # ???
+            # Direção de descida 
+            # descida = - gradiente     # --> deve ser oposto ao gradiente...somente sinal?
+
+            # Valor de t
+            # t = ?  --> t = -c*m   --> c * gradiente' * descida   (considerar o gradiente no ponto)
+
+            # Condição de ARMIJO é satisfeita?
+            contador = 0
+             
+            while true # Pode usar assim ? ou o correto seria a condição de "ARMIJO"?
+                # Calcula a nova objetivo após o passo
+                novo_objetivo = Objetivo(MP, nodes_target)
+
+                # Verificar a condição de ARMIJO
+                if objetivo_slp - novo_objetivo >= α_0 * c * gradiente' * descida
+                    println("Condição de ARMIJO satisfeita. Passo aceito = ", α_0)
+               
+                    # Condição for satisfeita ?? sair do loop
+                break 
+                else
+                    # Caso contrário, reduzir o passo multiplicando por τ e tentar novamente
+                    α_0 *= τ
+                    contador += 1
+                    println("Condição de ARMIJO não satisfeita. Reduzindo ", α_0, " na iteração ", contador)
+                end # if
+
+                # Limitar o número de tentativas ??
+                if contador > 50 
+                    println("Limite de tentativas atingido. Parando a busca!")
+                    break
+                end
+
+            end # while
+
         end #ls
 
         # Atualiza o objetivo
