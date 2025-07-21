@@ -8,7 +8,7 @@
 # Rotina principal
 #
 """
- Otim(meshfile::String,freqs=[])
+ Otim_LS(meshfile::String,freqs=[])
 
  Basic input:
 
@@ -19,7 +19,7 @@
  Inputs -> freqs, a vector with the frequencies to sweep
 
 """
-function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
+function Otim_LS(meshfile::String,freqs::Vector;verifica_derivada=false)
     
     # Evita chamar um .geo
     occursin(".geo",meshfile) && error("Chamar com .msh..")
@@ -101,22 +101,21 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Não precisamos do centróide e de vizinhança se for para verificar a derivada
     if !verifica_derivada
     
-         # TODO 
-         # Calcular centróides e vizinhos somente de elementos de projeto
-         # 
+        # TODO 
+        # Calcular centróides e vizinhos somente de elementos de projeto
+        # 
 
-         # Calcula a matriz com os centróides de cada elemento da malha
-         println("Determinando os centróides dos elementos")
-         @time centroides = Centroides(ne,connect,coord,elements_design)
+        # Calcula a matriz com os centróides de cada elemento da malha
+        println("Determinando os centróides dos elementos")
+        @time centroides = Centroides(ne,connect,coord,elements_design)
 
-         # TODO 
-         # Ver cálculo automático de raio se raio_filtro for nulo
-         #
+        # TODO 
+        # Ver cálculo automático de raio se raio_filtro for nulo
+        #
          
-         # Obtém os vizinhos de cada elemento da malha
-         println("Determinando a vizinhança para um raio de $(raio_filtro)")
-         @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro,elements_design)
-
+        # Obtém os vizinhos de cada elemento da malha
+        println("Determinando a vizinhança para um raio de $(raio_filtro)")
+        @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro,elements_design)
 
     end
 
@@ -255,6 +254,8 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # cada coluna é o vetor P para uma frequência de excitação
         MP,K,M =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
+        # Calcula o SPL para esta iteração 
+        objetivo = Objetivo(MP,nodes_target)
         
         println("Iteração       ", iter)
         #println("Objetivo       ", objetivo)
@@ -314,13 +315,16 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         objetivo_slp = 0.0
 
         # Fator de redução do passo 
-        τ = 0.005 # --> QUAL SERIA O VALOR CORRETO DE UTILIZAR AQUI?
+        τ = 0.05 # --> QUAL SERIA O VALOR CORRETO DE UTILIZAR AQUI?
         
         # Constante 'c'
         c = 1E-4
 
         # Passo inicial
         α_0 = er
+
+        # Contador de "tentativas"
+        contador = 0
 
         for ls=1:10
  
@@ -348,45 +352,59 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
 
             # "Gradiente" para a condição de ARMIJO
             # Será SN[elements_design] ou dΦ[elements_design] ?
-            # gradiente = -dΦ[elements_design]  # ???
+            gradiente =  SN[elements_design]  # ???
             # Direção de descida 
-            # descida = - gradiente     # --> deve ser oposto ao gradiente...somente sinal?
+            descida = - gradiente     # --> deve ser oposto ao gradiente...somente sinal?
 
             # Valor de t
             # t = ?  --> t = -c*m   --> c * gradiente' * descida   (considerar o gradiente no ponto)
 
-            # Condição de ARMIJO é satisfeita?
-            contador = 0
-             
+            # Condição de ARMIJO é satisfeita         
             while true # Pode usar assim ? ou o correto seria a condição de "ARMIJO"?
+                
                 # Calcula a nova objetivo após o passo
                 novo_objetivo = Objetivo(MP, nodes_target)
 
                 # Verificar a condição de ARMIJO
-                if objetivo_slp - novo_objetivo >= α_0 * c * gradiente' * descida
+                if novo_objetivo <= objetivo_slp + α_0 * c * gradiente' * descida
                     println("Condição de ARMIJO satisfeita. Passo aceito = ", α_0)
-               
-                    # Condição for satisfeita ?? sair do loop
+
+                    contador += 1
+                    # Condição for satisfeita ?? Então sair do loop
                 break 
                 else
-                    # Caso contrário, reduzir o passo multiplicando por τ e tentar novamente
+                    # Caso contrário, reduzir o passo multiplicando por 'τ' e tentar novamente
                     α_0 *= τ
                     contador += 1
                     println("Condição de ARMIJO não satisfeita. Reduzindo ", α_0, " na iteração ", contador)
                 end # if
 
-                # Limitar o número de tentativas ??
-                if contador > 50 
-                    println("Limite de tentativas atingido. Parando a busca!")
-                    break
+                # Atualiza o objetivo
+                objetivo = objetivo_slp 
+
+                # Passo muito pequeno. Então sair
+                if α_0 < 1E-3
+                    println("Passo α_0 muito pequeno. Parando e continuando com α_0: ", α_0)
+                    break   
                 end
 
+                # Limitar o número de tentativas ?? --> VER MAIS MANEIRAS DE FAZER ESSE LIMITE
+                if contador > 10 
+                    println("Limite de tentativas atingido. Parando a busca!")
+                    break
+                end # limite
+
             end # while
+            
+            # Encontrou um α_0 (er) válido? Então sair do loop de ls
+            if contador <= 10
+                break
+            end # limite ls
 
         end #ls
 
         # Atualiza o objetivo
-        objetivo = objetivo_slp 
+       objetivo = objetivo_slp 
 
         # Armazena no historico de SPL
         historico_SLP[iter] = objetivo
@@ -410,28 +428,27 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
 
     println("Final da otimização, executando a análise SWEEP na topologia otimizada")
 
-   # Roda o sweep na topologia otimizada e exporta para visualização 
-   MP,_ =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
+    # Roda o sweep na topologia otimizada e exporta para visualização 
+    MP,_ =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
-   # Número de frequências
-   nf = length(freqs)
+    # Número de frequências
+    nf = length(freqs)
     
-   # Exporta por frequência
-   for i=1:nf
+    # Exporta por frequência
+    for i=1:nf
 
-      # frequência
-      f = freqs[i]
+        # frequência
+        f = freqs[i]
 
-      # Exporta
-      Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressure in $f Hz [abs]")
+        # Exporta
+        Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressure in $f Hz [abs]")
+    end 
 
-   end
+    # Grava um arquivo com os γ finais
+    writedlm(arquivo_γ_fin,γ)
 
-   # Grava um arquivo com os γ finais
-   writedlm(arquivo_γ_fin,γ)
-
-   # Retorna o histórico de volume e também o da função objetivo 
-   return historico_V, historico_SLP
+    # Retorna o histórico de volume e também o da função objetivo 
+    return historico_V, historico_SLP
 
 end # main_otim
 
@@ -463,4 +480,4 @@ function Calcula_volume_er(er,volume_atual,Vast)
     # Retorna o volume a ser atendido pelo BESO
     return vol
 
-end
+end 

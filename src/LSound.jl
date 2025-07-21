@@ -54,6 +54,8 @@ module LSound
 
     include("otim/processa_FRF.jl")
 
+    include("otim/otim_LS.jl")
+
     export Analise
 
 end
