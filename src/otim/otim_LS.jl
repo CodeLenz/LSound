@@ -315,17 +315,13 @@ function Otim_LS(meshfile::String,freqs::Vector;verifica_derivada=false)
         objetivo_slp = 0.0
 
         # Fator de redução do passo 
-        τ = 0.05 # --> QUAL SERIA O VALOR CORRETO DE UTILIZAR AQUI?
+        τ = 1.5 
         
-        # Constante 'c'
-        c = 1E-4
-
         # Passo inicial
         α_0 = er
-
-        # Contador de "tentativas"
-        contador = 0
-
+        
+        # Flag para vermos se ele tentou todas as reduções de er
+        flag_ls = false
         for ls=1:10
  
             # Lógica de atualização do er
@@ -334,81 +330,60 @@ function Otim_LS(meshfile::String,freqs::Vector;verifica_derivada=false)
             # Volume a ser utilizado como limite para esta iteração
             # Este é o principal parâmetro de controle para a estabilidade
             # do processo de otimização
-            vol = Calcula_volume_er(er,volume_atual,Vast)
+            vol = Calcula_volume_er(α_0,volume_atual,Vast)
+
+            # BESO Clássico
+            γn_, flag_alterou = BESO3(γ, ESED_F_media,V,vol,elements_design,xmin=γ_min,xmax=γ_max)
+
+            if flag_alterou 
+               γn .= γn_
+            else
+               break 
+            end
 
             # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
             # cada coluna é o vetor P para uma frequência de excitação
-            MP,K,M =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
+            MP_,_ =  Sweep(nn,ne,coord,connect,γn,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
-            # BESO Clássico
-            γn .= BESO3(γ, ESED_F_media,V,vol,elements_design,xmin=γ_min,xmax=γ_max)
-            
             # Calcula o SPL para esta iteração 
-            objetivo_slp = Objetivo(MP,nodes_target)
+            objetivo_slp = Objetivo(MP_,nodes_target)
 
-            println("Objetivo  LS     ", objetivo_slp)
+            println("Objetivo  LS   $(ls) :  ", objetivo_slp)
+
 
             # comparação do objetivo_ls com o objetivo atual
+            # Se baixou, aceitamos e continuamos no loop principal. 
+            # Do contrário, alteramos o er e tentamos novamente
+            if objetivo_slp < objetivo
 
-            # "Gradiente" para a condição de ARMIJO
-            # Será SN[elements_design] ou dΦ[elements_design] ?
-            gradiente =  SN[elements_design]  # ???
-            # Direção de descida 
-            descida = - gradiente     # --> deve ser oposto ao gradiente...somente sinal?
+               # Indica que saimos por redução do objetivo
+               flag_ls = true
+               break
 
-            # Valor de t
-            # t = ?  --> t = -c*m   --> c * gradiente' * descida   (considerar o gradiente no ponto)
+            else
 
-            # Condição de ARMIJO é satisfeita         
-            while true # Pode usar assim ? ou o correto seria a condição de "ARMIJO"?
-                
-                # Calcula a nova objetivo após o passo
-                novo_objetivo = Objetivo(MP, nodes_target)
+                # Diminui o er 
+                α_0 = α_0 / τ 
 
-                # Verificar a condição de ARMIJO
-                if novo_objetivo <= objetivo_slp + α_0 * c * gradiente' * descida
-                    println("Condição de ARMIJO satisfeita. Passo aceito = ", α_0)
+                # Atualiza as variáveis de projeto 
+                # γ .= γn
 
-                    contador += 1
-                    # Condição for satisfeita ?? Então sair do loop
-                break 
-                else
-                    # Caso contrário, reduzir o passo multiplicando por 'τ' e tentar novamente
-                    α_0 *= τ
-                    contador += 1
-                    println("Condição de ARMIJO não satisfeita. Reduzindo ", α_0, " na iteração ", contador)
-                end # if
+            end
 
-                # Atualiza o objetivo
-                objetivo = objetivo_slp 
-
-                # Passo muito pequeno. Então sair
-                if α_0 < 1E-3
-                    println("Passo α_0 muito pequeno. Parando e continuando com α_0: ", α_0)
-                    break   
-                end
-
-                # Limitar o número de tentativas ?? --> VER MAIS MANEIRAS DE FAZER ESSE LIMITE
-                if contador > 10 
-                    println("Limite de tentativas atingido. Parando a busca!")
-                    break
-                end # limite
-
-            end # while
             
-            # Encontrou um α_0 (er) válido? Então sair do loop de ls
-            if contador <= 10
-                break
-            end # limite ls
-
         end #ls
 
+        if !flag_ls
+           println("O LS não reduziu o objetivo") 
+        end
+
         # Atualiza o objetivo
-       objetivo = objetivo_slp 
+        @show objetivo, objetivo_slp
+
+        #objetivo = objetivo_slp 
 
         # Armazena no historico de SPL
-        historico_SLP[iter] = objetivo
-
+        historico_SLP[iter] = objetivo_slp
 
         # Grava a topologia para visualização 
         Lgmsh_export_element_scalar(arquivo_pos,γn,"Iter $iter")
@@ -452,32 +427,3 @@ function Otim_LS(meshfile::String,freqs::Vector;verifica_derivada=false)
 
 end # main_otim
 
-#
-# Rotina que calcula o volume da próxima iteração, baseado no conceito de 
-# er (evolutionary rate, ou taxa de evolução)
-#
-function Calcula_volume_er(er,volume_atual,Vast)
-
-    # Volume a ser utilizado como limite para esta iteração
-    # Este é o principal parâmetro de controle para a estabilidade
-    # do processo de otimização
-    if volume_atual > Vast
-        vol = max(Vast, volume_atual*(1.0 - er))
-    elseif volume_atual < Vast
-        vol = min(Vast,volume_atual*(1 + er))
-    else
-        vol = Vast
-    end 
- 
-    # Caso tenhamos um volume nulo, decorrente de uma 
-    # inicialização com todos os γ=γ_min, devemos utilizar
-    # vol como sendo algum valor pré-determinado, pois o 
-    # if das linhas anteriores vai retornar zero
-    if vol==0
-       vol = er*Vast
-    end
-
-    # Retorna o volume a ser atendido pelo BESO
-    return vol
-
-end 

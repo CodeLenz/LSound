@@ -65,7 +65,7 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
     nmax = maximum(Lgmsh_nodemap()[et])
 
     # Read mesh
-    nn, coord, ne, etypes, connect, etags = Readmesh(meshfile,et)
+    nn, coord, ne, etypes, connect, centroids, etags = Readmesh(meshfile,et)
 
     # Le todos os grupos físicos do arquivo 
     pgroups, pgnames = Lgmsh_import_physical_groups(meshfile)

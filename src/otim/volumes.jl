@@ -47,3 +47,33 @@ function Volumes(ne,connect,coord)
     return V
 
 end
+
+#
+# Rotina que calcula o volume da próxima iteração, baseado no conceito de 
+# er (evolutionary rate, ou taxa de evolução)
+#
+function Calcula_volume_er(er,volume_atual,Vast)
+
+    # Volume a ser utilizado como limite para esta iteração
+    # Este é o principal parâmetro de controle para a estabilidade
+    # do processo de otimização
+    if volume_atual > Vast
+        vol = max(Vast, volume_atual*(1.0 - er))
+    elseif volume_atual < Vast
+        vol = min(Vast,volume_atual*(1 + er))
+    else
+        vol = Vast
+    end 
+ 
+    # Caso tenhamos um volume nulo, decorrente de uma 
+    # inicialização com todos os γ=γ_min, devemos utilizar
+    # vol como sendo algum valor pré-determinado, pois o 
+    # if das linhas anteriores vai retornar zero
+    if vol==0
+       vol = er*Vast
+    end
+
+    # Retorna o volume a ser atendido pelo BESO
+    return vol
+
+end 

@@ -177,6 +177,13 @@ function BESO3(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, eleme
     # Agora verificamos quais são os valores de corte para adição e remoção de material 
     lista_adicao, lista_remocao = Elementos_a_modificar(x,D,elements_design,V,cheio,Vlim, xmin, xmax)
 
+    # Flag que indica alteração de ao menos um elemento 
+    flag_alterou = true
+    if all(lista_adicao.==false) && all(lista_remocao.==false)
+       println("Não existem elementos para alterar ...verique o er") 
+       flag_alterou = false
+    end
+
     # println("Flag de adição: ", flag_adicao, " Adição: ", adicao)
     # println("Flag de remoção: ", flag_remocao, " Remoção: ", remocao)
     # println("Lista de adição: ", lista_adicao)
@@ -186,7 +193,7 @@ function BESO3(x::Vector{T1}, D::Vector{T1}, V::Vector{T1}, Vlim::Float64, eleme
     xn[lista_adicao]   .= xmax
     xn[lista_remocao]  .= xmin
 
-    # retorna o novo vetor 
-    return xn
+    # retorna o novo vetor e o flag
+    return xn, flag_alterou
 
 end

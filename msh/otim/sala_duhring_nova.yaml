@@ -6,7 +6,7 @@
 versao: 1.0
 
 # Fração de volume (obrigatório)
-volfrac: 0.3
+volfrac: 0.6
 
 # Raio do filtro (obrigatório)
 raio: 0.2
@@ -22,7 +22,7 @@ niter: 100
 parametrizacao: PEREIRA
 
 # Número de iterações para a média histórica
-nhisto: 5
+nhisto: 1
 
 # Valor mínimo da variável de projeto
 γmin: 1E-3
