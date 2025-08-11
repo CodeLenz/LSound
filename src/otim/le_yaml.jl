@@ -26,7 +26,12 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
 
     # Valor padrão de parametrização 
     # PEREIRA ou DUHRING
-    param = "PEREIRA"
+    parametrizacao = "PEREIRA"
+
+    # Valor do 'ponto de partida', lembrando que não podemos começar com todas as posições nulas, pois 
+    # isso vai fazer com que a atualização de volume seja  0*(1+er) = sempre zero. Então, podemos começar 
+    # com um padrão que seja fisicamente adequado para o problema em questão.
+    partida = 1E-3
 
     # Primeiro lemos o arquivo de dados
     dados = YAML.load_file(arquivo)
@@ -178,7 +183,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         parametrizacao in ["PEREIRA"; "DUHRING"]  || error("Parametrização $parametrizacao é inválida") 
 
     else
-        println("parametrização não foi informada no .yaml. Utilizando o valor padrão ", parametrizacao)
+        println("Parametrização não foi informada no .yaml. Utilizando o valor padrão ", parametrizacao)
     end
 
 
@@ -202,8 +207,29 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         println("Número de iterações para o histórico de sensibilidade não foi informado no .yaml. Utilizando o valor padrão ", nhisto)
     end
 
+    # Recupera o valor do 'ponto de partida'
+    if haskey(dados,"partida")
+
+        # recupera como string
+        string_partida = dados["partida"]
+
+        # Se foi informado como string, convertemos
+        if isa(string_partida,String)
+            partida =  parse(Float64,string_partida)
+        else
+            partida = string_partida
+        end
+ 
+        # Testa consistência da informação 
+        (partida<=0||partida>=1) && throw("Le_YAML::partida deve estar em (0,1) ") 
+        
+    else
+        println("Ponto de partida não foi informado no .yaml. Utilizando o valor padrão ", partida)
+    end
+
+
 
    # Retorna os dados 
-   return raio, niter, nhisto, er, vf, parametrizacao, γmin, γmax
+   return raio, niter, nhisto, er, vf, parametrizacao, γmin, γmax, partida 
 
 end

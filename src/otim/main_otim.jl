@@ -54,7 +54,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     elements_design = setdiff(1:ne,sort!(elements_fixed))
 
     # Le os dados do arquivo yaml
-    raio_filtro, niter, nhisto, er, vf, parametrizacao, γ_min, γ_max = Le_YAML(arquivo_yaml)
+    raio_filtro, niter, nhisto, er, vf, parametrizacao, γ_min, γ_max, partida = Le_YAML(arquivo_yaml)
 
     # Seleciona as rotinas de parametrização de material de acordo com 
     # a opção 
@@ -86,7 +86,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
          #dfρ(γ) = dfρ_duhring(γ)
          #fκ(γ)  = fκ_duhring(γ)
          #dfκ(γ) = dfκ_duhring(γ)
-    end
+    end # parametrizacao
      
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
     # que vai funcionar como nodes_probe aqui
@@ -117,8 +117,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
          println("Determinando a vizinhança para um raio de $(raio_filtro)")
          @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro,elements_design)
 
-
-    end
+    end # verifica_derivada
 
     # Vamos inicializar o vetor de variáveis de projeto.
     # γ = 0 --> ar
@@ -130,8 +129,9 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Então, podemos começar com um padrão que seja fisicamente
     # adequado para o problema em questão.
     println("Inicializando o vetor de variáveis de projeto")
-    #println("Utilizando a fração de volume como ponto de partida")
-    γ = γ_min*ones(ne) #+ 1E-2*randn(ne)
+    γ = partida*ones(ne)
+    println("Ponto de partida = ", partida )
+    println()
 
     # Fixa os valores prescritos de densidade relativa
     Fix_γ!(γ,elements_fixed,values_fixed)
@@ -332,7 +332,7 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         # podem ser colocados ou retirados. 
 
         # BESO Clássico
-        γn = BESO3(γ, ESED_F_media,V,vol,elements_design,xmin=γ_min,xmax=γ_max)
+        γn, flag_alterou = BESO3(γ, ESED_F_media,V,vol,elements_design,xmin=γ_min,xmax=γ_max)
 
 
         # Quando sairmos do loop, podemos aceitar o γn e continuar...

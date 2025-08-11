@@ -31,7 +31,7 @@ Line(6) = {5, 6};
 Line(7) = {6, 4};
 
 // Região de excitação 
-Circle(8) = {2, 2, 0, 0.5, 0, 2*Pi};
+Circle(8) = {2, 2, 0, 0.1, 0, 2*Pi};
 
 // Região target
 Circle(9) = {16, 2, 0, 1, 0, 2*Pi};
@@ -42,19 +42,27 @@ Curve Loop(10) = {1, 2, 3, 4};
 // Loop para a área de projeto
 Curve Loop(20) = {-3, 5, 6, 7};
 
-// Curve loops para os círculos
-Curve Loop(30) = {8};
-Curve Loop(40) = {9};
-
 // Superfície que não é de projeto
 Plane Surface(100) = {10};
-Curve{8, 9} In Surface{100};
 
 // Superfície de projeto
 Plane Surface(200) = {20};
 
-// Adicionando os circulos na superficie que não é de projeto
-Curve{8, 9} In Surface{100};
+// Curve loops para os círculos
+Curve Loop(30) = {8};
+Curve Loop(40) = {9};
+
+// Cria uma superfície para cada círculo
+Plane Surface(300) = {30};
+Plane Surface(400) = {40};
+
+// Faz um buraco no furo da fonte
+// Mantendo a superfície 100
+BooleanDifference{ Surface{100}; Delete;}{ Surface{300}; Delete;}
+
+// Outro buraco com o furo do target
+// mantendo a superfície 100
+BooleanDifference{ Surface{100}; Delete;}{ Surface{400}; Delete;}
 
 // Material da sala (Ar)
 Physical Surface("Material,Ar,1,1.204,343.328,400.0") = {100};
@@ -63,7 +71,7 @@ Physical Surface("Material,Ar,1,1.204,343.328,400.0") = {100};
 Physical Surface("Material,Al,2,2643.0,5098.3516,400.0") = {200};
 
 // Aplica uma excitação de velocidade normal na parede da esquerda
-Physical Curve("Vn,1E-3,34.56,0.0") = {8};
+Physical Curve("Vn,1E-3,34.56,0.0") = {13};
 
 // A região 1 (Ar) não é de projeto
 Physical Surface("Fixed,1E-3") = {100};
@@ -71,7 +79,7 @@ Physical Surface("Fixed,1E-3") = {100};
 // Aplica uma excitação de pressão imposta na parede da esquerda
 // Só para testar a leitura de dados, ainda não implementado no 
 // código
-//Physical Curve("Pressure,1E1,100.0,0.0") = {4};
+// Physical Curve("Pressure,1E1,100.0,0.0") = {4};
 
 // Nós para monitorar as pressões
 // Vamos monitorar em TODOS os nós
@@ -81,11 +89,11 @@ Physical Surface("Fixed,1E-3") = {100};
 Physical Curve("Target") = {9};
 
 // Convert triangles to quads
-//Recombine Surface{:};
+Recombine Surface{:};
 
 // Better quad algorithm
 Mesh.Algorithm = 8;
 
 // Build mesh
 Mesh 2;
-Save "sala_duhring_nova.msh";
+Save "sala_duhring_lacuna.msh";
