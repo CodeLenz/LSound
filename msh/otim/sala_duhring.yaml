@@ -6,7 +6,7 @@
 versao: 1.0
 
 # Fração de volume (obrigatório)
-volfrac: 0.6
+volfrac: 0.3
 
 # Raio do filtro (obrigatório)
 raio: 0.2
@@ -15,17 +15,19 @@ raio: 0.2
 er : 0.1
 
 # Número de iterações de otimização (valor padrão é 100)
-niter: 100
+niter: 50
 
 # Parametrização do material 
-# PEREIRA OU DUHRING 
 parametrizacao: PEREIRA
 
 # Número de iterações para a média histórica
-nhisto: 1
+nhisto: 5
 
 # Valor mínimo da variável de projeto
 γmin: 1E-3
 
 # Valor máximo da variável de projeto
 γmax: 0.99
+
+# Valor do 'ponto de partida'
+partida: 1E-3

@@ -129,8 +129,9 @@ function Otim_LS(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Então, podemos começar com um padrão que seja fisicamente
     # adequado para o problema em questão.
     println("Inicializando o vetor de variáveis de projeto")
-    #println("Utilizando a fração de volume como ponto de partida")
-    γ = γ_min*ones(ne) #+ 1E-2*randn(ne)
+    γ = partida*ones(ne)
+    println("Ponto de partida = ", partida )
+    println()
 
     # Fixa os valores prescritos de densidade relativa
     Fix_γ!(γ,elements_fixed,values_fixed)
