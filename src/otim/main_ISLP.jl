@@ -320,6 +320,17 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         #                                         A = [ Gradiente da restrição de volume '  ] 
         #
         # 
+
+
+        #
+        # Cuidado que agora as variáveis de projeto vão estar sempre em 0/1
+        #
+        #
+        # \gamma  == 0 -> gamma_min
+        # \gamma  == 1 -> 0.99
+        #
+        # \gamma = min + (0.99-min)*x 
+        #
         
 
 
