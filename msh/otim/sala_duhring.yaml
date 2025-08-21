@@ -15,13 +15,13 @@ raio: 0.2
 er : 0.1
 
 # Número de iterações de otimização (valor padrão é 100)
-niter: 50
+niter: 20
 
 # Parametrização do material 
 parametrizacao: PEREIRA
 
 # Número de iterações para a média histórica
-nhisto: 5
+nhisto: 2
 
 # Valor mínimo da variável de projeto
 γmin: 1E-3
@@ -30,4 +30,4 @@ nhisto: 5
 γmax: 0.99
 
 # Valor do 'ponto de partida'
-partida: 1E-3
+partida: 0.99
