@@ -19,7 +19,7 @@
  Inputs -> freqs, a vector with the frequencies to sweep
 
 """
-function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
+function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
     
     # Evita chamar um .geo
     occursin(".geo",meshfile) && error("Chamar com .msh..")
@@ -314,26 +314,59 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
         #
         # Um vetor b = [\Delta g ]
         #
+        # Definir ϵ1 ϵ2
+         ϵ1 = 0.1
+         ϵ2 = 0.1
+
+         # Vetor de valores de referência (g_k)
+         # gk = []      
+
+         # Vetor b inicial
+         b = zeros(length(γ))
+
+         # Calcular as variações Δg
+         for i in 1:length(γ)
+            g = γ[i]
+            g_ref = gk[i]
+            
+            if g < (1 - ϵ1) * g_ref
+               Δg = - ϵ1 * g_ref
+            elseif g >= (1 - ϵ1) * g_ref && g <= (1 + ϵ2) * g_ref
+               Δg = g - g_ref
+            else
+               Δg = ϵ2 * g_ref
+            end
+            # Vetor vetor b conforme as variações
+            b[i] = Δg
+         end
 
         # 
-        # Chama a rotina de LP passando o o vetor c = ESED_F_media
-        #                                         A = [ Gradiente da restrição de volume '  ] 
-        #
-        # 
+        # Chama a rotina de LP passando em que 
+        # os vetores 
+        # c = ESED_F_media
+        # A = [ Gradiente da restrição de volume '  ] 
 
+         # Número de variáveis de projeto
+         nγ = rand(γ)
 
-        #
-        # Cuidado que agora as variáveis de projeto vão estar sempre em 0/1
-        #
-        #
-        # \gamma  == 0 -> gamma_min
-        # \gamma  == 1 -> 0.99
-        #
-        # \gamma = min + (0.99-min)*x 
-        #
-        
+         A = transpose(V[elements_design])
 
+         # Vetor de variáveis de projeto no ponto de ótimo
+         # LP(n, c, A, b)
+         xopt = LP(nγ, ESED_F_media, A , b)
 
+         #
+         # Cuidado que agora as variáveis de projeto vão estar sempre em 0/1
+         #
+         #
+         # \gamma  == 0 -> gamma_min
+         # \gamma  == 1 -> 0.99
+         #
+         # \gamma = min + (0.99-min)*x 
+         #
+
+         γ = [ γ_min + (0.99 - γ_min) * x for x in xopt]
+     
         # Quando sairmos do loop, podemos aceitar o γn e continuar...
 
         # Grava a topologia para visualização 
@@ -378,3 +411,69 @@ function Otim(meshfile::String,freqs::Vector;verifica_derivada=false)
    return historico_V, historico_SLP
 
 end # main_otim
+
+
+
+#
+# n => número de variáveis de projeto
+#
+function LP(n, c, A, b)
+
+   #
+   # Cria o modelo vazio e associa a um otimizador
+   # O Alpine utiliza mais de um pacote de otimização, dependendo 
+   # da etapa que ele está realizando. O mip_solver é bem crítico para 
+   # a primeira etapa, em que é contínua. O Gurobi é uma boa opção, mas 
+   # precisamos instalar a licença no computador. Uma outra opção é utilizar
+   # o Ipopt u o HigHS.
+   # O Cbc é o otimizador para a etapa discreta (branch and bound), que é 
+   # realizada depois da etapa contínua.
+   ipopt  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
+   gurobi = optimizer_with_attributes(Gurobi.Optimizer, "output_flag" => false)
+   highs  = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
+   cbc    = optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
+    
+   # minlp_solver é o solver para o problema binário (0/1)
+   # nlp_solver é o solver para o problema contínuo do LP
+   # mip_solver é o utilizado na primeira etapa 
+   model = Model(
+      optimizer_with_attributes(
+         Alpine.Optimizer,
+         "minlp_solver" => highs, #<- para binario. Aqui também dá para usar o cbc
+         #"nlp_solver" => ipopt,  #<- para contínuo
+         #"mip_solver" => gurobi,
+         "mip_solver" => highs,
+      ),
+   )
+
+   # Cria um vetor de variáveis de projeto
+   @variable(model, x[1:n], Bin)
+
+   # Monta todas as restrições ao mesmo tempo 
+   @constraint(model, A * x .>= b)
+
+   # Monta a função objetivo
+   @objective(model, Min, c' * x)
+
+   # Resolve o problema 
+   optimize!(model)
+
+   # Valor do objetivo
+   objective_value(model)
+
+   # Vetor de variáveis de projeto no ponto de ótimo
+   xopt = value(x)
+
+   # Vamos testar as restrições
+   @show [A*xopt b]
+
+   # @show c
+   # @show A
+   # @show xopt
+
+   # Retorna o vetor de variáveis de projeto no ponto de ótimo
+   return  xopt
+
+end
+
+

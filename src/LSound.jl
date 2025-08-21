@@ -13,6 +13,13 @@ module LSound
     using Lgmsh
     using YAML
 
+   using JuMP
+   using Alpine
+   using Gurobi
+   using Ipopt
+   using HiGHS
+   using Cbc
+
     # Main structure for mesh 
     include("mesh.jl")
 
@@ -55,6 +62,9 @@ module LSound
     include("otim/processa_FRF.jl")
 
     include("otim/otim_LS.jl")
+
+    include("otim/main_ISLP.jl")
+
 
     export Analise
 
