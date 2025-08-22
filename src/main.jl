@@ -71,7 +71,7 @@ function Analise(meshfile::String,metodo=:Modal;nev=4,Tf=1.0,Δt=1E-6,γ = 1/2, 
     end
 
     # Calcula as matrizes globais
-    K, M = Monta_KM(nn,ne,coord,connect,materials)
+    K, M = Monta_KM(ne,coord,connect,materials)
 
     # Vamos evitar que o usuário utilize pressure com outras análises que não a 
     # Harmônica
