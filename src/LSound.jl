@@ -15,7 +15,7 @@ module LSound
 
    using JuMP
    using Alpine
-   #using Gurobi
+   using Gurobi
    using Ipopt
    using HiGHS
    using Cbc
@@ -47,7 +47,6 @@ module LSound
     include("otim/param_pereira.jl")
     include("otim/fixos.jl")
     include("otim/global_otim.jl")
-    include("otim/main_otim.jl")
     include("otim/objetivo.jl")
     include("otim/sensibilidade.jl")
     include("otim/df.jl")
@@ -57,16 +56,9 @@ module LSound
     include("otim/filtro_espacial.jl")
     include("otim/sweep.jl")
     include("otim/verifica_derivada.jl")
-    include("otim/BESO.jl")
-    include("otim/BESO_classico.jl")
-
     include("otim/processa_FRF.jl")
-
-    include("otim/otim_LS.jl")
-
     include("otim/main_ISLP.jl")
 
-
-    export Analise
+    export Analise, Otim_ISLP, Processa_FRF
 
 end

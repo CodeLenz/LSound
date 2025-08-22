@@ -5,7 +5,7 @@
 function Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures::Vector)
 
     # Calcula as matrizes globais
-    K,M = Monta_KM2(ne,coord,connect,γ,fρ,fκ)
+    K,M = Monta_KM_param(ne,coord,connect,γ,fρ,fκ)
     
     # E a de amortecimento
     # TODO adicionar amortecimento depois

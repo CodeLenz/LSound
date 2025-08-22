@@ -6,7 +6,7 @@
 # fκ  ->  função que parametriza κ
 # ===================================================================================
 
-function Monta_KM2(ne,coord,connect,γ::Vector,fρ::Function,fκ::Function)  
+function Monta_KM_param(ne,coord,connect,γ::Vector,fρ::Function,fκ::Function)  
     
     # Aloca vetores para a montagem eficiente 
     # das matrizes esparsas

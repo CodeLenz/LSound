@@ -1,8 +1,7 @@
 #
 # Monta as matrizes globais K e M
 #
-function Monta_KM(nn,ne,coord,connect,materials)  
-    # A 101325 Pa e 20 °C = 293,15 K, ρ = 101325 / (287,058 ⋅ 293,15) = 1,204 kg/m³
+function Monta_KM(ne,coord,connect,materials)  
 
     # Aloca vetores para a montagem eficiente 
     # das matrizes esparsas
