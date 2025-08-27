@@ -1,4 +1,13 @@
 
+
+#=
+
+ESSAS PARAMETRIZAÇÕES ESTÂO ERRADAS, POIS FOI IGNORADO O FATO DE QUE A Parametrização
+É DEFINIDAS EM TERMOS DE PROPRIEDADES NORMALIZADAS EM RELAÇÃO AO AR
+
+=#
+
+
 #=
 Maria B. Dühring, Jakob S. Jensen, Ole Sigmund,
 Acoustic design by topology optimization,
@@ -15,63 +24,53 @@ https://doi.org/10.1016/j.jsv.2008.03.042.
 # Parametrização do inverso de ρ
 #
 # γe: variável de projeto
-# ρ_ar: densidade do ar
-# ρ2  : densidade da fase sólida
+# ρ_ar : densidade do ar
+# ρ_s  : densidade da fase sólida
 #
-function fρ_duhring(γe;ρ_ar=1.204,ρ2=2643.0)     
+function fρ_duhring(γe;ρ_ar=1.204,ρ_s=2643.0)     
 
     # Teste de consistência
     0<γe<1 || error("fρ:: γe inválido")
 
-    # ρ do ar
-    ρ1 = ρ_ar
+    # Parametrização 
+    return (1/ρ_ar) + γe*(1/ρ_s-1/ρ_ar)
 
-    
-    # Calcula a parametrização    [(ρ2/ρ1)^(-1) = (ρ1/ρ2)]
-    return 1 + γe *((ρ1/ρ2) - 1)
 
 end 
 
 # Derivada da parametrização do inverso de ρ
-function dfρ_duhring(γe;ρ_ar=1.204,ρ2=2643.0)
+function dfρ_duhring(γe;ρ_ar=1.204,ρ_s=2643.0)
 
     # Teste de consistência
     0<γe<1 || error("dfρ:: γe inválido")
-
-    # ρ do ar
-    ρ1 = ρ_ar 
     
     # Calcula derivada da parametrização de ρ
-    return ((ρ1/ρ2) - 1)
+    return (1/ρ_s-1/ρ_ar)
 
 end 
 
 
 # Parametrização do inverso de κ
-function fκ_duhring(γe ; κ_ar=141.921E3,κ2=6.87E10)
+function fκ_duhring(γe ; κ_ar=141.921E3,κ_s=6.87E10)
 
     # Teste de consistência
     0<γe<1 || error("fκ:: γe inválido")
 
-    # κ do ar
-    κ1 = κ_ar
-
-    # Calcula a parametrização    [(κ2/κ1)^(-1) = (κ1/κ2)]
-    return 1 + γe *((κ1/κ2) - 1)
+    
+    # Calcula a parametrização 
+    return (1/κ_ar) + γe*(1/κ_s-1/κ_ar)
 
 end 
 
 # Derivada da parametrização do inverso de κ
-function dfκ_duhring(γe; κ_ar=141.921E3,κ2=6.87E10)
+function dfκ_duhring(γe; κ_ar=141.921E3,κ2_s=6.87E10)
 
     # Teste de consistência
     0<γe<1 || error("dfκ:: γe inválido")
 
-     # κ do ar
-    κ1 = κ_ar
 
-    # Calcula a parametrização    [(κ2/κ1)^(-1) = (κ1/κ2)]
-    return ((κ1/κ2) - 1)
+    # Calcula a parametrização 
+    return (1/κ_s-1/κ_ar)
 
 end 
 
