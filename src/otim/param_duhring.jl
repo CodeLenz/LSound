@@ -1,13 +1,4 @@
 
-
-#=
-
-ESSAS PARAMETRIZAÇÕES ESTÂO ERRADAS, POIS FOI IGNORADO O FATO DE QUE A Parametrização
-É DEFINIDAS EM TERMOS DE PROPRIEDADES NORMALIZADAS EM RELAÇÃO AO AR
-
-=#
-
-
 #=
 Maria B. Dühring, Jakob S. Jensen, Ole Sigmund,
 Acoustic design by topology optimization,
