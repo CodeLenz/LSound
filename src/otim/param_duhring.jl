@@ -55,7 +55,6 @@ function fκ_duhring(γe ; κ_ar=141.921E3,κ_s=6.87E10)
 
     # Teste de consistência
     0<γe<1 || error("fκ:: γe inválido")
-
     
     # Calcula a parametrização 
     return (1/κ_ar) + γe*(1/κ_s-1/κ_ar)
@@ -63,11 +62,10 @@ function fκ_duhring(γe ; κ_ar=141.921E3,κ_s=6.87E10)
 end 
 
 # Derivada da parametrização do inverso de κ
-function dfκ_duhring(γe; κ_ar=141.921E3,κ2_s=6.87E10)
+function dfκ_duhring(γe; κ_ar=141.921E3,κ_s=6.87E10)
 
     # Teste de consistência
     0<γe<1 || error("dfκ:: γe inválido")
-
 
     # Calcula a parametrização 
     return (1/κ_s-1/κ_ar)
