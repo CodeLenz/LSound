@@ -67,6 +67,9 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     # Lista com os elementos que são de projeto
     elements_design = setdiff(1:ne,sort!(elements_fixed))
 
+    # Número de variáveis de projeto 
+    nvp = length(elements_design)
+
     # Le os dados do arquivo yaml
     raio_filtro, niter, nhisto, ϵ1, ϵ2, vf, parametrizacao, γ_min, γ_max, partida = Le_YAML(arquivo_yaml)
 
@@ -188,6 +191,9 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     # Verifica derivadas
     if verifica_derivada
 
+      # Vamos inicializar com algo aleatório
+      γ = rand(ne)
+
       # Derivada utilizando o procedimento analítico
       MP,K,M =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
@@ -195,14 +201,16 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
       dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design,vA) 
 
       println("Verificando as derivadas utilizando diferenças finitas centrais...")
+      println("O número efetivo de variáveis de projeto é ", length(elements_design))
 
       # Derivada numérica
       dnum = Verifica_derivada(γ,nn,ne,coord,connect,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures,nodes_target,elements_design,vA)
 
-      # Relativo
-      rel = (dΦ.-dnum)./dnum
+      # Relativo, evitando divisão por zero
+      rel = (dΦ.-dnum)./(dnum.+1E-12)
       
       # Exporta para a visualização no Gmsh
+      Lgmsh_export_element_scalar(arquivo_pos,γ,"γ")
       Lgmsh_export_element_scalar(arquivo_pos,dΦ,"Analitica")
       Lgmsh_export_element_scalar(arquivo_pos,dnum,"Numerica")
       Lgmsh_export_element_scalar(arquivo_pos,rel,"relativa")
@@ -225,9 +233,6 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
 
     # Target volume
     Vast = vf*volume_full_projeto
-
-    # Sensitivity index in the current iteration
-    SN = zeros(ne)    
 
     # Sensitivity index in the last iterations
     # Aqui vamos  simplificar um pouco a lógica, sacrificando memória
@@ -267,16 +272,14 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
         historico_SLP[iter] = objetivo
 
         # Calcula a derivada da função objetivo em relação ao vetor γ
+        # somente nas posições de projeto
         dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design,vA) 
   
-        # ESED - Normaliza a derivada do objetivo
-        SN[elements_design] .= dΦ[elements_design] ./ V[elements_design]
-        
         # Filtro de vizinhança espacial
-        ESED_F =  Filtro(vizinhos,pesos,SN,elements_design)
+        dΦ_f =  Filtro(vizinhos,pesos,dΦ,elements_design)
 
         # Guarda na coluna de ESED_F_media
-        ESED_F_ANT[elements_design,iter] .= ESED_F[elements_design]
+        ESED_F_ANT[elements_design,iter] .= dΦ_f[elements_design]
 
         # Mean value using the last iterations
         # Aqui temos que ter um cuidado muito importante. O número de colunas 
@@ -288,8 +291,6 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
         ESED_F_media[elements_design] .= mean(ESED_F_ANT[elements_design,pini:pfin],dims=2)
      
         # Visualiza as ESEDS...
-        Lgmsh_export_element_scalar(arquivo_pos,SN,"SN")  
-        Lgmsh_export_element_scalar(arquivo_pos,ESED_F,"ESED_F")  
         Lgmsh_export_element_scalar(arquivo_pos,ESED_F_media,"ESED_media")  
 
          #

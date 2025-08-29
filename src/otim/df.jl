@@ -8,7 +8,7 @@ function df(γ0::Vector,f::Function, elements_design::Vector, δ=1E-6)
     fill!(d,0.0)
 
     # Para cada componente do vetor, perturba e calcula a diferença
-    for i in elements_design
+    @showprogress "Calculando a derivada " for i in elements_design
 
         # Valor atual nesta posição
         γe = γ0[i]

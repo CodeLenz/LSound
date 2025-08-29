@@ -74,6 +74,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
                   nodes_target::Vector{T1},MP::Matrix{T2},
                   elements_design::Vector,A::Vector,p0=20E-6) where {T0,T1,T2}
 
+  
     # Define o vetor de derivadas
     d = zeros(ne)
 
