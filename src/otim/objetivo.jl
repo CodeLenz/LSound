@@ -33,15 +33,17 @@ end
 #
 # p0 é a pressão de referência (20μ Pa)
 #
-function Objetivo(MP::Matrix, nodes_target::Vector, p0=20E-6)
+function Objetivo(MP::Matrix, nodes_target::Vector, A::Vector, p0=20E-6)
 
     # Incializa a soma
     soma = 0.0
 
     # Para cada coluna em MP, calcula o SPL
     # Cada coluna em MP é P[nodes_target] para uma frequência específica
+    coluna = 1
     for P in eachcol(MP)
-        soma = soma + SPLn(P[nodes_target],p0)
+        soma = soma + A[coluna]*SPLn(P[nodes_target],p0)
+        coluna += 1
     end
 
     # Número de frequências é o número de colunas em target

@@ -72,7 +72,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
                   livres::Vector{T1},freqs::Vector{T0},
                   pressures::Vector, dfρ::Function, dfκ::Function,
                   nodes_target::Vector{T1},MP::Matrix{T2},
-                  elements_design::Vector,p0=20E-6) where {T0,T1,T2}
+                  elements_design::Vector,A::Vector,p0=20E-6) where {T0,T1,T2}
 
     # Define o vetor de derivadas
     d = zeros(ne)
@@ -105,6 +105,9 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
         # Converte a freq para rad/s
         ωn = 2*pi*f
 
+        # Sensibilidade para essa frequência 
+        An = A[coluna]
+
         # Recupera as pressões para essa frequência (coluna de target)
         P .= MP[:,coluna]
 
@@ -121,7 +124,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
         P2avg = P2 / nt
 
         # Escalona F pela cte e pelo Nf
-        Fn .= Fn*cte/(P2avg)
+        Fn .= An*Fn*cte/(P2avg)
         
         # Soluciona o problema adjunto, obtendo λ^n
         λn[livres] .= Kd\Fn[livres]

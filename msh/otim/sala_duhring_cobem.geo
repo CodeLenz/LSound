@@ -5,7 +5,7 @@
 SetFactory("OpenCASCADE");
 
 // Element size
-lc = 0.1;
+lc = 0.2;
 
 // Tamanho de elemento 
 Mesh.CharacteristicLengthMin = lc;

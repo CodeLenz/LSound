@@ -9,29 +9,30 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     # valores padrão (que podem ser modificados via arquivo) 
     #
 
-    # Evolution Rate
-    er = 0.01
-
     # Número de iterações 
     niter = 100
 
     # Número de iterações para o histórico de sensibilidade
     nhisto = 1
 
+    # Parâmetros do ISLP
+    ϵ1 = 0.1
+    ϵ2 = 0.1
+
     # Valor mínimo da variável de projeto 
-    γmin = 1E-3
+    γmin = 0.0
 
     # Valor máximo da variável de projeto 
-    γmax = 0.99
+    γmax = 1
 
     # Valor padrão de parametrização 
     # PEREIRA ou DUHRING
-    parametrizacao = "PEREIRA"
+    parametrizacao = "DUHRING"
 
     # Valor do 'ponto de partida', lembrando que não podemos começar com todas as posições nulas, pois 
     # isso vai fazer com que a atualização de volume seja  0*(1+er) = sempre zero. Então, podemos começar 
     # com um padrão que seja fisicamente adequado para o problema em questão.
-    partida = 1E-3
+    partida = 1.0
 
     # Primeiro lemos o arquivo de dados
     dados = YAML.load_file(arquivo)
@@ -69,28 +70,50 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         throw("Le_YAML::raio é uma informação obrigatória") 
     end
 
-    # Recupera Evolution Rate (er)
-    if haskey(dados,"er")
+    # Recupera ϵ1
+    if haskey(dados,"ϵ1")
 
         # recupera como string
-        string_er = dados["er"]
+        string_er = dados["ϵ1"]
 
         # Se foi informado como string, convertemos
         if isa(string_er,String)
-            er =  parse(Float64,string_er)
+            ϵ1 =  parse(Float64,string_er)
         else
-            er = string_er
+            ϵ1 = string_er
         end
  
         # Testa consistência da informação 
-        (er<=0||er>=1) && throw("Le_YAML::Evolution Rate raio deve estar em (0,1) ") 
+        (ϵ1<=0 || ϵ1>=1) && throw("Le_YAML::ϵ1 deve deve estar em (0,1) ") 
         
     else
-        println("Evolution Rate não foi informado no .yaml. Utilizando o valor padrão ", er)
+        println("Parâmetro ϵ1 não foi informado no .yaml. Utilizando o valor padrão ", ϵ1)
     end
 
-     # Recupera o número de iterações
-     if haskey(dados,"niter")
+    # Recupera ϵ2
+    if haskey(dados,"ϵ2")
+
+        # recupera como string
+        string_er = dados["ϵ2"]
+
+        # Se foi informado como string, convertemos
+        if isa(string_er,String)
+            ϵ2 =  parse(Float64,string_er)
+        else
+            ϵ2 = string_er
+        end
+ 
+        # Testa consistência da informação 
+        (ϵ2<=0 || ϵ2>=1) && throw("Le_YAML::ϵ2 deve deve estar em (0,1) ") 
+        
+    else
+        println("Parâmetro ϵ2 não foi informado no .yaml. Utilizando o valor padrão ", ϵ2)
+    end
+
+
+
+    # Recupera o número de iterações
+    if haskey(dados,"niter")
 
         # recupera como string
         string_niter = dados["niter"]
@@ -126,7 +149,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         (vf<=0||vf>=1) && throw("Le_YAML::Volume fraction deve estar em (0,1) ") 
         
     else
-        println("Evolution Rate não foi informado no .yaml. Utilizando o valor padrão ", er)
+        println("Frção de volume não foi informado no .yaml. Utilizando o valor padrão ", vf)
     end
 
     # Recupera o valor mínimo da variável de projeto
@@ -143,7 +166,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         end
  
         # Testa consistência da informação 
-        (γmin<=0||γmin>=1) && throw("Le_YAML::γmin deve estar em (0,1) ") 
+        ( 0<= γmin <=1 ) || throw("Le_YAML::γmin deve estar em (0,1) ") 
         
     else
         println("γmin não foi informado no .yaml. Utilizando o valor padrão ", γmin)
@@ -164,7 +187,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         end
  
         # Testa consistência da informação 
-        (γmax<=0||γmax>1) && throw("Le_YAML::γmax deve estar em (0,1) ") 
+        (0<γmax<=1) || throw("Le_YAML::γmax deve estar em (0,1) ") 
         
     else
         println("γmax não foi informado no .yaml. Utilizando o valor padrão ", γmax)
@@ -221,7 +244,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         end
  
         # Testa consistência da informação 
-        (partida<=0||partida>=1) && throw("Le_YAML::partida deve estar em (0,1) ") 
+        ( 0<= partida <=1) || throw("Le_YAML::partida deve estar em (0,1) ") 
         
     else
         println("Ponto de partida não foi informado no .yaml. Utilizando o valor padrão ", partida)
@@ -230,6 +253,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
 
 
    # Retorna os dados 
-   return raio, niter, nhisto, er, vf, parametrizacao, γmin, γmax, partida 
+   return raio, niter, nhisto, ϵ1, ϵ2,  vf, parametrizacao, γmin, γmax, partida 
 
 end

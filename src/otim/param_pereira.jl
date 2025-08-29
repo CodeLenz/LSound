@@ -14,7 +14,7 @@ https://doi.org/10.1016/j.finel.2021.103701.
 function fρ_pereira(γe,ψ=2.0;ρ_ar=1.21,ρ2=1.21*1E7)
 
     # Teste de consistência
-    0<γe<1 || error("fρ:: γe inválido")
+    0<=γe<=1 || error("fρ:: γe inválido")
 
     # ρ do ar
     ρa = ρ_ar
@@ -31,7 +31,7 @@ end
 function dfρ_pereira(γe,ψ=2.0;ρ_ar=1.21,ρ2=1.21*1E7)
 
     # Teste de consistência
-    0<γe<1 || error("dfρ:: γe inválido")
+    0<=γe<=1 || error("dfρ:: γe inválido")
 
     # ρ do ar
     ρa = ρ_ar
@@ -49,7 +49,7 @@ end
 function fκ_pereira(γe,ψ=2.0;κ_ar=1.42E5,κ2=1.42E5*1E9)
 
     # Teste de consistência
-    0<γe<1 || error("fκ:: γe inválido")
+    0<=γe<=1 || error("fκ:: γe inválido")
 
     # κ do ar
     κa = κ_ar
@@ -66,7 +66,7 @@ end
 function dfκ_pereira(γe,ψ=2.0;κ_ar=1.42E5,κ2=1.42E5*1E9)
 
     # Teste de consistência
-    0<γe<1 || error("dfκ:: γe inválido")
+    0<=γe<=1 || error("dfκ:: γe inválido")
 
     # κ do ar
     κa = κ_ar

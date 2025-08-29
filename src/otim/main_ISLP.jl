@@ -14,12 +14,16 @@
 
  meshfile -> arquivo de entrada (.msh)
 
+ freqs -> vetor com as frquências (em Hz)
+
+ vA -> Vetor com as sensibilidades para cada frequência
+
  verifica_derivada -> bool 
 
  Inputs -> freqs, a vector with the frequencies to sweep
 
 """
-function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
+function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=false)
     
     # Evita chamar um .geo
     occursin(".geo",meshfile) && error("Chamar com .msh..")
@@ -44,6 +48,16 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Verifica se os arquivos de entrada existem
     isfile(meshfile) || error("Otim:: arquivo de entrada $meshfile não existe")
 
+    # Número de frequências
+    nf = length(freqs)
+
+    # Verifica se A foi definido
+    if isempty(vA)
+       vA = ones(nf)
+    else 
+       length(vA)==nf || error("Otim:: dimensão de vA deve ser nf")
+    end
+
     # Arquivo .yaml
     isfile(arquivo_yaml) || error("Otim:: arquivo de entrada $(arquivo_yaml) não existe")
 
@@ -54,7 +68,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
     elements_design = setdiff(1:ne,sort!(elements_fixed))
 
     # Le os dados do arquivo yaml
-    raio_filtro, niter, nhisto, er, vf, parametrizacao, γ_min, γ_max, partida = Le_YAML(arquivo_yaml)
+    raio_filtro, niter, nhisto, ϵ1, ϵ2, vf, parametrizacao, γ_min, γ_max, partida = Le_YAML(arquivo_yaml)
 
     # Seleciona as rotinas de parametrização de material de acordo com 
     # a opção 
@@ -66,11 +80,9 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
     vetor_fκ  = [fκ_pereira, fκ_duhring]
     vetor_dfκ = [dfκ_pereira, dfκ_duhring]
 
-
     # 1 para PEREIRA e 2 para Duhring
-    ponteiro_parametrizacao = 1
+    ponteiro_parametrizacao = 2
  
-
     if parametrizacao=="PEREIRA"
          println("Utilizando a parametrização de PEREIRA")
          #fρ(γ)  = fρ_pereira(γ) #,ψ, ρ_ar = ρ_ar, ρ2 = ρ_solido)
@@ -161,8 +173,6 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
     # Sweep na topologia inicial, para comparação com a otimizada
     MP,_ =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
-    # Número de frequências
-    nf = length(freqs)
    
     # Exporta por frequência
     for i=1:nf
@@ -182,12 +192,12 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
       MP,K,M =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
       # Calcula a derivada da função objetivo em relação ao vetor γ
-      dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design) 
+      dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design,vA) 
 
       println("Verificando as derivadas utilizando diferenças finitas centrais...")
 
       # Derivada numérica
-      dnum = Verifica_derivada(γ,nn,ne,coord,connect,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures,nodes_target,elements_design)
+      dnum = Verifica_derivada(γ,nn,ne,coord,connect,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures,nodes_target,elements_design,vA)
 
       # Relativo
       rel = (dΦ.-dnum)./dnum
@@ -250,7 +260,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
         MP,K,M =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
         # Calcula o SPL para esta iteração 
-        objetivo = Objetivo(MP,nodes_target)
+        objetivo = Objetivo(MP,nodes_target,vA)
 
         println("Iteração       ", iter)
         println("Objetivo       ", objetivo)
@@ -262,7 +272,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
         historico_SLP[iter] = objetivo
 
         # Calcula a derivada da função objetivo em relação ao vetor γ
-        dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design) 
+        dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design,vA) 
   
         # ESED - Normaliza a derivada do objetivo
         SN[elements_design] .= dΦ[elements_design] ./ V[elements_design]
@@ -293,10 +303,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
          #
          # Um vetor b = [\Delta g ]
          #
-         # Definir ϵ1 ϵ2
-         ϵ1 = 0.1
-         ϵ2 = 0.1
-
+         
          # Calcular as variações ΔV^k para essa iteração
          # lembrando que só temos uma restrição (de volume)
 
@@ -319,7 +326,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
         b = [ΔV]
 
          # 
-         # Chama a rotina de LP passando em que 
+         # Chama a rotina de LP passando  
          # os vetores 
          # c = ESED_F_media
          # A = [ Gradiente da restrição de volume '  ] 
@@ -338,18 +345,10 @@ function Otim_ISLP(meshfile::String,freqs::Vector;verifica_derivada=false)
          #
          # Cuidado que agora as variáveis de projeto vão estar sempre em 0/1
          #
-         #
-         # \gamma  == 0 -> gamma_min
-         # \gamma  == 1 -> 0.99
-         #
-         # \gamma = min + (0.99-min)*x 
+         # Só para garantir...
          #
          for ele in elements_design
-            if γ[ele] < 0.5
-               γ[ele] = γ_min 
-            else
-               γ[ele] = γ_max
-            end
+             γ[ele] = round(γ[ele])
          end
 
          # Grava a topologia para visualização 
