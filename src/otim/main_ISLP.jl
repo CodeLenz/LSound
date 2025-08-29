@@ -245,12 +245,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     for iter = 1:niter
 
         # Volume atual da estrutura
-        volume_atual = 0.0
-        for ele in elements_design
-            if γ[ele]≈γ_max
-               volume_atual += V[ele]
-            end
-        end
+        volume_atual = sum(γ[elements_design].*V[elements_design])
 
         # Armazena o volume no histório de volumes
         historico_V[iter] = volume_atual
@@ -316,14 +311,14 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
          α = (1-ϵ1)*volume_atual
          β = (1+ϵ2)*volume_atual
 
-        if Vast < α
-           ΔV = -ϵ1*volume_atual
-        elseif Vast > β
-           ΔV = ϵ2*volume_atual
-        end
+         if Vast < α
+            ΔV = -ϵ1*volume_atual
+         elseif Vast > β
+            ΔV = ϵ2*volume_atual
+         end
 
-        # Como só temos uma restrição, 
-        b = [ΔV]
+         # Como só temos uma restrição, 
+         b = [ΔV]
 
          # 
          # Chama a rotina de LP passando  
