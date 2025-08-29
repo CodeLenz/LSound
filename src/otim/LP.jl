@@ -60,7 +60,8 @@ function LP(c, A, b, γ)
    @objective(model, Min, c' * x)
 
    # Resolve o problema 
-   optimize!(model)
+   #optimize!(model)
+   redirect_stdout((()->optimize!(model)),open("/dev/null", "w"))
 
    # Valor do objetivo
    objective_value(model)

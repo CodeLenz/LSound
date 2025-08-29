@@ -97,7 +97,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         string_eps2 = dados["ϵ2"]
 
         # Se foi informado como string, convertemos
-        if isa(string_er,String)
+        if isa(string_eps2,String)
             ϵ2 =  parse(Float64,string_eps2)
         else
             ϵ2 = string_eps2
@@ -249,7 +249,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     else
         println("Ponto de partida não foi informado no .yaml. Utilizando o valor padrão ", partida)
     end
-
 
 
    # Retorna os dados 
