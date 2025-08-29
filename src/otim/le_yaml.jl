@@ -74,13 +74,13 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     if haskey(dados,"ϵ1")
 
         # recupera como string
-        string_er = dados["ϵ1"]
+        string_eps1 = dados["ϵ1"]
 
         # Se foi informado como string, convertemos
-        if isa(string_er,String)
-            ϵ1 =  parse(Float64,string_er)
+        if isa(string_eps1,String)
+            ϵ1 =  parse(Float64,string_eps1)
         else
-            ϵ1 = string_er
+            ϵ1 = string_eps1
         end
  
         # Testa consistência da informação 
@@ -94,13 +94,13 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     if haskey(dados,"ϵ2")
 
         # recupera como string
-        string_er = dados["ϵ2"]
+        string_eps2 = dados["ϵ2"]
 
         # Se foi informado como string, convertemos
         if isa(string_er,String)
-            ϵ2 =  parse(Float64,string_er)
+            ϵ2 =  parse(Float64,string_eps2)
         else
-            ϵ2 = string_er
+            ϵ2 = string_eps2
         end
  
         # Testa consistência da informação 
@@ -119,7 +119,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         string_niter = dados["niter"]
 
         # Se foi informado como string, convertemos
-        if isa(string_er,String)
+        if isa(string_niter,String)
             niter =  parse(Int64,string_niter)
         else
             niter = string_niter
@@ -149,7 +149,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         (vf<=0||vf>=1) && throw("Le_YAML::Volume fraction deve estar em (0,1) ") 
         
     else
-        println("Frção de volume não foi informado no .yaml. Utilizando o valor padrão ", vf)
+        println("Fração de volume não foi informado no .yaml. Utilizando o valor padrão ", vf)
     end
 
     # Recupera o valor mínimo da variável de projeto

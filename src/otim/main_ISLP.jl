@@ -361,9 +361,6 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
    # Roda o sweep na topologia otimizada e exporta para visualização 
    MP,_ =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
 
-   # Número de frequências
-   nf = length(freqs)
-    
    # Exporta por frequência
    for i=1:nf
 
@@ -379,6 +376,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
    writedlm(arquivo_γ_fin,γ)
 
    # Retorna o histórico de volume e também o da função objetivo 
+   println("Retornando históricos de V e de SLP")
    return historico_V, historico_SLP
 
 end # main_otim
