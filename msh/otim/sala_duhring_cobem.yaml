@@ -20,7 +20,7 @@ raio: 0.3
 niter: 100
 
 # Parametrização do material 
-parametrizacao: DUHRING
+parametrizacao: PEREIRA
 
 # Número de iterações para a média histórica
 nhisto: 2

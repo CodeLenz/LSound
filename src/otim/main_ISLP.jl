@@ -84,7 +84,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     vetor_dfκ = [dfκ_pereira, dfκ_duhring]
 
     # 1 para PEREIRA e 2 para Duhring
-    ponteiro_parametrizacao = 2
+    ponteiro_parametrizacao = 1
  
     if parametrizacao=="PEREIRA"
          println("Utilizando a parametrização de PEREIRA")

@@ -61,7 +61,7 @@ function LP(c, A, b, γ)
 
    # Resolve o problema 
    #optimize!(model)
-   redirect_stdout((()->optimize!(model)),open("/dev/null", "w"))
+   redirect_stdout((()->optimize!(model)),open("nul", "w"))
 
    # Valor do objetivo
    objective_value(model)
