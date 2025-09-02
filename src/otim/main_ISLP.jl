@@ -25,6 +25,9 @@
 """
 function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=false)
     
+   # Restrição de perímetro
+   Past = 50.0
+
     # Evita chamar um .geo
     occursin(".geo",meshfile) && error("Chamar com .msh..")
     
@@ -84,7 +87,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     vetor_dfκ = [dfκ_pereira, dfκ_duhring]
 
     # 1 para PEREIRA e 2 para Duhring
-    ponteiro_parametrizacao = 1
+    ponteiro_parametrizacao = 2
  
     if parametrizacao=="PEREIRA"
          println("Utilizando a parametrização de PEREIRA")
@@ -132,8 +135,12 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
          println("Determinando a vizinhança para um raio de $(raio_filtro)")
          @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro,elements_design)
 
+
     end # verifica_derivada
 
+    # Em teste...vizinhos de arestas
+    neighedge = NeighborEdges(ne,connect,elements_design)
+        
     # Vamos inicializar o vetor de variáveis de projeto.
     # γ = 0 --> ar
     # γ = 1 --> sólido
@@ -215,8 +222,16 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
       Lgmsh_export_element_scalar(arquivo_pos,dnum,"Numerica")
       Lgmsh_export_element_scalar(arquivo_pos,rel,"relativa")
 
+      #
+      # Vamos validar a derivada do perímetro também 
+      #
+      FPerimiter(γ) =  Perimiter(γ, neighedge, elements_design)
+      dPnum = df(γ,FPerimiter,elements_design)
+      dP = dPerimiter(ne, γ, neighedge, elements_design)
+
+
       # Retorna as derivadas
-      return dΦ, dnum 
+      return dΦ, dnum, dP, dPnum 
 
     end
 
@@ -238,13 +253,14 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     # Aqui vamos  simplificar um pouco a lógica, sacrificando memória
     ESED_F_ANT = zeros(ne,niter)
 
-    # Valor médio da sensibilidade (entre duas iterações)
+    # Valor médio da sensibilidade (entre nhisto)
     ESED_F_media = zeros(ne)
 
-    # Monitora o histórico de volume e de SPL ao longo das 
-    # iterações 
+    # Monitora o histórico de volume, do perímetro e 
+    # do SPL ao longo das  iterações 
     historico_V   = zeros(niter)
     historico_SLP = zeros(niter)
+    historico_P   = zeros(niter)
 
     #############################  Main loop ###########################
     for iter = 1:niter
@@ -262,14 +278,22 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
         # Calcula o SPL para esta iteração 
         objetivo = Objetivo(MP,nodes_target,vA)
 
-        println("Iteração       ", iter)
-        println("Objetivo       ", objetivo)
-        println("Volume atual   ", volume_atual)
-        println("Volume target  ", Vast)
-        println()
-
         # Armazena no historico de SPL
         historico_SLP[iter] = objetivo
+
+        # Perímetro 
+        perimetro = Perimiter(γ, neighedge, elements_design)
+
+        # Guarda para o histórico
+        historico_P[iter] = perimetro
+
+        println("Iteração        ", iter)
+        println("Objetivo        ", objetivo)
+        println("Perimetro       ", perimetro)
+        println("Past            ", Past)
+        println("Volume atual    ", volume_atual)
+        println("Volume target   ", Vast)
+        println()
 
         # Calcula a derivada da função objetivo em relação ao vetor γ
         # somente nas posições de projeto
@@ -293,11 +317,17 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
         # Visualiza as ESEDS...
         Lgmsh_export_element_scalar(arquivo_pos,ESED_F_media,"ESED_media")  
 
+        # Derivada do perímetro
+        dP = dPerimiter(ne, γ, neighedge, elements_design)
+   
+        # Visualiza a derivada do perímetro
+        Lgmsh_export_element_scalar(arquivo_pos,dP,"dP")  
+
          #
          # Esquema de relaxação da restrição de volume Eq. 4
          #
          #
-         # Um vetor b = [\Delta g ]
+         # Um vetor b = [\Delta g ; ]
          #
          
          # Calcular as variações ΔV^k para essa iteração
@@ -306,27 +336,67 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
          # Lado direito da restrição de volume linearizada em Δγ
          ΔV = Vast - volume_atual
 
+         #
          # Lógica para relaxar a restrição de volume 
          #
          # Parâmetros para comparação 
-         α = (1-ϵ1)*volume_atual
-         β = (1+ϵ2)*volume_atual
+         if volume_atual > 0
 
-         if Vast < α
-            ΔV = -ϵ1*volume_atual
-         elseif Vast > β
-            ΔV = ϵ2*volume_atual
+            # Limites "móveis"
+            αv = (1-ϵ1)*volume_atual
+            βv = (1+ϵ2)*volume_atual
+
+            if Vast < αv
+               ΔV = -ϵ1*volume_atual
+            elseif Vast > βv
+               ΔV = ϵ2*volume_atual
+            end
          end
 
-         # Como só temos uma restrição, 
-         b = [ΔV]
+         #
+         # Lógica para relaxar a restrição de perímetro
+         #
+         ΔP = Past - perimetro
+         
+         # Parâmetros para comparação 
+         if perimetro > 0
+
+            # Limites "móveis"
+            αp = (1-ϵ1)*perimetro
+            βp = (1+ϵ2)*perimetro
+
+            @show αp, perimetro, βp
+
+            if Past < αp
+               ΔP = -ϵ1*perimetro
+            elseif Past > βp
+               ΔP = ϵ2*perimetro
+            end
+
+         end
+
+         # Limites das restrições
+         if perimetro>0
+            b = [ΔV ; ΔP]
+         else
+            b = [ΔV]
+         end
+
+         @show b  
 
          # 
          # Chama a rotina de LP passando  
          # os vetores 
          # c = ESED_F_media
-         # A = [ Gradiente da restrição de volume '  ] 
-         A = Matrix(transpose(V[elements_design]))
+         # A = [ Gradiente da restrição de volume '  ;
+         #       Gradiente da restrição de perímetro '] 
+         if perimetro>0
+            A = vcat(transpose(V[elements_design]), 
+                     transpose(dP[elements_design]) )
+         else
+            A = vcat(transpose(V[elements_design]))
+         end
+
 
          # Vetor de coeficientes da função objetivo
          c = ESED_F_media[elements_design]
@@ -373,7 +443,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
 
    # Retorna o histórico de volume e também o da função objetivo 
    println("Retornando históricos de V e de SLP")
-   return historico_V, historico_SLP
+   return historico_V, historico_SLP, historico_P
 
 end # main_otim
 

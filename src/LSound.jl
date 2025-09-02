@@ -57,6 +57,7 @@ module LSound
     include("otim/sweep.jl")
     include("otim/verifica_derivada.jl")
     include("otim/processa_FRF.jl")
+    include("otim/perimiter.jl")
     include("otim/main_ISLP.jl")
 
     export Analise, Otim_ISLP, Processa_FRF

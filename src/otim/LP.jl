@@ -11,7 +11,7 @@ function LP(c, A, b, γ)
    # da etapa que ele está realizando. O mip_solver é bem crítico para 
    # a primeira etapa, em que é contínua. O Gurobi é uma boa opção, mas 
    # precisamos instalar a licença no computador. Uma outra opção é utilizar
-   # o Ipopt u o HigHS.
+   # o Ipopt ou  HigHS.
    # O Cbc é o otimizador para a etapa discreta (branch and bound), que é 
    # realizada depois da etapa contínua.
    ipopt  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
@@ -42,42 +42,43 @@ function LP(c, A, b, γ)
    mb==ma || error("LP: dimensões inconsistentes")
 
    # Cria o vetor com as restrições laterais para cada variável
-   xi = zeros(Int,na)
-   xs = zeros(Int,na)
+   Δxi = zeros(Int,na)
+   Δxs = zeros(Int,na)
 
-   for i in LinearIndices(xi)
-       xi[i] = -round(Int,γ[i])
-       xs[i] =  round(Int,1-γ[i])
+   for i in LinearIndices(Δxi)
+       Δxi[i] = -round(Int,γ[i])
+       Δxs[i] =  round(Int,1-γ[i])
    end
 
    # Cria um vetor de variáveis de projeto
-   @variable(model, xi[i] <= x[i=1:na] <= xs[i], Int)
+   @variable(model, Δxi[i] <= Δx[i=1:na] <= Δxs[i], Int)
 
    # Monta todas as restrições ao mesmo tempo 
-   @constraint(model, A * x .<= b)
+   @constraint(model, A * Δx .<= b)
 
    # Monta a função objetivo
-   @objective(model, Min, c' * x)
+   @objective(model, Min, c' * Δx)
 
    # Resolve o problema 
    #optimize!(model)
    redirect_stdout((()->optimize!(model)),open("nul", "w"))
 
    # Valor do objetivo
-   objective_value(model)
+   # objective_value(model)
 
    # Vetor de variáveis de projeto no ponto de ótimo
-   xopt = value(x)
+   Δxopt = value(Δx)
 
    # Vamos testar as restrições
-   @show [A*xopt b]
+   @show [A*Δxopt b]
+   @show termination_status(model)
 
    # @show c
    # @show A
    # @show xopt
 
    # Retorna o vetor de variáveis de projeto no ponto de ótimo
-   return xopt
+   return Δxopt
 
 end
 

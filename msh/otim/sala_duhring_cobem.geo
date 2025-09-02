@@ -66,7 +66,7 @@ Physical Surface("Material,Al,2,2643.0,5098.3516,400.0") = {200};
 Physical Curve("Vn,1E-3,34.56,0.0") = {8};
 
 // A região 1 (Ar) não é de projeto
-Physical Surface("Fixed,1E-3") = {100};
+Physical Surface("Fixed,0.0") = {100};
 
 // Aplica uma excitação de pressão imposta na parede da esquerda
 // Só para testar a leitura de dados, ainda não implementado no 
