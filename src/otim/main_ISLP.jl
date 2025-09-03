@@ -415,24 +415,26 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
             # Constraint 
             g_air = 5 + sum(γ[elements_air])
 
-            vcat(b,g_air)
-            vcat(A,transpose(one_air))
+            b = vcat(b,g_air)
+            A = vcat(A,transpose(one_air))
 
          end
          
 
          # Restrição de variação de elementos sólidos
+         #=
          if !isempty(elements_solid)
 
             # Constraint
-            g_solid  = 5 - sum(γ[elements_solid])
+            g_solid  = 50 - sum(γ[elements_solid])
 
-            vcat(b,g_solid)
-            vcat(A,-transpose(one_solid))
+            b = vcat(b,g_solid)
+            A = vcat(A,-transpose(one_solid))
 
          end
+         =#
 
-         @show b, length(elements_air), length(elements_solid)
+         @show b
 
          # Vetor de coeficientes da função objetivo
          c = ESED_F_media[elements_design]
