@@ -265,6 +265,25 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     #############################  Main loop ###########################
     for iter = 1:niter
 
+
+        # Lista de elementos de projeto com ar e com sólido
+        elements_air = Int64[]
+        elements_solid = Int64[]
+        one_air = Float64[]
+        one_solid = Float64[]
+        for ele in elements_design
+            if γ[ele]<0.5 
+               push!(elements_air,ele)
+               push!(one_air,1.0)
+               push!(one_solid,0)
+            else
+               push!(elements_solid,ele)
+               push!(one_air,0)
+               push!(one_solid,1)
+            end
+        end
+
+
         # Volume atual da estrutura
         volume_atual = sum(γ[elements_design].*V[elements_design])
 
@@ -353,6 +372,12 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
             end
          end
 
+         # Primeiro limite de restrição...volume
+         b = [ΔV]
+         A = vcat(V[elements_design]')
+
+         #=
+
          #
          # Lógica para relaxar a restrição de perímetro
          #
@@ -382,21 +407,32 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
             b = [ΔV]
          end
 
-         @show b  
+        =#
 
-         # 
-         # Chama a rotina de LP passando  
-         # os vetores 
-         # c = ESED_F_media
-         # A = [ Gradiente da restrição de volume '  ;
-         #       Gradiente da restrição de perímetro '] 
-         if perimetro>0
-            A = vcat(transpose(V[elements_design]), 
-                     transpose(dP[elements_design]) )
-         else
-            A = vcat(transpose(V[elements_design]))
+         # Restrição de variação de elementos com ar
+         if !isempty(elements_air)
+
+            # Constraint 
+            g_air = 5 + sum(γ[elements_air])
+
+            vcat(b,g_air)
+            vcat(A,transpose(one_air))
+
+         end
+         
+
+         # Restrição de variação de elementos sólidos
+         if !isempty(elements_solid)
+
+            # Constraint
+            g_solid  = 5 - sum(γ[elements_solid])
+
+            vcat(b,g_solid)
+            vcat(A,-transpose(one_solid))
+
          end
 
+         @show b, length(elements_air), length(elements_solid)
 
          # Vetor de coeficientes da função objetivo
          c = ESED_F_media[elements_design]
