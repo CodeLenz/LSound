@@ -13,14 +13,14 @@ raio: 0.3
 
 # Parâmetros de ajuste das restrições 
 # linearizadas
-ϵ1: 0.001
-ϵ2: 0.001
+ϵ1: 0.01
+ϵ2: 0.01
 
 # Número de iterações de otimização (valor padrão é 100)
-niter: 200
+niter: 100
 
 # Parametrização do material 
-parametrizacao: DUHRING
+parametrizacao: PEREIRA
 
 # Número de iterações para a média histórica
 nhisto: 1

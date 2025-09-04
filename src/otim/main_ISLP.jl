@@ -87,7 +87,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     vetor_dfκ = [dfκ_pereira, dfκ_duhring]
 
     # 1 para PEREIRA e 2 para Duhring
-    ponteiro_parametrizacao = 2
+    ponteiro_parametrizacao = 1
  
     if parametrizacao=="PEREIRA"
          println("Utilizando a parametrização de PEREIRA")
@@ -377,6 +377,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
          #
          
          # Parâmetros para comparação 
+         #=
          if perimetro > 0
 
             # Variação sem a relaxação
@@ -392,7 +393,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
                ΔP = ϵ2*perimetro
             end
 
-            # Limite da restrição de perímetro
+            # Limite da restrição de perímetro linearizada e relaxada
             b = vcat(b, ΔP)
 
             # Derivada do perímetro
@@ -404,13 +405,13 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
             A = vcat(A,transpose(dP[elements_design]))
 
          end
-
+         =#
 
          # Restrição de variação de elementos com ar
          if !isempty(elements_air)
 
             # Constraint 
-            g_air = 0.1*length(elements_design) 
+            g_air = ceil(0.01*length(elements_design))
 
             b = vcat(b,g_air)
             A = vcat(A,transpose(one_air))
@@ -422,7 +423,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
          if !isempty(elements_solid)
 
             # Constraint
-            g_solid  = 0.1*length(elements_design) 
+            g_solid  = ceil(0.01*length(elements_design)) 
 
             b = vcat(b,g_solid)
             A = vcat(A,-transpose(one_solid))

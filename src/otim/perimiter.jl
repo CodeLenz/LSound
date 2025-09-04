@@ -17,9 +17,7 @@ function Perimiter(γ, neighedge, elements_design)
 
        # Loop over neighedge
        for viz in vizinhos
-
-            P += sqrt((γe - γ[viz])^2)
-
+           P += 0.5*(γe - γ[viz])^2
        end #viz
 
    end #ele
@@ -30,7 +28,7 @@ function Perimiter(γ, neighedge, elements_design)
 end
 
 #
-# Delta de kroenecker
+# Delta de Kroenecker
 #
 function DK(a::Int,b::Int)
     ifelse(a==b,1.0,0.0)
@@ -41,7 +39,7 @@ end
 #
 # Gradiente do perímetro
 #
-function dPerimiter(ne, γ, neighedge, elements_design, δ=1E-6)
+function dPerimiter(ne, γ, neighedge, elements_design)
 
    # Vetor de derivadas
    dP = zeros(ne)
@@ -62,10 +60,11 @@ function dPerimiter(ne, γ, neighedge, elements_design, δ=1E-6)
             for viz in vizinhos
 
                 # Pej
-                Pej = sqrt((γe - γ[viz])^2 + δ^2)
+                Pej = (γe - γ[viz])
                 
                 # Derivada
-                dP[m] += (1/Pej)*(γe - γ[viz])*(DK(ele,m) - DK(viz,m))
+                dP[m] += Pej*(DK(ele,m) - DK(viz,m))
+                
 
             end #viz
 
