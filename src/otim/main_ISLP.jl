@@ -336,11 +336,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
         # Visualiza as ESEDS...
         Lgmsh_export_element_scalar(arquivo_pos,ESED_F_media,"ESED_media")  
 
-        # Derivada do perímetro
-        dP = dPerimiter(ne, γ, neighedge, elements_design)
-   
-        # Visualiza a derivada do perímetro
-        Lgmsh_export_element_scalar(arquivo_pos,dP,"dP")  
+       
 
          #
          # Esquema de relaxação da restrição de volume Eq. 4
@@ -376,21 +372,19 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
          b = [ΔV]
          A = vcat(V[elements_design]')
 
-         #=
-
          #
          # Lógica para relaxar a restrição de perímetro
          #
-         ΔP = Past - perimetro
          
          # Parâmetros para comparação 
          if perimetro > 0
 
+            # Variação sem a relaxação
+            ΔP = Past - perimetro
+
             # Limites "móveis"
             αp = (1-ϵ1)*perimetro
             βp = (1+ϵ2)*perimetro
-
-            @show αp, perimetro, βp
 
             if Past < αp
                ΔP = -ϵ1*perimetro
@@ -398,22 +392,25 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
                ΔP = ϵ2*perimetro
             end
 
+            # Limite da restrição de perímetro
+            b = vcat(b, ΔP)
+
+            # Derivada do perímetro
+            dP = dPerimiter(ne, γ, neighedge, elements_design)
+   
+            # Visualiza a derivada do perímetro
+            Lgmsh_export_element_scalar(arquivo_pos,dP,"dP")  
+
+            A = vcat(A,transpose(dP[elements_design]))
+
          end
 
-         # Limites das restrições
-         if perimetro>0
-            b = [ΔV ; ΔP]
-         else
-            b = [ΔV]
-         end
-
-        =#
 
          # Restrição de variação de elementos com ar
          if !isempty(elements_air)
 
             # Constraint 
-            g_air = 5 + sum(γ[elements_air])
+            g_air = 0.1*length(elements_design) 
 
             b = vcat(b,g_air)
             A = vcat(A,transpose(one_air))
@@ -422,17 +419,15 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
          
 
          # Restrição de variação de elementos sólidos
-         #=
          if !isempty(elements_solid)
 
             # Constraint
-            g_solid  = 50 - sum(γ[elements_solid])
+            g_solid  = 0.1*length(elements_design) 
 
             b = vcat(b,g_solid)
             A = vcat(A,-transpose(one_solid))
 
          end
-         =#
 
          @show b
 

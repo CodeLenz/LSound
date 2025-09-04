@@ -17,7 +17,7 @@ raio: 0.3
 ϵ2: 0.001
 
 # Número de iterações de otimização (valor padrão é 100)
-niter: 20
+niter: 200
 
 # Parametrização do material 
 parametrizacao: DUHRING
