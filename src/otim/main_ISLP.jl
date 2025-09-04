@@ -367,7 +367,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
                ΔV = ϵ2*volume_atual
             end
          end
-
+      
          # Primeiro limite de restrição...volume
          b = [ΔV]
          A = vcat(V[elements_design]')
@@ -377,7 +377,6 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
          #
          
          # Parâmetros para comparação 
-         #=
          if perimetro > 0
 
             # Variação sem a relaxação
@@ -405,8 +404,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
             A = vcat(A,transpose(dP[elements_design]))
 
          end
-         =#
-
+         
          # Restrição de variação de elementos com ar
          if !isempty(elements_air)
 
