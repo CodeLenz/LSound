@@ -23,24 +23,47 @@
  Inputs -> freqs, a vector with the frequencies to sweep
 
 """
-function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=false)
+function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=false)
     
-   # Restrição de perímetro
-   Past = 50.0
+   # Se o arquivo for um .geo, geramos um .msh utilizando a biblioteca
+   # do gmsh
+   if occursin(".geo",arquivo)
+       
+      # Gera a malha
+      gmsh.initialize()
+      gmsh.open(arquivo)
+      gmsh.model.mesh.generate(2)
+       
+      # Cria o mesmo nome, mas com .msh
+      mshfile = replace(arquivo,".geo"=>".msh")
 
-    # Evita chamar um .geo
-    occursin(".geo",meshfile) && error("Chamar com .msh..")
-    
-    # Define os nomes dos arquivos de entrada (yaml) e de saída
-    # (pos) em função do nome de meshfile
-    arquivo_yaml = meshfile[1:end-3]*"yaml"
-    arquivo_pos  = meshfile[1:end-3]*"pos"
+      # Cria o .msh
+      gmsh.write(mshfile)
+      
+   else 
+
+      # Assumimos que já passaram o .msh (seria bom testar...)
+      mshfile = arquivo
+
+   end
+
+    # Restrição de perímetro
+    Past = 50.0
+
+    # Define os nomes dos arquivos de entrada (yaml) 
+    arquivo_yaml = replace(mshfile,".msh"=>".yaml")
+
+    # Nomes de arquivos que serão gravados no direorio raiz
+    nomebase = basename(mshfile)
+
+    # Arquivo .pos
+    arquivo_pos  = replace(nomebase,".msh"=>".pos")
 
     # Define o nome dos arquivos contendo a distribuição inicial e final (otimizada)
     # das variáveis de projeto. Esses arquivos serão utilizados posteriormente em 
     # Processa_FRF
-    arquivo_γ_ini = meshfile[1:end-3]*"_γ_ini.dat"
-    arquivo_γ_fin = meshfile[1:end-3]*"_γ_opt.dat"
+    arquivo_γ_ini = replace(nomebase,".msh"=>"_γ_ini.dat")
+    arquivo_γ_fin = replace(nomebase,".msh"=>"_γ_opt.dat")
 
     # Verificamos se existem frequências sendo informadas
     isempty(freqs) && error("Analise Harmonica:: freqs deve ser um vetor não vazio")
@@ -49,7 +72,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     isa(freqs,Vector{Float64}) || error("freqs deve ser um vetor de floats")
     
     # Verifica se os arquivos de entrada existem
-    isfile(meshfile) || error("Otim:: arquivo de entrada $meshfile não existe")
+    isfile(mshfile) || error("Otim:: arquivo de entrada $mshfile não existe")
 
     # Número de frequências
     nf = length(freqs)
@@ -65,7 +88,7 @@ function Otim_ISLP(meshfile::String,freqs::Vector, vA::Vector;verifica_derivada=
     isfile(arquivo_yaml) || error("Otim:: arquivo de entrada $(arquivo_yaml) não existe")
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed = Parsemsh_Daniele(meshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed = Parsemsh_Daniele(mshfile)
 
     # Lista com os elementos que são de projeto
     elements_design = setdiff(1:ne,sort!(elements_fixed))
