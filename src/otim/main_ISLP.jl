@@ -97,7 +97,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     nvp = length(elements_design)
 
     # Le os dados do arquivo yaml
-    raio_filtro, niter, nhisto, ϵ1, ϵ2, vf, parametrizacao, γ_min, γ_max, partida = Le_YAML(arquivo_yaml)
+    raio_filtro, niter, nhisto, ϵ1, ϵ2, vf, parametrizacao, partida = Le_YAML(arquivo_yaml)
 
     # Seleciona as rotinas de parametrização de material de acordo com 
     # a opção 

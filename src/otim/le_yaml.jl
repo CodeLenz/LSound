@@ -19,12 +19,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     ϵ1 = 0.1
     ϵ2 = 0.1
 
-    # Valor mínimo da variável de projeto 
-    γmin = 0.0
-
-    # Valor máximo da variável de projeto 
-    γmax = 1
-
     # Valor padrão de parametrização 
     # PEREIRA ou DUHRING
     parametrizacao = "DUHRING"
@@ -152,50 +146,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         println("Fração de volume não foi informado no .yaml. Utilizando o valor padrão ", vf)
     end
 
-    # Recupera o valor mínimo da variável de projeto
-    if haskey(dados,"γmin")
-
-        # recupera como string
-        string_γmin = dados["γmin"]
-
-        # Se foi informado como string, convertemos
-        if isa(string_γmin,String)
-            γmin =  parse(Float64,string_γmin)
-        else
-            γmin = string_γmin
-        end
- 
-        # Testa consistência da informação 
-        ( 0<= γmin <=1 ) || throw("Le_YAML::γmin deve estar em (0,1) ") 
-        
-    else
-        println("γmin não foi informado no .yaml. Utilizando o valor padrão ", γmin)
-    end
-
-
-    # Recupera o valor máximo da variável de projeto
-    if haskey(dados,"γmax")
-
-        # recupera como string
-        string_γmax = dados["γmax"]
-
-        # Se foi informado como string, convertemos
-        if isa(string_γmax,String)
-            γmax =  parse(Float64,string_γmax)
-        else
-            γmax = string_γmax
-        end
- 
-        # Testa consistência da informação 
-        (0<γmax<=1) || throw("Le_YAML::γmax deve estar em (0,1) ") 
-        
-    else
-        println("γmax não foi informado no .yaml. Utilizando o valor padrão ", γmax)
-    end
-
-    # Teste para ver se γmin < γmax
-    (γmin<γmax) || throw("Le_YAML::γmin deve ser menor do que γmax") 
-
     # Recupera o tipo de parametrização do material
     if haskey(dados,"parametrizacao")
 
@@ -252,6 +202,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
 
 
    # Retorna os dados 
-   return raio, niter, nhisto, ϵ1, ϵ2,  vf, parametrizacao, γmin, γmax, partida 
+   return raio, niter, nhisto, ϵ1, ϵ2,  vf, parametrizacao, partida 
 
 end
