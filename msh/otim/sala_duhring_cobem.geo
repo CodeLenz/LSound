@@ -81,7 +81,7 @@ Physical Surface("Fixed,0.0") = {100};
 Physical Curve("Target") = {9};
 
 // Convert triangles to quads
-Recombine Surface{:};
+Recombine Surface{200};
 
 // Better quad algorithm
 Mesh.Algorithm = 8;

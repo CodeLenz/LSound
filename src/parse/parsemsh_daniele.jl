@@ -329,6 +329,6 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
 
     # Return processed data
     return nn, coord, ne, connect2, materials2, unique!(nodes_open), velocities, unique!(nodes_pressure), 
-           pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed
+           pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed, centroids
 
 end

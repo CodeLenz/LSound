@@ -88,7 +88,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     isfile(arquivo_yaml) || error("Otim:: arquivo de entrada $(arquivo_yaml) não existe")
 
     # Le dados da malha
-    nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed = Parsemsh_Daniele(mshfile)
+    nn, coord, ne, connect, materials, nodes_open, velocities, nodes_pressure, pressures, damping, nodes_probe, nodes_target, elements_fixed, values_fixed, centroides = Parsemsh_Daniele(mshfile)
 
     # Lista com os elementos que são de projeto
     elements_design = setdiff(1:ne,sort!(elements_fixed))
@@ -147,8 +147,8 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
          # 
 
          # Calcula a matriz com os centróides de cada elemento da malha
-         println("Determinando os centróides dos elementos")
-         @time centroides = Centroides(ne,connect,coord,elements_design)
+         #println("Determinando os centróides dos elementos")
+         #@time centroides = Centroides(ne,connect,coord,elements_design)
 
          # TODO 
          # Ver cálculo automático de raio se raio_filtro for nulo

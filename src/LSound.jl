@@ -12,6 +12,7 @@ module LSound
     using DelimitedFiles
     using Lgmsh
     using YAML
+    using Gmsh
 
    using JuMP
    using Alpine
