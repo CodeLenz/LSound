@@ -143,14 +143,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     if !verifica_derivada
     
          # TODO 
-         # Calcular centróides e vizinhos somente de elementos de projeto
-         # 
-
-         # Calcula a matriz com os centróides de cada elemento da malha
-         #println("Determinando os centróides dos elementos")
-         #@time centroides = Centroides(ne,connect,coord,elements_design)
-
-         # TODO 
          # Ver cálculo automático de raio se raio_filtro for nulo
          #
          
@@ -292,8 +284,12 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         # Lista de elementos de projeto com ar e com sólido
         elements_air = Int64[]
         elements_solid = Int64[]
+
+        # Vetores com a dimensão do número de variáveis de projeto 
         one_air = Float64[]
         one_solid = Float64[]
+
+        # Elementos de projeto, separando por ar ou sólido
         for ele in elements_design
             if γ[ele]<0.5 
                push!(elements_air,ele)
@@ -302,10 +298,9 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
             else
                push!(elements_solid,ele)
                push!(one_air,0)
-               push!(one_solid,1)
+               push!(one_solid,1.0)
             end
         end
-
 
         # Volume atual da estrutura
         volume_atual = sum(γ[elements_design].*V[elements_design])
@@ -359,37 +354,25 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         # Visualiza as ESEDS...
         Lgmsh_export_element_scalar(arquivo_pos,ESED_F_media,"ESED_media")  
 
-       
+        # Lado direito da restrição de volume linearizada em Δγ
+        ΔV = Vast - volume_atual
 
-         #
-         # Esquema de relaxação da restrição de volume Eq. 4
-         #
-         #
-         # Um vetor b = [\Delta g ; ]
-         #
-         
-         # Calcular as variações ΔV^k para essa iteração
-         # lembrando que só temos uma restrição (de volume)
+        #
+        # Lógica para relaxar a restrição de volume 
+        #
+        # Parâmetros para comparação 
+        if volume_atual > 0
 
-         # Lado direito da restrição de volume linearizada em Δγ
-         ΔV = Vast - volume_atual
+           # Limites "móveis"
+           αv = (1-ϵ1)*volume_atual
+           βv = (1+ϵ2)*volume_atual
 
-         #
-         # Lógica para relaxar a restrição de volume 
-         #
-         # Parâmetros para comparação 
-         if volume_atual > 0
-
-            # Limites "móveis"
-            αv = (1-ϵ1)*volume_atual
-            βv = (1+ϵ2)*volume_atual
-
-            if Vast < αv
-               ΔV = -ϵ1*volume_atual
-            elseif Vast > βv
-               ΔV = ϵ2*volume_atual
-            end
-         end
+           if Vast < αv
+              ΔV = -ϵ1*volume_atual
+           elseif Vast > βv
+              ΔV = ϵ2*volume_atual
+           end
+        end
       
          # Primeiro limite de restrição...volume
          b = [ΔV]
@@ -400,6 +383,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
          #
          
          # Parâmetros para comparação 
+         #=
          if perimetro > 0
 
             # Variação sem a relaxação
@@ -427,7 +411,8 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
             A = vcat(A,transpose(dP[elements_design]))
 
          end
-         
+         =#
+
          # Restrição de variação de elementos com ar
          if !isempty(elements_air)
 
