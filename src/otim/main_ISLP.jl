@@ -24,7 +24,10 @@
 
 """
 function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=false)
-    
+
+   # Fator de ajuste para elementos cheios e vazios
+   FATOR_MUDANCA = 0.1 
+
    # Se o arquivo for um .geo, geramos um .msh utilizando a biblioteca
    # do gmsh
    if occursin(".geo",arquivo)
@@ -383,7 +386,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
          #
          
          # Parâmetros para comparação 
-         #=
          if perimetro > 0
 
             # Variação sem a relaxação
@@ -411,13 +413,12 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
             A = vcat(A,transpose(dP[elements_design]))
 
          end
-         =#
-
+         
          # Restrição de variação de elementos com ar
          if !isempty(elements_air)
 
             # Constraint 
-            g_air = ceil(0.01*length(elements_design))
+            g_air = ceil(FATOR_MUDANCA*length(elements_design))
 
             b = vcat(b,g_air)
             A = vcat(A,transpose(one_air))
@@ -429,7 +430,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
          if !isempty(elements_solid)
 
             # Constraint
-            g_solid  = ceil(0.01*length(elements_design)) 
+            g_solid  = ceil(FATOR_MUDANCA*length(elements_design)) 
 
             b = vcat(b,g_solid)
             A = vcat(A,-transpose(one_solid))

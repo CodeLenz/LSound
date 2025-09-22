@@ -6,7 +6,7 @@
 versao: 1.0
 
 # Fração de volume (obrigatório)
-volfrac: 0.15
+volfrac: 0.5
 
 # Raio do filtro (obrigatório)
 raio: 0.6
