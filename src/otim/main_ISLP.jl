@@ -26,7 +26,7 @@
 function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=false)
 
    # Fator de ajuste para elementos cheios e vazios
-   FATOR_MUDANCA = 0.1 
+   FATOR_MUDANCA = 0.1
 
    # Se o arquivo for um .geo, geramos um .msh utilizando a biblioteca
    # do gmsh
@@ -50,8 +50,10 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
 
    end
 
+   VOLUME = false
+
     # Restrição de perímetro
-    Past = 50.0
+    Past = 20.0
 
     # Define os nomes dos arquivos de entrada (yaml) 
     arquivo_yaml = replace(mshfile,".msh"=>".yaml")
@@ -267,18 +269,12 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     # Target volume
     Vast = vf*volume_full_projeto
 
-    # Sensitivity index in the last iterations
-    # Aqui vamos  simplificar um pouco a lógica, sacrificando memória
-    ESED_F_ANT = zeros(ne,niter)
-
-    # Valor médio da sensibilidade (entre nhisto)
-    ESED_F_media = zeros(ne)
 
     # Monitora o histórico de volume, do perímetro e 
     # do SPL ao longo das  iterações 
-    historico_V   = zeros(niter)
-    historico_SLP = zeros(niter)
-    historico_P   = zeros(niter)
+    historico_V   = Float64[] #zeros(niter)
+    historico_SLP = Float64[] #zeros(niter)
+    historico_P   = Float64[] #zeros(niter)
 
     #############################  Main loop ###########################
     for iter = 1:niter
@@ -309,7 +305,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         volume_atual = sum(γ[elements_design].*V[elements_design])
 
         # Armazena o volume no histório de volumes
-        historico_V[iter] = volume_atual
+        push!(historico_V , volume_atual)
 
         # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
         # cada coluna é o vetor P para uma frequência de excitação
@@ -319,13 +315,13 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         objetivo = Objetivo(MP,nodes_target,vA)
 
         # Armazena no historico de SPL
-        historico_SLP[iter] = objetivo
+        push!(historico_SLP, objetivo)
 
         # Perímetro 
         perimetro = Perimiter(γ, neighedge, elements_design)
 
         # Guarda para o histórico
-        historico_P[iter] = perimetro
+        push!(historico_P, perimetro)
 
         println("Iteração        ", iter)
         println("Objetivo        ", objetivo)
@@ -339,23 +335,8 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         # somente nas posições de projeto
         dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design,vA) 
   
-        # Filtro de vizinhança espacial
-        dΦ_f =  Filtro(vizinhos,pesos,dΦ,elements_design)
-
-        # Guarda na coluna de ESED_F_media
-        ESED_F_ANT[elements_design,iter] .= dΦ_f[elements_design]
-
-        # Mean value using the last iterations
-        # Aqui temos que ter um cuidado muito importante. O número de colunas 
-        # para calcularmos a média deve ser o menor entre iter e nhisto
-        pini = max(1,iter-nhisto)
-        pfin = max(iter,iter-nhisto) 
-        
-        # Valor médio 
-        ESED_F_media[elements_design] .= mean(ESED_F_ANT[elements_design,pini:pfin],dims=2)
-     
         # Visualiza as ESEDS...
-        Lgmsh_export_element_scalar(arquivo_pos,ESED_F_media,"ESED_media")  
+        Lgmsh_export_element_scalar(arquivo_pos,dΦ,"dΦ")  
 
         # Lado direito da restrição de volume linearizada em Δγ
         ΔV = Vast - volume_atual
@@ -366,20 +347,25 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         # Parâmetros para comparação 
         if volume_atual > 0
 
-           # Limites "móveis"
-           αv = (1-ϵ1)*volume_atual
-           βv = (1+ϵ2)*volume_atual
+            # Limites "móveis"
+            αv = (1-ϵ1)*volume_atual
+            βv = (1+ϵ2)*volume_atual
 
-           if Vast < αv
-              ΔV = -ϵ1*volume_atual
-           elseif Vast > βv
-              ΔV = ϵ2*volume_atual
-           end
-        end
-      
-         # Primeiro limite de restrição...volume
-         b = [ΔV]
-         A = vcat(V[elements_design]')
+            if Vast < αv
+               ΔV = -ϵ1*volume_atual
+            elseif Vast > βv
+               ΔV = ϵ2*volume_atual
+            end
+         
+            # Primeiro limite de restrição...volume
+            b = [ΔV]
+
+            # Derivada do volume
+            A = vcat(V[elements_design]')
+
+         else
+            error("Volume igual a zero na otimização ")
+         end
 
          #
          # Lógica para relaxar a restrição de perímetro
@@ -403,15 +389,16 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
 
             # Limite da restrição de perímetro linearizada e relaxada
             b = vcat(b, ΔP)
-
+            
             # Derivada do perímetro
             dP = dPerimiter(ne, γ, neighedge, elements_design)
-   
+             
             # Visualiza a derivada do perímetro
             Lgmsh_export_element_scalar(arquivo_pos,dP,"dP")  
 
+            # Adiciona a linha em A
             A = vcat(A,transpose(dP[elements_design]))
-
+            
          end
          
          # Restrição de variação de elementos com ar
@@ -422,7 +409,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
 
             b = vcat(b,g_air)
             A = vcat(A,transpose(one_air))
-
+           
          end
          
 
@@ -434,17 +421,23 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
 
             b = vcat(b,g_solid)
             A = vcat(A,-transpose(one_solid))
-
+            
          end
 
          @show b
 
          # Vetor de coeficientes da função objetivo
-         c = ESED_F_media[elements_design]
+         c = dΦ[elements_design]# ESED_F_media[elements_design]
 
          # Vetor de variáveis de projeto no ponto de ótimo
          # LP(n, c, A, b)
          Δγ =  LP(c, A , b, γ[elements_design])
+
+         # Critério de parada por variação do γ
+         if norm(Δγ)< 1/nvp
+            println("Variação é muito pequena...terminando")
+            break
+         end
 
          # Incrementa os γ
          γ[elements_design] .+= Δγ
