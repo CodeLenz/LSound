@@ -26,7 +26,7 @@
 function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=false)
 
    # Fator de ajuste para elementos cheios e vazios
-   FATOR_MUDANCA = 0.1
+   FATOR_MUDANCA = 0.001
 
    # Se o arquivo for um .geo, geramos um .msh utilizando a biblioteca
    # do gmsh
@@ -50,10 +50,8 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
 
    end
 
-   VOLUME = false
-
     # Restrição de perímetro
-    Past = 20.0
+    Past = 200.0
 
     # Define os nomes dos arquivos de entrada (yaml) 
     arquivo_yaml = replace(mshfile,".msh"=>".yaml")
@@ -171,9 +169,15 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     # Então, podemos começar com um padrão que seja fisicamente
     # adequado para o problema em questão.
     println("Inicializando o vetor de variáveis de projeto")
-    γ = partida*ones(ne)
+    γ = zeros(ne)
     println("Ponto de partida = ", partida )
     println()
+
+    #mascara_init = rand(elements_design,round(Int,0.5*length(elements_design)))
+    #γ[round(Int,1/3*nvp):round(Int,2/3*nvp)] .= 0
+    γ[1:16] .= 1.0
+    γ[33:64] .= 1.0
+
 
     # Fixa os valores prescritos de densidade relativa
     Fix_γ!(γ,elements_fixed,values_fixed)
@@ -314,6 +318,10 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         # Calcula o SPL para esta iteração 
         objetivo = Objetivo(MP,nodes_target,vA)
 
+
+        @show objetivo 
+
+
         # Armazena no historico de SPL
         push!(historico_SLP, objetivo)
 
@@ -345,6 +353,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         # Lógica para relaxar a restrição de volume 
         #
         # Parâmetros para comparação 
+        #=
         if volume_atual > 0
 
             # Limites "móveis"
@@ -357,39 +366,51 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
                ΔV = ϵ2*volume_atual
             end
          
-            # Primeiro limite de restrição...volume
-            b = [ΔV]
-
-            # Derivada do volume
-            A = vcat(V[elements_design]')
-
          else
-            error("Volume igual a zero na otimização ")
+
+            ΔV = 0.1*Vast
+
+
+            #error("Volume igual a zero na otimização ")
          end
+       
+         # Primeiro limite de restrição...volume
+         b = [ΔV]
+
+         # Mostra a linearização 
+         println("Volume linearizado   ", b[1])
+
+         # Derivada do volume
+         A = vcat(V[elements_design]')
 
          #
          # Lógica para relaxar a restrição de perímetro
          #
          
          # Parâmetros para comparação 
-         if perimetro > 0
+         if  perimetro > 0
+
+            ϵP = 10*ϵ1 
 
             # Variação sem a relaxação
             ΔP = Past - perimetro
 
             # Limites "móveis"
-            αp = (1-ϵ1)*perimetro
-            βp = (1+ϵ2)*perimetro
+            αp = (1-ϵP)*perimetro
+            βp = (1+ϵP)*perimetro
 
             if Past < αp
-               ΔP = -ϵ1*perimetro
+               ΔP = -ϵP*perimetro
             elseif Past > βp
-               ΔP = ϵ2*perimetro
+               ΔP = ϵP*perimetro
             end
 
             # Limite da restrição de perímetro linearizada e relaxada
             b = vcat(b, ΔP)
             
+            # Mostra a linearização 
+            println("Perimetro linearizado   ", ΔP)
+
             # Derivada do perímetro
             dP = dPerimiter(ne, γ, neighedge, elements_design)
              
@@ -401,28 +422,39 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
             
          end
          
+         =#
+
+         @show length(elements_air), length(elements_solid)
+
+
          # Restrição de variação de elementos com ar
-         if !isempty(elements_air)
+         #if !isempty(elements_air)
 
             # Constraint 
             g_air = ceil(FATOR_MUDANCA*length(elements_design))
 
-            b = vcat(b,g_air)
-            A = vcat(A,transpose(one_air))
-           
-         end
+            # Mostra a linearização 
+            println("Air linearizado   ", g_air)
+
+            b = vcat(g_air)
+            A = vcat(transpose(one_air))
+            
+         #end
          
 
          # Restrição de variação de elementos sólidos
-         if !isempty(elements_solid)
+         #if !isempty(elements_solid)
 
             # Constraint
             g_solid  = ceil(FATOR_MUDANCA*length(elements_design)) 
 
+            # Mostra a linearização 
+            println("Solid linearizado   ", g_solid)
+
             b = vcat(b,g_solid)
             A = vcat(A,-transpose(one_solid))
-            
-         end
+               
+         #end
 
          @show b
 
@@ -434,10 +466,10 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
          Δγ =  LP(c, A , b, γ[elements_design])
 
          # Critério de parada por variação do γ
-         if norm(Δγ)< 1/nvp
-            println("Variação é muito pequena...terminando")
-            break
-         end
+         #if norm(Δγ)< 1/nvp
+         #   println("Variação é muito pequena...terminando")
+         #   break
+         #end
 
          # Incrementa os γ
          γ[elements_design] .+= Δγ
