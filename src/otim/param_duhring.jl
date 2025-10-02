@@ -18,7 +18,7 @@ https://doi.org/10.1016/j.jsv.2008.03.042.
 # ρ_ar : densidade do ar
 # ρ_s  : densidade da fase sólida
 #
-function fρ_duhring(γe;ρ_ar=1.204,ρ_s=2643.0)     
+function fρ(γe;ρ_ar=1.204,ρ_s=2643.0)     
 
     # Teste de consistência
     0<=γe<=1 || error("fρ:: γe inválido")
@@ -30,7 +30,7 @@ function fρ_duhring(γe;ρ_ar=1.204,ρ_s=2643.0)
 end 
 
 # Derivada da parametrização do inverso de ρ
-function dfρ_duhring(γe;ρ_ar=1.204,ρ_s=2643.0)
+function dfρ(γe;ρ_ar=1.204,ρ_s=2643.0)
 
     # Teste de consistência
     0<=γe<=1 || error("dfρ:: γe inválido")
@@ -42,7 +42,7 @@ end
 
 
 # Parametrização do inverso de κ
-function fκ_duhring(γe ; κ_ar=141.921E3,κ_s=6.87E10)
+function fκ(γe ; κ_ar=141.921E3,κ_s=6.87E10)
 
     # Teste de consistência
     0<=γe<=1 || error("fκ:: γe inválido")
@@ -53,7 +53,7 @@ function fκ_duhring(γe ; κ_ar=141.921E3,κ_s=6.87E10)
 end 
 
 # Derivada da parametrização do inverso de κ
-function dfκ_duhring(γe; κ_ar=141.921E3,κ_s=6.87E10)
+function dfκ(γe; κ_ar=141.921E3,κ_s=6.87E10)
 
     # Teste de consistência
     0<=γe<=1 || error("dfκ:: γe inválido")

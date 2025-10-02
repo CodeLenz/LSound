@@ -9,15 +9,15 @@ versao: 1.0
 volfrac: 0.5
 
 # Raio do filtro (obrigatório)
-raio: 0.6
+raio: 0.02
 
 # Parâmetros de ajuste das restrições 
 # linearizadas
-ϵ1: 0.001
-ϵ2: 0.001
+ϵ1: 0.01
+ϵ2: 0.01
 
 # Número de iterações de otimização (valor padrão é 100)
-niter: 10
+niter: 100
 
 # Parametrização do material 
 parametrizacao: PEREIRA

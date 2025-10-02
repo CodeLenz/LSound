@@ -78,7 +78,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
     #
     # TESTE 
     #       
-    γ[γ.==0]    .= 1E-3   
+    #γ[γ.==0]    .= 1E-3   
     
     # Define o vetor de derivadas
     d = zeros(ne)
@@ -176,7 +176,7 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
     #
     # TESTE
     #
-    γ[γ.==0]    .= 0
+    # γ[γ.==0]    .= 0
     
 
 

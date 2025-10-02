@@ -44,8 +44,8 @@ module LSound
     # Otimização
     include("otim/le_yaml.jl")
     include("otim/LP.jl")
-    #include("otim/param_duhring.jl")
-    include("otim/param_pereira.jl")
+    include("otim/param_duhring.jl")
+    #include("otim/param_pereira.jl")
     include("otim/fixos.jl")
     include("otim/global_otim.jl")
     include("otim/objetivo.jl")
