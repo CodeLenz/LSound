@@ -106,31 +106,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     # a opção 
     @show parametrizacao
 
-    # Vetores de funções 
-    vetor_fρ  = [fρ_pereira, fρ_duhring]
-    vetor_dfρ = [dfρ_pereira, dfρ_duhring]
-    vetor_fκ  = [fκ_pereira, fκ_duhring]
-    vetor_dfκ = [dfκ_pereira, dfκ_duhring]
-
-    # 1 para PEREIRA e 2 para Duhring
-    ponteiro_parametrizacao = 1
- 
-    if parametrizacao=="PEREIRA"
-         println("Utilizando a parametrização de PEREIRA")
-         #fρ(γ)  = fρ_pereira(γ) #,ψ, ρ_ar = ρ_ar, ρ2 = ρ_solido)
-         #dfρ(γ) = dfρ_pereira(γ)
-         #fκ(γ)  = fκ_pereira(γ)
-         #dfκ(γ) = dfκ_pereira(γ)
-
-    elseif parametrizacao=="DUHRING"
-         println("Utilizando a parametrização de DUHRING")
-         ponteiro_parametrizacao = 2
-
-         #fρ(γ)  = fρ_duhring(γ)
-         #dfρ(γ) = dfρ_duhring(γ)
-         #fκ(γ)  = fκ_duhring(γ)
-         #dfκ(γ) = dfκ_duhring(γ)
-    end # parametrizacao
      
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
     # que vai funcionar como nodes_probe aqui
@@ -205,7 +180,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     Lgmsh_export_element_scalar(arquivo_pos,γ,"Iter 0")
    
     # Sweep na topologia inicial, para comparação com a otimizada
-    MP,_ =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
+    MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
    
     # Exporta por frequência
@@ -226,16 +201,16 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
       γ = rand(ne)
 
       # Derivada utilizando o procedimento analítico
-      MP,K,M =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
+      MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
       # Calcula a derivada da função objetivo em relação ao vetor γ
-      dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design,vA) 
+      dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP,elements_design,vA) 
 
       println("Verificando as derivadas utilizando diferenças finitas centrais...")
       println("O número efetivo de variáveis de projeto é ", length(elements_design))
 
       # Derivada numérica
-      dnum = Verifica_derivada(γ,nn,ne,coord,connect,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures,nodes_target,elements_design,vA)
+      dnum = Verifica_derivada(γ,nn,ne,coord,connect,fρ,fκ,freqs,livres,velocities,pressures,nodes_target,elements_design,vA)
 
       # Relativo, evitando divisão por zero
       rel = (dΦ.-dnum)./(dnum.+1E-12)
@@ -313,7 +288,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
 
         # Faz o sweep. A matriz MP tem dimensão nn × nf, ou seja, 
         # cada coluna é o vetor P para uma frequência de excitação
-        MP,K,M =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
+        MP,K,M =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
         # Calcula o SPL para esta iteração 
         objetivo = Objetivo(MP,nodes_target,vA)
@@ -341,7 +316,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
 
         # Calcula a derivada da função objetivo em relação ao vetor γ
         # somente nas posições de projeto
-        dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,vetor_dfρ[ponteiro_parametrizacao],vetor_dfκ[ponteiro_parametrizacao],nodes_target,MP,elements_design,vA) 
+        dΦ = Derivada(ne,nn,γ,connect,coord,K,M,livres,freqs,pressures,dfρ,dfκ,nodes_target,MP,elements_design,vA) 
   
         # Visualiza as ESEDS...
         Lgmsh_export_element_scalar(arquivo_pos,dΦ,"dΦ")  
@@ -491,7 +466,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     println("Final da otimização, executando a análise SWEEP na topologia otimizada")
 
    # Roda o sweep na topologia otimizada e exporta para visualização 
-   MP,_ =  Sweep(nn,ne,coord,connect,γ,vetor_fρ[ponteiro_parametrizacao],vetor_fκ[ponteiro_parametrizacao],freqs,livres,velocities,pressures)
+   MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
    # Exporta por frequência
    for i=1:nf

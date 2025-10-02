@@ -74,7 +74,12 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
                   nodes_target::Vector{T1},MP::Matrix{T2},
                   elements_design::Vector,A::Vector,p0=20E-6) where {T0,T1,T2}
 
-  
+
+    #
+    # TESTE 
+    #       
+    γ[γ.==0]    .= 1E-3   
+    
     # Define o vetor de derivadas
     d = zeros(ne)
 
@@ -167,6 +172,13 @@ function Derivada(ne,nn,γ::Vector{T0},connect::Matrix{T1},coord::Matrix{T0},
         coluna += 1
 
     end # Frequência
+
+    #
+    # TESTE
+    #
+    γ[γ.==0]    .= 0
+    
+
 
     # Retorna a derivada, lembrando de dividir pelo número de 
     # frequências

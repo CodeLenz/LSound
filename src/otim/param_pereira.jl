@@ -11,7 +11,7 @@ https://doi.org/10.1016/j.finel.2021.103701.
 =#
 
 # Parametrização do inverso de ρ
-function fρ_pereira(γe,ψ=2.0;ρ_ar=1.21,ρ2=1.21*1E7)
+function fρ(γe,ψ=2.0;ρ_ar=1.21,ρ2=1.21*1E7)
 
     # Teste de consistência
     0<=γe<=1 || error("fρ:: γe inválido")
@@ -28,7 +28,7 @@ function fρ_pereira(γe,ψ=2.0;ρ_ar=1.21,ρ2=1.21*1E7)
 end 
 
 # Derivada da parametrização do inverso de ρ
-function dfρ_pereira(γe,ψ=2.0;ρ_ar=1.21,ρ2=1.21*1E7)
+function dfρ(γe,ψ=2.0;ρ_ar=1.21,ρ2=1.21*1E7)
 
     # Teste de consistência
     0<=γe<=1 || error("dfρ:: γe inválido")
@@ -46,7 +46,7 @@ end
 
 
 # Parametrização do inverso de κ
-function fκ_pereira(γe,ψ=2.0;κ_ar=1.42E5,κ2=1.42E5*1E9)
+function fκ(γe,ψ=2.0;κ_ar=1.42E5,κ2=1.42E5*1E9)
 
     # Teste de consistência
     0<=γe<=1 || error("fκ:: γe inválido")
@@ -63,7 +63,7 @@ function fκ_pereira(γe,ψ=2.0;κ_ar=1.42E5,κ2=1.42E5*1E9)
 end 
 
 # Derivada da parametrização do inverso de κ
-function dfκ_pereira(γe,ψ=2.0;κ_ar=1.42E5,κ2=1.42E5*1E9)
+function dfκ(γe,ψ=2.0;κ_ar=1.42E5,κ2=1.42E5*1E9)
 
     # Teste de consistência
     0<=γe<=1 || error("dfκ:: γe inválido")
