@@ -5,28 +5,28 @@
 #
 function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     
-    #
+    # ###########################################################
     # valores padrão (que podem ser modificados via arquivo) 
-    #
+    # ###########################################################
 
     # Número de iterações 
     niter = 100
-
-    # Número de iterações para o histórico de sensibilidade
-    nhisto = 1
 
     # Parâmetros do ISLP
     ϵ1 = 0.1
     ϵ2 = 0.1
 
-    # Valor padrão de parametrização 
-    # PEREIRA ou DUHRING
-    parametrizacao = "DUHRING"
+    # Fração de volume (restrição de volume)
+    vf = 0.5
 
-    # Valor do 'ponto de partida', lembrando que não podemos começar com todas as posições nulas, pois 
-    # isso vai fazer com que a atualização de volume seja  0*(1+er) = sempre zero. Então, podemos começar 
-    # com um padrão que seja fisicamente adequado para o problema em questão.
-    partida = 1.0
+    # Perímetro limite (restrição de perímetro)
+    perimetro = 0.0
+
+    # Fator de mudança cheio/vazio
+    fatorcv = 1E-3
+
+    # Raio do filtro 
+    raio = 0.0
 
     # Primeiro lemos o arquivo de dados
     dados = YAML.load_file(arquivo)
@@ -44,7 +44,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     end
      
     # Recupera raio do filtro
-    raio = 0.0
     if haskey(dados,"raio")
 
         # recupera como string
@@ -104,8 +103,6 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         println("Parâmetro ϵ2 não foi informado no .yaml. Utilizando o valor padrão ", ϵ2)
     end
 
-
-
     # Recupera o número de iterações
     if haskey(dados,"niter")
 
@@ -146,62 +143,48 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
         println("Fração de volume não foi informado no .yaml. Utilizando o valor padrão ", vf)
     end
 
-    # Recupera o tipo de parametrização do material
-    if haskey(dados,"parametrizacao")
+    # Valor limite para a restrição de perímetro
+    if haskey(dados,"perimetro")
 
         # recupera como string
-        parametrizacao = dados["parametrizacao"]
-
-        # verifica se é uma das parametrizações válidas
-        parametrizacao in ["PEREIRA"; "DUHRING"]  || error("Parametrização $parametrizacao é inválida") 
-
-    else
-        println("Parametrização não foi informada no .yaml. Utilizando o valor padrão ", parametrizacao)
-    end
-
-
-    # Recupera o número de iterações para o histórico de sensibilidades
-     if haskey(dados,"nhisto")
-
-        # recupera como string
-        string_nhisto = dados["nhisto"]
+        string_perimetro = dados["perimetro"]
 
         # Se foi informado como string, convertemos
-        if isa(string_nhisto,String)
-            nhisto =  parse(Int64,string_nhisto)
+        if isa(string_perimetro,String)
+            perimetro =  parse(Float64,string_perimetro)
         else
-            nhisto = string_nhisto
+            perimetro = string_perimetro
         end
  
         # Testa consistência da informação 
-        nhisto>=1 || throw("Le_YAML::Número de iterações para o histórico de sensibilidades deve ser >=1") 
+        (perimetro<0) && throw("Le_YAML::Valor limite do perímetro deve ser maior do que zero") 
         
     else
-        println("Número de iterações para o histórico de sensibilidade não foi informado no .yaml. Utilizando o valor padrão ", nhisto)
+        println("Perímetro não foi informado no .yaml. Utilizando o valor padrão ", perimetro)
     end
 
-    # Recupera o valor do 'ponto de partida'
-    if haskey(dados,"partida")
+
+    # Valor limite para a restrição de perímetro
+    if haskey(dados,"fatorcv")
 
         # recupera como string
-        string_partida = dados["partida"]
+        string_fatorcv = dados["fatorcv"]
 
         # Se foi informado como string, convertemos
-        if isa(string_partida,String)
-            partida =  parse(Float64,string_partida)
+        if isa(string_fatorcv,String)
+            fatorcv =  parse(Float64,string_fatorcv)
         else
-            partida = string_partida
+            fatorcv = string_fatorcv
         end
  
         # Testa consistência da informação 
-        ( 0<= partida <=1) || throw("Le_YAML::partida deve estar em (0,1) ") 
+        (fatorcv<=0||fatorcv>=1) && throw("Le_YAML::Fator de mudança para cheio/vazio  maior do que zero e menor do que um") 
         
     else
-        println("Ponto de partida não foi informado no .yaml. Utilizando o valor padrão ", partida)
+        println("fatorcv não foi informado no .yaml. Utilizando o valor padrão ", fatorcv)
     end
-
 
    # Retorna os dados 
-   return raio, niter, nhisto, ϵ1, ϵ2,  vf, parametrizacao, partida 
+   return raio, niter, ϵ1, ϵ2,  vf, perimetro, fatorcv
 
 end

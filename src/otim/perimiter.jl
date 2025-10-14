@@ -56,6 +56,9 @@ function dPerimiter(ne, γ, neighedge, elements_design)
             # Densidade do elemento 
             γe = γ[ele]
 
+            # Pré-computa DK(ele,m)
+            p1 = DK(ele,m)
+            
             # Loop over neighedge
             for viz in vizinhos
 
@@ -63,7 +66,7 @@ function dPerimiter(ne, γ, neighedge, elements_design)
                 Pej = (γe - γ[viz])
                 
                 # Derivada
-                dP[m] += Pej*(DK(ele,m) - DK(viz,m))
+                dP[m] += Pej*(p1 - DK(viz,m))
                 
 
             end #viz

@@ -6,30 +6,23 @@
 versao: 1.0
 
 # Fração de volume (obrigatório)
-volfrac: 0.5
+volfrac: 0.2
+
+# Restrição de perímetro 
+# 0 desliga o uso da restrição 
+perimetro: 100
+
+# Fator de mudança cheio/vazio
+fatorcv: 0.0011
 
 # Raio do filtro (obrigatório)
 raio: 0.02
 
-# Parâmetros de ajuste das restrições 
-# linearizadas
+# Parâmetros de ajuste das restrições linearizadas
+# Não estou utilizando agora
 ϵ1: 0.01
 ϵ2: 0.01
 
 # Número de iterações de otimização (valor padrão é 100)
-niter: 100
+niter: 120
 
-# Parametrização do material 
-parametrizacao: PEREIRA
-
-# Número de iterações para a média histórica
-nhisto: 1
-
-# Valor mínimo da variável de projeto
-γmin: 0.0
-
-# Valor máximo da variável de projeto
-γmax: 1.0
-
-# Valor do 'ponto de partida'
-partida: 1.0

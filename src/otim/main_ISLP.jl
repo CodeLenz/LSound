@@ -25,9 +25,6 @@
 """
 function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=false)
 
-   # Fator de ajuste para elementos cheios e vazios
-   FATOR_MUDANCA = 0.001
-
    # Se o arquivo for um .geo, geramos um .msh utilizando a biblioteca
    # do gmsh
    if occursin(".geo",arquivo)
@@ -49,9 +46,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
       mshfile = arquivo
 
    end
-
-    # Restrição de perímetro
-    Past = 200.0
 
     # Define os nomes dos arquivos de entrada (yaml) 
     arquivo_yaml = replace(mshfile,".msh"=>".yaml")
@@ -100,12 +94,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     nvp = length(elements_design)
 
     # Le os dados do arquivo yaml
-    raio_filtro, niter, nhisto, ϵ1, ϵ2, vf, parametrizacao, partida = Le_YAML(arquivo_yaml)
-
-    # Seleciona as rotinas de parametrização de material de acordo com 
-    # a opção 
-    @show parametrizacao
-
+    raio_filtro, niter, ϵ1, ϵ2,  vf, Past, fatorcv = Le_YAML(arquivo_yaml)
      
     # Agora que queremos otimizar o SPL, vamos precisar OBRIGATÓRIAMENTE de nodes_target,
     # que vai funcionar como nodes_probe aqui
@@ -126,32 +115,25 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
          
          # Obtém os vizinhos de cada elemento da malha
          println("Determinando a vizinhança para um raio de $(raio_filtro)")
-         @time vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro,elements_design)
+         vizinhos, pesos = Vizinhanca(ne,centroides,raio_filtro,elements_design)
 
+    end # !verifica_derivada
 
-    end # verifica_derivada
-
-    # Em teste...vizinhos de arestas
+    # Em teste...vizinhos de arestas para restrição de perímetro
     neighedge = NeighborEdges(ne,connect,elements_design)
         
     # Vamos inicializar o vetor de variáveis de projeto.
     # γ = 0 --> ar
     # γ = 1 --> sólido
     #
-    # Não podemos começar com todas as posições nulas, pois 
-    # isso vai fazer com que a atualização de volume seja 
-    # 0*(1+er) = sempre zero.
-    # Então, podemos começar com um padrão que seja fisicamente
-    # adequado para o problema em questão.
     println("Inicializando o vetor de variáveis de projeto")
     γ = zeros(ne)
-    println("Ponto de partida = ", partida )
-    println()
 
     #mascara_init = rand(elements_design,round(Int,0.5*length(elements_design)))
     #γ[round(Int,1/3*nvp):round(Int,2/3*nvp)] .= 0
-    γ[1:16] .= 1.0
-    γ[33:64] .= 1.0
+    #γ[1:16] .= 1.0
+    #γ[33:64] .= 1.0
+    #γ[1] = 1.0
 
 
     # Fixa os valores prescritos de densidade relativa
@@ -159,12 +141,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     
     # Grava o arquivo com a distribuição inicial de densidades
     writedlm(arquivo_γ_ini,γ)
-
-    # Vamos avisar que a análise de sensibilidade ainda não está consideranto
-    # pressões impostas diretamente
-    #if !isempty(pressures) 
-    #  error("Aplicação de Pressure é válida para análise, mas não estamos considerando na otimização")
-    #end
 
     # Concatena nodes_open e nodes_pressure
     nodes_mask = sort(vcat(nodes_open,nodes_pressure))
@@ -182,7 +158,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     # Sweep na topologia inicial, para comparação com a otimizada
     MP,_ =  Sweep(nn,ne,coord,connect,γ,fρ,fκ,freqs,livres,velocities,pressures)
 
-   
     # Exporta por frequência
     for i=1:nf
 
@@ -228,7 +203,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
       dPnum = df(γ,FPerimiter,elements_design)
       dP = dPerimiter(ne, γ, neighedge, elements_design)
 
-
       # Retorna as derivadas
       return dΦ, dnum, dP, dPnum 
 
@@ -248,7 +222,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
     # Target volume
     Vast = vf*volume_full_projeto
 
-
     # Monitora o histórico de volume, do perímetro e 
     # do SPL ao longo das  iterações 
     historico_V   = Float64[] #zeros(niter)
@@ -257,7 +230,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
 
     #############################  Main loop ###########################
     for iter = 1:niter
-
 
         # Lista de elementos de projeto com ar e com sólido
         elements_air = Int64[]
@@ -293,10 +265,6 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         # Calcula o SPL para esta iteração 
         objetivo = Objetivo(MP,nodes_target,vA)
 
-
-        @show objetivo 
-
-
         # Armazena no historico de SPL
         push!(historico_SLP, objetivo)
 
@@ -323,62 +291,35 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
 
         # Lado direito da restrição de volume linearizada em Δγ
         ΔV = Vast - volume_atual
-
-        #
-        # Lógica para relaxar a restrição de volume 
-        #
-        # Parâmetros para comparação 
-        if volume_atual > 0
-
-            # Limites "móveis"
-            αv = (1-ϵ1)*volume_atual
-            βv = (1+ϵ2)*volume_atual
-
-            #if Vast < αv
-            #   ΔV = -ϵ1*volume_atual
-            #elseif Vast > βv
-            #   ΔV = ϵ2*volume_atual
-            #end
-         
-         else
-
-            error("volume zero")
-
-
-            #error("Volume igual a zero na otimização ")
-         end
        
-         # Primeiro limite de restrição...volume
-         b = [ΔV]
+        # Primeiro limite de restrição...volume
+        b = [ΔV]
 
-         # Mostra a linearização 
-         println("Volume linearizado   ", b[1])
+        # Mostra a linearização 
+        println("Volume linearizado   ", b[1])
 
-         # Derivada do volume
-         A = vcat(V[elements_design]')
+        # Derivada do volume
+        A = vcat(V[elements_design]')
 
-         #
-         # Lógica para relaxar a restrição de perímetro
-         #
+        #
+        # Lógica para relaxar a restrição de perímetro
+        #
          
-         # Parâmetros para comparação 
-         #=
-         if  perimetro > 0
-
-            ϵP = ϵ1 
+        # Parâmetros para comparação 
+        if  perimetro > 0 && Past>0
 
             # Variação sem a relaxação
             ΔP = Past - perimetro
 
             # Limites "móveis"
-            αp = (1-ϵP)*perimetro
-            βp = (1+ϵP)*perimetro
+            #αp = (1-ϵP)*perimetro
+            #βp = (1+ϵP)*perimetro
 
-            if Past < αp
-               ΔP = -ϵP*perimetro
-            elseif Past > βp
-               ΔP = ϵP*perimetro
-            end
+            #if Past < αp
+            #   ΔP = -ϵP*perimetro
+            #elseif Past > βp
+            #   ΔP = ϵP*perimetro
+            #end
 
             # Limite da restrição de perímetro linearizada e relaxada
             b = vcat(b, ΔP)
@@ -396,13 +337,12 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
             A = vcat(A,transpose(dP[elements_design]))
             
          end
-         =#
        
          # Restrição de variação de elementos com ar
          if !isempty(elements_air)
 
             # Constraint 
-            g_air = ceil(FATOR_MUDANCA*length(elements_design))
+            g_air = ceil(fatorcv*length(elements_design))
 
             # Mostra a linearização 
             println("Air linearizado   ", g_air)
@@ -417,7 +357,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
          if !isempty(elements_solid)
 
             # Constraint
-            g_solid  = ceil(FATOR_MUDANCA*length(elements_design)) 
+            g_solid  = ceil(fatorcv*length(elements_design)) 
 
             # Mostra a linearização 
             println("Solid linearizado   ", g_solid)
@@ -435,7 +375,7 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
          Lgmsh_export_element_scalar(arquivo_pos,dΦf,"Filtrada")
 
          # Vetor de coeficientes da função objetivo
-         c = dΦ[elements_design]# ESED_F_media[elements_design]
+         c = dΦf[elements_design]# ESED_F_media[elements_design]
 
          # Vetor de variáveis de projeto no ponto de ótimo
          # LP(n, c, A, b)
