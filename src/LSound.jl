@@ -14,12 +14,6 @@ module LSound
     using YAML
     using Gmsh
 
-   using JuMP
-   using Alpine
-   using Gurobi
-   using Ipopt
-   using HiGHS
-   using Cbc
 
     # Main structure for mesh 
     include("mesh.jl")
@@ -41,26 +35,8 @@ module LSound
     include("solvers/modal.jl")
     include("main.jl")
 
-    # Otimização
-    include("otim/le_yaml.jl")
-    include("otim/LP.jl")
-    include("otim/param_duhring.jl")
-    #include("otim/param_pereira.jl")
-    include("otim/fixos.jl")
-    include("otim/global_otim.jl")
-    include("otim/objetivo.jl")
-    include("otim/sensibilidade.jl")
-    include("otim/df.jl")
-    include("otim/volumes.jl")
-    include("otim/centroides.jl")
-    include("otim/vizinhanca.jl")
-    include("otim/filtro_espacial.jl")
-    include("otim/sweep.jl")
-    include("otim/verifica_derivada.jl")
-    include("otim/processa_FRF.jl")
-    include("otim/perimiter.jl")
-    include("otim/main_ISLP.jl")
+   
 
-    export Analise, Otim_ISLP, Processa_FRF
+    export Analise
 
 end
