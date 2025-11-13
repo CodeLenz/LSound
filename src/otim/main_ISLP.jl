@@ -2,6 +2,10 @@
 # TODO
 #
 # raio_filtro -> pensar em uma maneira de entrar com este dado
+
+
+#
+# FILTRAR AS RESTRIÇÕES È INCONSISTENTE
 #
 
 #
@@ -271,6 +275,17 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
         # Perímetro 
         perimetro = Perimiter(γ, neighedge, elements_design)
 
+        # Exporta por frequência
+        for i=1:nf
+
+         # frequência
+         f = freqs[i]
+
+         # Exporta
+         Lgmsh_export_nodal_scalar(arquivo_pos,abs.(MP[:,i]),"Pressure in $f Hz [abs]")
+
+        end
+
         # Guarda para o histórico
         push!(historico_P, perimetro)
 
@@ -330,10 +345,15 @@ function Otim_ISLP(arquivo::String,freqs::Vector, vA::Vector;verifica_derivada=f
             # Derivada do perímetro
             dP = dPerimiter(ne, γ, neighedge, elements_design)
              
+            # Filtra a derivada do perímetro
+            #dPf =  Filtro(vizinhos,pesos,dP,elements_design)
+
             # Visualiza a derivada do perímetro
+            #Lgmsh_export_element_scalar(arquivo_pos,dPf,"dPf")  
             Lgmsh_export_element_scalar(arquivo_pos,dP,"dP")  
 
             # Adiciona a linha em A
+            #A = vcat(A,transpose(dPf[elements_design]))
             A = vcat(A,transpose(dP[elements_design]))
             
          end

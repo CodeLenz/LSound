@@ -15,7 +15,7 @@ function LP(c, A, b, γ)
    # O Cbc é o otimizador para a etapa discreta (branch and bound), que é 
    # realizada depois da etapa contínua.
    ipopt  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
-   #gurobi = optimizer_with_attributes(Gurobi.Optimizer, "output_flag" => false)
+   gurobi = optimizer_with_attributes(Gurobi.Optimizer, "output_flag" => false)
    highs  = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
    cbc    = optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
     
@@ -27,8 +27,8 @@ function LP(c, A, b, γ)
          Alpine.Optimizer,
          "minlp_solver" => highs, #<- para binario. Aqui também dá para usar o cbc
          #"nlp_solver" => ipopt,  #<- para contínuo
-         #"mip_solver" => gurobi,
-         "mip_solver" => highs,
+         "mip_solver" => gurobi,
+         #"mip_solver" => highs,
       ),
    )
 

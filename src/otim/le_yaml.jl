@@ -23,7 +23,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     perimetro = 0.0
 
     # Fator de mudança cheio/vazio
-    fatorcv = 1E-3
+    fatorcv = 5E-3
 
     # Raio do filtro 
     raio = 0.0
@@ -164,7 +164,7 @@ function Le_YAML(arquivo::AbstractString,ver=1.0;verbose=false)
     end
 
 
-    # Valor limite para a restrição de perímetro
+    # Fator de atualização de air/solid
     if haskey(dados,"fatorcv")
 
         # recupera como string
