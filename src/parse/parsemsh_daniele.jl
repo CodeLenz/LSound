@@ -321,6 +321,9 @@ function Parsemsh_Daniele(meshfile::String,verbose=false)
          
     end
 
+    # All elements must have material 
+    all(connect2[:,2].>0) || error("LSound::Parsemsh:: some elements are not associated to material. Check your mesh")
+
     # Testing...
     #=
     Mesh(nn, coord, ne, connect2, materials2, unique!(nodes_open), velocities, unique!(nodes_pressure), 
